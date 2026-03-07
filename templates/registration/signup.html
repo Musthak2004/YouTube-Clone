@@ -1,10 +1,134 @@
-{% extends 'base.html' %}
-{% block title %}Sign Up{% endblock %}
-{% block content %}
-<h2>Welcome to Signup Page</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Sign Up" />
-</form>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Create account - YouClone</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+            color: #f1f1f1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            background: #181818;
+            border: 1px solid #303030;
+            max-width: 420px;
+            width: 100%;
+        }
+        .btn-red {
+            background-color: #c00;
+            border-color: #c00;
+        }
+        .btn-red:hover {
+            background-color: #a00;
+            border-color: #a00;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="text-center mb-5">
+        <i class="bi bi-youtube text-danger" style="font-size: 5.5rem;"></i>
+        <h3 class="mt-2 fw-bold">YouClone</h3>
+        <p class="text-secondary">Create your YouClone account</p>
+    </div>
+
+    <div class="card mx-auto shadow">
+        <div class="card-body p-4 p-md-5">
+
+            <h5 class="text-center mb-4">Sign up</h5>
+
+            {% if form.errors %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {% if form.non_field_errors %}
+                        {{ form.non_field_errors }}
+                    {% else %}
+                        Please fix the errors below.
+                    {% endif %}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+                    <input type="text"
+                           name="{{ form.username.name }}"
+                           class="form-control bg-dark border-secondary text-white"
+                           id="{{ form.username.id_for_label }}"
+                           placeholder="Username"
+                           autofocus
+                           required
+                           value="{{ form.username.value|default:'' }}">
+                </div>
+
+                {% if form.email %}
+                <div class="mb-3">
+                    <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                    <input type="email"
+                           name="{{ form.email.name }}"
+                           class="form-control bg-dark border-secondary text-white"
+                           id="{{ form.email.id_for_label }}"
+                           placeholder="Email address"
+                           required
+                           value="{{ form.email.value|default:'' }}">
+                </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <label for="{{ form.password1.id_for_label }}" class="form-label">Password</label>
+                    <input type="password"
+                           name="{{ form.password1.name }}"
+                           class="form-control bg-dark border-secondary text-white"
+                           id="{{ form.password1.id_for_label }}"
+                           placeholder="Create password"
+                           required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="{{ form.password2.id_for_label }}" class="form-label">Confirm password</label>
+                    <input type="password"
+                           name="{{ form.password2.name }}"
+                           class="form-control bg-dark border-secondary text-white"
+                           id="{{ form.password2.id_for_label }}"
+                           placeholder="Confirm password"
+                           required>
+                </div>
+
+                <div class="d-grid mb-3">
+                    <button type="submit" class="btn btn-red btn-lg">Create account</button>
+                </div>
+
+                <p class="text-center small text-secondary mb-0">
+                    By continuing, you agree to YouClone's Terms and Privacy Policy.
+                </p>
+            </form>
+
+            <hr class="border-secondary my-4">
+
+            <p class="text-center mb-0">
+                Already have an account?
+                <a href="{% url 'login' %}" class="text-danger text-decoration-none fw-medium">Sign in</a>
+            </p>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+</body>
+</html>
