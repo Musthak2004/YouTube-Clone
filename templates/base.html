@@ -106,7 +106,7 @@
 </head>
 <body>
 
-    <!-- Navbar (unchanged from your last version) -->
+    <!-- Navbar -->
     <nav class="navbar navbar-expand navbar-dark fixed-top">
         <div class="container-fluid px-3">
             <div class="d-flex align-items-center">
@@ -171,7 +171,7 @@
         </div>
     </nav>
 
-    <!-- Clean Sidebar -->
+    <!-- Sidebar with Upload Video -->
     <div class="sidebar" id="sidebar">
         <a href="{% url 'home' %}" class="sidebar-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
             <i class="bi bi-house-door-fill"></i>
@@ -197,7 +197,16 @@
             <span class="sidebar-text">History</span>
         </a>
 
-        <!-- Bottom section - cleaner look -->
+        <!-- Upload Video - only visible when logged in -->
+        {% if user.is_authenticated %}
+        <hr class="border-secondary mx-3 my-3">
+        <a href="{% url 'video_create' %}" class="sidebar-item {% if request.resolver_match.url_name == 'video_create' %}active{% endif %}">
+            <i class="bi bi-cloud-upload text-danger"></i>
+            <span class="sidebar-text">Upload Video</span>
+        </a>
+        {% endif %}
+
+        <!-- Bottom section -->
         <div class="sidebar-bottom">
             {% if user.is_authenticated %}
                 <a href="#" class="sidebar-item">
@@ -241,7 +250,6 @@
             }
         });
 
-        // Close sidebar on outside click (mobile)
         document.addEventListener('click', function(event) {
             if (window.innerWidth >= 992) return;
             if (!sidebar.contains(event.target) && !toggleBtn.contains(event.target)) {

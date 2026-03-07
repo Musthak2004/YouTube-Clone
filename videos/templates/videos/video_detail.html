@@ -31,14 +31,13 @@
                         </p>
                     </div>
 
-                    <!-- Like / Dislike buttons -->
-                    <div class="d-flex gap-2">
+                    <!-- Like / Dislike + Share / Save -->
+                    <div class="d-flex gap-2 flex-wrap">
                         <form method="post" action="#" class="d-inline">
                             {% csrf_token %}
                             <input type="hidden" name="reaction" value="like">
                             <button type="submit" class="btn btn-outline-light btn-sm {% if user_reaction == 'like' %}active{% endif %}">
                                 <i class="bi bi-hand-thumbs-up-fill me-1"></i> Like
-                                <!-- {% if likes_count %}( {{ likes_count }} ){% endif %} -->
                             </button>
                         </form>
 
@@ -50,7 +49,6 @@
                             </button>
                         </form>
 
-                        <!-- Share / Save buttons (placeholder) -->
                         <button class="btn btn-outline-light btn-sm">
                             <i class="bi bi-share me-1"></i> Share
                         </button>
@@ -60,24 +58,38 @@
                     </div>
                 </div>
 
-                <!-- Channel Info -->
-                <div class="d-flex align-items-center gap-3 p-3 bg-dark rounded-3 mb-3">
-                    <img src="https://via.placeholder.com/48"
-                         alt="{{ video.uploader.username }}"
-                         class="rounded-circle" width="48" height="48">
+                <!-- Channel Info + Owner Actions -->
+                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3 p-3 bg-dark rounded-3 mb-3">
+                    <div class="d-flex align-items-center gap-3 flex-grow-1">
+                        <img src="https://via.placeholder.com/48"
+                             alt="{{ video.uploader.username }}"
+                             class="rounded-circle" width="48" height="48">
 
-                    <div>
-                        <h6 class="mb-0">
-                            <a href="#" class="text-white text-decoration-none">
-                                {{ video.uploader.username }}
-                            </a>
-                        </h6>
-                        <small class="text-secondary">Subscriber count placeholder</small>
+                        <div>
+                            <h6 class="mb-0">
+                                <a href="#" class="text-white text-decoration-none">
+                                    {{ video.uploader.username }}
+                                </a>
+                            </h6>
+                            <small class="text-secondary">Subscriber count placeholder</small>
+                        </div>
                     </div>
 
-                    <button class="btn btn-danger ms-auto rounded-pill px-4">
-                        Subscribe
-                    </button>
+                    <!-- Subscribe + Edit/Delete (only for owner) -->
+                    <div class="d-flex gap-2 mt-3 mt-md-0 ms-md-auto">
+                        <button class="btn btn-danger rounded-pill px-4">
+                            Subscribe
+                        </button>
+
+                        {% if user.is_authenticated and user == video.uploader %}
+                            <a href="{% url 'video_update' video.pk %}" class="btn btn-outline-primary rounded-pill px-4">
+                                <i class="bi bi-pencil me-1"></i> Edit
+                            </a>
+                            <a href="{% url 'video_delete' video.pk %}" class="btn btn-outline-danger rounded-pill px-4">
+                                <i class="bi bi-trash me-1"></i> Delete
+                            </a>
+                        {% endif %}
+                    </div>
                 </div>
 
                 <!-- Description -->
@@ -86,7 +98,7 @@
                 </div>
             </div>
 
-            <!-- Comments Section (Placeholder - model இல்லைனா basic) -->
+            <!-- Comments Section (Placeholder) -->
             <div class="mt-5">
                 <h5 class="mb-4">Comments</h5>
                 <form method="post" class="mb-4">
@@ -105,13 +117,12 @@
 
         </div>
 
-        <!-- Sidebar - Recommended videos -->
+        <!-- Sidebar - Recommended videos (unchanged) -->
         <div class="col-lg-4">
-
             <div class="sticky-top" style="top: 76px;">
                 <h5 class="mb-3">Up next</h5>
 
-                {% for related in related_videos|slice:":8" %}  <!-- context-ல pass பண்ணு -->
+                {% for related in related_videos|slice:":8" %}
                 <div class="row mb-3 g-2">
                     <div class="col-4">
                         <a href="{{ related.get_absolute_url }}">
@@ -141,7 +152,6 @@
                     <p class="text-secondary">No recommendations available</p>
                 {% endfor %}
             </div>
-
         </div>
 
     </div>
