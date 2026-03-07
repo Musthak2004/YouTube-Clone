@@ -121,7 +121,7 @@
 
             <div class="d-flex justify-content-center gap-3 flex-wrap">
                 {% if user.is_authenticated %}
-                    <a href="#" class="btn btn-primary-custom btn-lg btn-custom">
+                    <a href="{% url 'video_list' %}" class="btn btn-primary-custom btn-lg btn-custom">
                         <i class="bi bi-play-circle-fill me-2"></i> Explore Videos
                     </a>
                 {% else %}
