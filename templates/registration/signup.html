@@ -22,7 +22,7 @@
         .card {
             background: #181818;
             border: 1px solid #303030;
-            max-width: 420px;
+            max-width: 460px;
             width: 100%;
         }
         .btn-red {
@@ -33,11 +33,22 @@
             background-color: #a00;
             border-color: #a00;
         }
+        .form-label {
+            font-weight: 500;
+        }
+        .profile-preview {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid #444;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="container py-5">
     <div class="text-center mb-5">
         <i class="bi bi-youtube text-danger" style="font-size: 5.5rem;"></i>
         <h3 class="mt-2 fw-bold">YouClone</h3>
@@ -49,72 +60,110 @@
 
             <h5 class="text-center mb-4">Sign up</h5>
 
-            {% if form.errors %}
+            {% if form.non_field_errors %}
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {% if form.non_field_errors %}
-                        {{ form.non_field_errors }}
-                    {% else %}
-                        Please fix the errors below.
-                    {% endif %}
+                    {{ form.non_field_errors|join:"<br>" }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             {% endif %}
 
-            <form method="post">
+            <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
 
+                <!-- Username -->
                 <div class="mb-3">
                     <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
                     <input type="text"
                            name="{{ form.username.name }}"
                            class="form-control bg-dark border-secondary text-white"
                            id="{{ form.username.id_for_label }}"
-                           placeholder="Username"
+                           placeholder="Choose a username"
                            autofocus
                            required
                            value="{{ form.username.value|default:'' }}">
+                    {% if form.username.errors %}
+                        <div class="text-danger small mt-1">{{ form.username.errors|join:", " }}</div>
+                    {% endif %}
                 </div>
 
-                {% if form.email %}
+                <!-- Email -->
                 <div class="mb-3">
                     <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
                     <input type="email"
                            name="{{ form.email.name }}"
                            class="form-control bg-dark border-secondary text-white"
                            id="{{ form.email.id_for_label }}"
-                           placeholder="Email address"
+                           placeholder="Enter your email"
                            required
                            value="{{ form.email.value|default:'' }}">
+                    {% if form.email.errors %}
+                        <div class="text-danger small mt-1">{{ form.email.errors|join:", " }}</div>
+                    {% endif %}
                 </div>
-                {% endif %}
 
+                <!-- Profile Picture -->
+                <div class="mb-4">
+                    <label for="{{ form.profile_picture.id_for_label }}" class="form-label">Profile Picture</label>
+                    <input type="file"
+                           name="{{ form.profile_picture.name }}"
+                           class="form-control bg-dark border-secondary text-white"
+                           id="{{ form.profile_picture.id_for_label }}"
+                           accept="image/*">
+                    {% if form.profile_picture.errors %}
+                        <div class="text-danger small mt-1">{{ form.profile_picture.errors|join:", " }}</div>
+                    {% endif %}
+                    <small class="text-secondary">Optional - Upload a profile picture (jpg, png)</small>
+                </div>
+
+                <!-- Bio -->
+                <div class="mb-4">
+                    <label for="{{ form.bio.id_for_label }}" class="form-label">Bio</label>
+                    <textarea name="{{ form.bio.name }}"
+                              class="form-control bg-dark border-secondary text-white"
+                              id="{{ form.bio.id_for_label }}"
+                              rows="3"
+                              placeholder="Tell us about yourself... (optional)"></textarea>
+                    {% if form.bio.errors %}
+                        <div class="text-danger small mt-1">{{ form.bio.errors|join:", " }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Password -->
                 <div class="mb-3">
                     <label for="{{ form.password1.id_for_label }}" class="form-label">Password</label>
                     <input type="password"
                            name="{{ form.password1.name }}"
                            class="form-control bg-dark border-secondary text-white"
                            id="{{ form.password1.id_for_label }}"
-                           placeholder="Create password"
+                           placeholder="Create a strong password"
                            required>
+                    {% if form.password1.errors %}
+                        <div class="text-danger small mt-1">{{ form.password1.errors|join:", " }}</div>
+                    {% endif %}
                 </div>
 
+                <!-- Confirm Password -->
                 <div class="mb-4">
-                    <label for="{{ form.password2.id_for_label }}" class="form-label">Confirm password</label>
+                    <label for="{{ form.password2.id_for_label }}" class="form-label">Confirm Password</label>
                     <input type="password"
                            name="{{ form.password2.name }}"
                            class="form-control bg-dark border-secondary text-white"
                            id="{{ form.password2.id_for_label }}"
-                           placeholder="Confirm password"
+                           placeholder="Confirm your password"
                            required>
+                    {% if form.password2.errors %}
+                        <div class="text-danger small mt-1">{{ form.password2.errors|join:", " }}</div>
+                    {% endif %}
                 </div>
 
                 <div class="d-grid mb-3">
                     <button type="submit" class="btn btn-red btn-lg">Create account</button>
                 </div>
 
-                <p class="text-center small text-secondary mb-0">
-                    By continuing, you agree to YouClone's Terms and Privacy Policy.
+                <p class="text-center small text-secondary mb-3">
+                    By continuing, you agree to YouClone's Terms of Service and Privacy Policy.
                 </p>
+
             </form>
 
             <hr class="border-secondary my-4">
