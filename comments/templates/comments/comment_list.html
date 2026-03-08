@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}My Comments - YouClone{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+    <h2 class="mb-5 fw-bold text-center">My Comments</h2>
+
+    {% if comments %}
+        <div class="row g-4">
+            {% for comment in comments %}
+                <div class="col-12">
+                    <div class="card bg-dark border-secondary shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title mb-1">
+                                        <a href="{{ comment.video.get_absolute_url }}" class="text-white text-decoration-none">
+                                            {{ comment.video.title|truncatechars:80 }}
+                                        </a>
+                                    </h5>
+                                    <small class="text-secondary">
+                                        {{ comment.created_at|timesince }} ago •
+                                        <a href="{% url 'video_detail' comment.video.pk %}" class="text-info">View video</a>
+                                    </small>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'comment_edit' comment.pk %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
+                                    <a href="{% url 'comment_delete' comment.pk %}" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </a>
+                                </div>
+                            </div>
+
+                            <p class="card-text text-gray-300">
+                                {{ comment.text|linebreaks }}
+                            </p>
+
+                            <small class="text-muted">
+                                Last updated: {{ comment.updated_at|timesince }} ago
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination (if you add paginate_by later) -->
+        {% if is_paginated %}
+            <nav class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link bg-dark text-white" href="?page=1">First</a></li>
+                        <li class="page-item"><a class="page-link bg-dark text-white" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                            <a class="page-link bg-dark text-white" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link bg-dark text-white" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+
+    {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-chat-square-dots fs-1 text-secondary mb-3 d-block"></i>
+            <h5 class="text-secondary">You haven't commented on any videos yet</h5>
+            <p class="text-muted">Start engaging with videos!</p>
+            <a href="{% url 'video_list' %}" class="btn btn-outline-light mt-3">Browse Videos</a>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

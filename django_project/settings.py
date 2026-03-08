@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'pages.apps.PagesConfig',
     'videos.apps.VideosConfig',
+    'comments.apps.CommentsConfig',
 
     'crispy_forms',
     'crispy_bootstrap5',

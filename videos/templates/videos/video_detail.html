@@ -75,7 +75,6 @@
                         </div>
                     </div>
 
-                    <!-- Subscribe + Edit/Delete (only for owner) -->
                     <div class="d-flex gap-2 mt-3 mt-md-0 ms-md-auto">
                         <button class="btn btn-danger rounded-pill px-4">
                             Subscribe
@@ -98,56 +97,107 @@
                 </div>
             </div>
 
-            <!-- Comments Section (Placeholder) -->
+            <!-- Comments Section - Real Implementation -->
             <div class="mt-5">
-                <h5 class="mb-4">Comments</h5>
-                <form method="post" class="mb-4">
-                    {% csrf_token %}
-                    <div class="input-group">
-                        <textarea class="form-control bg-dark border-secondary text-white"
-                                  rows="2" placeholder="Add a comment..."></textarea>
-                        <button class="btn btn-danger" type="submit">Comment</button>
-                    </div>
-                </form>
+                <h5 class="mb-4 d-flex justify-content-between align-items-center">
+                    <span>Comments ({{ video.comments.count }})</span>
+                    {% if user.is_authenticated %}
+                        <button class="btn btn-sm btn-outline-light" data-bs-toggle="collapse" data-bs-target="#add-comment-form">
+                            <i class="bi bi-plus-circle me-1"></i> Add Comment
+                        </button>
+                    {% endif %}
+                </h5>
 
-                <div class="text-center text-secondary py-4">
-                    <p>No comments yet. Be the first to comment!</p>
-                </div>
+                <!-- Add Comment Form (collapsible) -->
+                {% if user.is_authenticated %}
+                    <div class="collapse mb-4" id="add-comment-form">
+                        <form method="post" action="#">
+                            {% csrf_token %}
+                            <div class="input-group input-group-lg">
+                                <textarea name="text" class="form-control bg-dark border-secondary text-white"
+                                          rows="3" placeholder="Add a public comment..." required></textarea>
+                                <button class="btn btn-danger" type="submit">
+                                    <i class="bi bi-send-fill"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                {% endif %}
+
+                <!-- Comments List -->
+                {% if video.comments.exists %}
+                    <div class="list-group">
+                        {% for comment in video.comments.all|dictsortreversed:"created_at" %}
+                            <div class="list-group-item bg-transparent border-secondary mb-3 p-4 rounded-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img src="https://via.placeholder.com/40"
+                                             alt="{{ comment.user.username }}"
+                                             class="rounded-circle" width="40" height="40">
+                                        <div>
+                                            <h6 class="mb-0 text-white">{{ comment.user.username }}</h6>
+                                            <small class="text-secondary">
+                                                {{ comment.created_at|timesince }} ago
+                                                {% if comment.updated_at > comment.created_at %}
+                                                    • edited {{ comment.updated_at|timesince }} ago
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    {% if user.is_authenticated and user == comment.user %}
+                                        <div class="d-flex gap-2">
+                                            <a href="{% url 'comment_edit' comment.pk %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'comment_delete' comment.pk %}" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <p class="mb-0 text-gray-300">{{ comment.text|linebreaks }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-secondary">
+                        <i class="bi bi-chat-square-dots fs-1 mb-3 d-block"></i>
+                        <p>No comments yet. Be the first to share your thoughts!</p>
+                    </div>
+                {% endif %}
             </div>
 
         </div>
 
-        <!-- Sidebar - Recommended videos (unchanged) -->
+        <!-- Recommended videos sidebar (unchanged) -->
         <div class="col-lg-4">
             <div class="sticky-top" style="top: 76px;">
                 <h5 class="mb-3">Up next</h5>
-
                 {% for related in related_videos|slice:":8" %}
-                <div class="row mb-3 g-2">
-                    <div class="col-4">
-                        <a href="{{ related.get_absolute_url }}">
-                            {% if related.thumbnail %}
-                                <img src="{{ related.thumbnail.url }}"
-                                     class="rounded-3 w-100"
-                                     alt="{{ related.title }}"
-                                     style="aspect-ratio: 16/9; object-fit: cover;">
-                            {% else %}
-                                <div class="ratio ratio-16x9 bg-dark rounded-3"></div>
-                            {% endif %}
-                        </a>
-                    </div>
-                    <div class="col-8">
-                        <h6 class="small fw-medium mb-1">
-                            <a href="{{ related.get_absolute_url }}" class="text-white text-decoration-none">
-                                {{ related.title|truncatechars:60 }}
+                    <div class="row mb-3 g-2">
+                        <div class="col-4">
+                            <a href="{{ related.get_absolute_url }}">
+                                {% if related.thumbnail %}
+                                    <img src="{{ related.thumbnail.url }}" class="rounded-3 w-100" alt="{{ related.title }}" style="aspect-ratio: 16/9; object-fit: cover;">
+                                {% else %}
+                                    <div class="ratio ratio-16x9 bg-dark rounded-3"></div>
+                                {% endif %}
                             </a>
-                        </h6>
-                        <p class="text-secondary small mb-0">{{ related.uploader.username }}</p>
-                        <p class="text-secondary small mb-0">
-                            {{ related.views }} views • {{ related.uploaded_at|timesince }} ago
-                        </p>
+                        </div>
+                        <div class="col-8">
+                            <h6 class="small fw-medium mb-1">
+                                <a href="{{ related.get_absolute_url }}" class="text-white text-decoration-none">
+                                    {{ related.title|truncatechars:60 }}
+                                </a>
+                            </h6>
+                            <p class="text-secondary small mb-0">{{ related.uploader.username }}</p>
+                            <p class="text-secondary small mb-0">
+                                {{ related.views }} views • {{ related.uploaded_at|timesince }} ago
+                            </p>
+                        </div>
                     </div>
-                </div>
                 {% empty %}
                     <p class="text-secondary">No recommendations available</p>
                 {% endfor %}
