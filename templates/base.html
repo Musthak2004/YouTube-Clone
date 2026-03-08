@@ -173,7 +173,7 @@
 
     <!-- Sidebar with Upload Video -->
     <div class="sidebar" id="sidebar">
-        <a href="{% url 'home' %}" class="sidebar-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+        <a href="{% url 'video_list' %}" class="sidebar-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
             <i class="bi bi-house-door-fill"></i>
             <span class="sidebar-text">Home</span>
         </a>

@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Add Comment - YouClone{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <h3 class="mb-4 text-center">Add a Comment</h3>
+            <p class="text-center text-secondary mb-5">
+                on <a href="{{ video.get_absolute_url }}" class="text-info">{{ video.title }}</a>
+            </p>
+
+            <div class="card bg-dark border-secondary shadow-lg">
+                <div class="card-body p-5">
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors|join:"<br>" }}
+                                {% for field in form %}
+                                    {% for error in field.errors %}
+                                        <div>{{ field.label }}: {{ error }}</div>
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">Your Comment</label>
+                            <textarea name="{{ form.text.name }}" rows="6"
+                                      class="form-control bg-dark border-secondary text-white"
+                                      placeholder="Write your thoughts here..." required></textarea>
+                            {% if form.text.errors %}
+                                <div class="text-danger small mt-1">{{ form.text.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-chat-square-text me-2"></i> Post Comment
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{{ video.get_absolute_url }}" class="text-secondary">← Back to video</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
