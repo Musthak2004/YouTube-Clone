@@ -58,7 +58,7 @@
                     </div>
                 </div>
 
-                <!-- Channel Info + Owner Actions -->
+                <!-- Channel Info + Subscribe + Owner Actions -->
                 <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3 p-3 bg-dark rounded-3 mb-3">
                     <div class="d-flex align-items-center gap-3 flex-grow-1">
                         {% if video.uploader.profile_picture %}
@@ -80,24 +80,43 @@
                                     {{ video.uploader.username }}
                                 </a>
                             </h6>
-                            <small class="text-secondary">Subscriber count placeholder</small>
+                            <small class="text-secondary">
+                                {{ video.uploader.subscribers_list.count }} subscriber{{ video.uploader.subscribers_list.count|pluralize }}
+                            </small>
                         </div>
                     </div>
 
-                    <div class="d-flex gap-2 mt-3 mt-md-0 ms-md-auto">
-                        <button class="btn btn-danger rounded-pill px-4">
-                            Subscribe
-                        </button>
+                    <div class="mt-3 mt-md-0 ms-md-auto">
+                        {% if user.is_authenticated %}
+                            <form method="post" action="{% url 'toggle_subscription' video.uploader.pk %}">
+                                {% csrf_token %}
+                                {% if is_subscribed %}
+                                    <button type="submit" class="btn btn-outline-secondary rounded-pill px-5 py-2 fw-medium">
+                                        <i class="bi bi-bell-slash me-2"></i> Unsubscribe
+                                    </button>
+                                {% else %}
+                                    <button type="submit" class="btn btn-danger rounded-pill px-5 py-2 fw-medium">
+                                        <i class="bi bi-bell-fill me-2"></i> Subscribe
+                                    </button>
+                                {% endif %}
+                            </form>
+                        {% else %}
+                            <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-outline-light rounded-pill px-5 py-2">
+                                <i class="bi bi-box-arrow-in-right me-2"></i> Sign in to subscribe
+                            </a>
+                        {% endif %}
+                    </div>
 
-                        {% if user.is_authenticated and user == video.uploader %}
+                    {% if user.is_authenticated and user == video.uploader %}
+                        <div class="d-flex gap-2 mt-3 mt-md-0 ms-3">
                             <a href="{% url 'video_update' video.pk %}" class="btn btn-outline-primary rounded-pill px-4">
                                 <i class="bi bi-pencil me-1"></i> Edit
                             </a>
                             <a href="{% url 'video_delete' video.pk %}" class="btn btn-outline-danger rounded-pill px-4">
                                 <i class="bi bi-trash me-1"></i> Delete
                             </a>
-                        {% endif %}
-                    </div>
+                        </div>
+                    {% endif %}
                 </div>
 
                 <!-- Description -->
@@ -117,7 +136,7 @@
                     {% endif %}
                 </h5>
 
-                <!-- Add Comment Form (collapsible) -->
+                <!-- Add Comment Form -->
                 {% if user.is_authenticated %}
                     <div class="collapse mb-4" id="add-comment-form">
                         <form method="post" action="{% url 'comment_create' video.pk %}">

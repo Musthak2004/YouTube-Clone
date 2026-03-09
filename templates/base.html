@@ -113,7 +113,7 @@
                 <button class="btn btn-link text-white me-3" id="sidebarToggle" type="button">
                     <i class="bi bi-list fs-4"></i>
                 </button>
-                <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+                <a class="navbar-brand d-flex align-items-center" href="{% url 'video_list' %}">
                     <i class="bi bi-youtube text-danger fs-3 me-1"></i>
                     <span class="fs-4 fw-bold">YouTube-Clone</span>
                 </a>
@@ -171,9 +171,9 @@
         </div>
     </nav>
 
-    <!-- Sidebar with Upload Video -->
+    <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
-        <a href="{% url 'video_list' %}" class="sidebar-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+        <a href="{% url 'video_list' %}" class="sidebar-item {% if request.resolver_match.url_name == 'video_list' %}active{% endif %}">
             <i class="bi bi-house-door-fill"></i>
             <span class="sidebar-text">Home</span>
         </a>
@@ -181,7 +181,7 @@
             <i class="bi bi-play-btn"></i>
             <span class="sidebar-text">Shorts</span>
         </a>
-        <a href="#" class="sidebar-item">
+        <a href="{% url 'subscription_list' %}" class="sidebar-item {% if request.resolver_match.url_name == 'subscription_list' %}active{% endif %}">
             <i class="bi bi-collection-play"></i>
             <span class="sidebar-text">Subscriptions</span>
         </a>
@@ -197,7 +197,6 @@
             <span class="sidebar-text">History</span>
         </a>
 
-        <!-- Upload Video - only visible when logged in -->
         {% if user.is_authenticated %}
         <hr class="border-secondary mx-3 my-3">
         <a href="{% url 'video_create' %}" class="sidebar-item {% if request.resolver_match.url_name == 'video_create' %}active{% endif %}">
@@ -206,7 +205,6 @@
         </a>
         {% endif %}
 
-        <!-- Bottom section -->
         <div class="sidebar-bottom">
             {% if user.is_authenticated %}
                 <a href="#" class="sidebar-item">

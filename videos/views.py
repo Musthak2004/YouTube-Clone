@@ -2,6 +2,7 @@ from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
+from subscriptions.models import Subscription
 
 from .models import Video
 
@@ -21,7 +22,15 @@ class VideoDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["comments"] = self.object.comments.order_by("-created_at")
+
+        if self.request.user.is_authenticated:
+            context["is_subscribed"] = Subscription.objects.filter(
+                user=self.request.user,
+                channel=self.object.uploader
+            ).exists()
+        else:
+            context["is_subscribed"] = False
+
         return context
 
 
