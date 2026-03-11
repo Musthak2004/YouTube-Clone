@@ -40,7 +40,7 @@
                 <!-- Video details -->
                 <div class="card-body p-0 mt-3 d-flex">
                     <!-- Channel avatar with profile picture -->
-                    <a href="{% url 'video_detail' video.uploader.id %}" class="me-3 flex-shrink-0">
+                    <a href="{ video.get_absolute_url }}" class="me-3 flex-shrink-0">
                         {% if video.uploader.profile_picture %}
                             <img src="{{ video.uploader.profile_picture.url }}"
                                  alt="{{ video.uploader.username }}'s profile"

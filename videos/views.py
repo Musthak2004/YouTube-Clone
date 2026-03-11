@@ -4,7 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from subscriptions.models import Subscription
 
-from .models import Video
+from .models import Video, VideoView
 
 
 class VideoListView(ListView):
@@ -19,6 +19,23 @@ class VideoDetailView(DetailView):
     model = Video
     template_name = "videos/video_detail.html"
     context_object_name = "video"
+
+    def get_object(self):
+
+        video = super().get_object()
+
+        # increase view count (avoid counting uploader views)
+        if self.request.user != video.uploader:
+            video.views += 1
+            video.save(update_fields=['views'])
+
+            # save view history
+            VideoView.objects.create(
+                user=self.request.user if self.request.user.is_authenticated else None,
+                video=video,
+            )
+
+        return video
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
