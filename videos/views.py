@@ -40,6 +40,13 @@ class VideoDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        # Related videos (e.g., same uploader or tags based)
+        context['related_videos'] = Video.objects.exclude(id=self.object.id).order_by('-views')[:8]  # உன் logic
+
+        # Fallback recent videos if no related
+        context['recent_videos'] = Video.objects.exclude(id=self.object.id).order_by('-uploaded_at')[:8]
+
+        # Subscribe check
         if self.request.user.is_authenticated:
             context["is_subscribed"] = Subscription.objects.filter(
                 user=self.request.user,
