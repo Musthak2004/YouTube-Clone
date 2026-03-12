@@ -151,7 +151,19 @@
                         </a>
 
                         <ul class="dropdown-menu dropdown-menu-end bg-dark border-secondary text-white">
-                            <li><a class="dropdown-item text-white" href="#"><i class="bi bi-person-circle me-2"></i> Your channel</a></li>
+                            {% if user.channel %}
+                                <li>
+                                    <a class="dropdown-item text-white" href="{% url 'channel_detail' user.channel.pk %}">
+                                        <i class="bi bi-person-circle me-2"></i> Your channel
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li>
+                                    <a class="dropdown-item text-white" href="#">
+                                        <i class="bi bi-plus-circle me-2"></i> Create channel
+                                    </a>
+                                </li>
+                            {% endif %}
                             <li><a class="dropdown-item text-white" href="#"><i class="bi bi-gear me-2"></i> Settings</a></li>
                             <li><hr class="dropdown-divider border-secondary"></li>
                             <li>

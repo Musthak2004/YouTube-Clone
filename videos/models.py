@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.urls import reverse
+from channels.models import Channel
 
 
 class Video(models.Model):
@@ -9,6 +10,14 @@ class Video(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="videos"
+    )
+
+    channel = models.ForeignKey(
+        Channel,
+        on_delete=models.CASCADE,
+        related_name="videos",
+        null=True,
+        blank=True
     )
 
     title = models.CharField(max_length=255)
