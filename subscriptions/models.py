@@ -8,7 +8,7 @@ class Subscription(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="subscriptions"
+        related_name="user_subscriptions",
     )
 
     channel = models.ForeignKey(

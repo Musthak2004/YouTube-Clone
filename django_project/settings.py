@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'videos.apps.VideosConfig',
     'comments.apps.CommentsConfig',
     'subscriptions.apps.SubscriptionsConfig',
+    'channels.apps.ChannelsConfig',
 
     'crispy_forms',
     'crispy_bootstrap5',

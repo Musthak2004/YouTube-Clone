@@ -27,6 +27,7 @@ urlpatterns = [
     path("videos/", include("videos.urls")),
     path("comments/", include("comments.urls")),
     path("subscriptions/", include("subscriptions.urls")),
+    path("channels/", include("channels.urls")),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

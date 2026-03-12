@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Channels{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">All Channels</h2>
+
+<ul>
+    {% for channel in channels %}
+        <li>
+            <a href="{{ channel.get_absolute_url }}">{{ channel.name }}</a>
+            by {{ channel.owner.username }}
+            (Created at: {{ channel.created_at|date:"Y-m-d" }})
+        </li>
+    {% empty %}
+        <li>No channels available yet.</li>
+    {% endfor %}
+</ul>
+{% endblock %}
