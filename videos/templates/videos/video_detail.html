@@ -1,273 +1,720 @@
 {% extends 'base.html' %}
-{% block title %}{{ video.title }} - YouClone{% endblock %}
+{% block title %}{{ video.title }} — YouClone{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --accent:      #ff0033;
+        --accent-dim:  rgba(255,0,51,0.1);
+        --card:        #111111;
+        --card2:       #161616;
+        --border:      rgba(255,255,255,0.07);
+        --muted:       #555;
+        --muted2:      #888;
+        --text:        #f0f0f0;
+        --input-bg:    #0c0c0c;
+    }
+
+    .video-page { padding: 12px 0 60px; animation: fadeUp 0.35s ease both; }
+    @keyframes fadeUp {
+        from { opacity:0; transform:translateY(14px); }
+        to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── PLAYER ── */
+    .player-wrap {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #000;
+        margin-bottom: 16px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+    .player-wrap video { display: block; width: 100%; }
+
+    /* ── VIDEO TITLE ROW ── */
+    .video-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.2rem;
+        font-weight: 600;
+        line-height: 1.4;
+        letter-spacing: -0.3px;
+        margin-bottom: 10px;
+    }
+
+    .meta-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .meta-stats {
+        font-size: 0.82rem;
+        color: var(--muted2);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .meta-dot { color: var(--muted); }
+
+    /* ── ACTION BUTTONS ── */
+    .action-group {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid var(--border);
+        border-radius: 99px;
+        color: var(--text);
+        padding: 8px 16px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.82rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .action-btn:hover {
+        background: rgba(255,255,255,0.1);
+        border-color: rgba(255,255,255,0.15);
+        color: var(--text);
+    }
+    .action-btn.active {
+        background: rgba(255,0,51,0.12);
+        border-color: rgba(255,0,51,0.25);
+        color: #ff6680;
+    }
+    .action-btn i { font-size: 0.95rem; }
+
+    /* ── CHANNEL BAR ── */
+    .channel-bar {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 16px 18px;
+        margin-bottom: 14px;
+    }
+
+    .ch-avatar {
+        width: 46px; height: 46px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1.5px solid var(--border);
+        flex-shrink: 0;
+    }
+    .ch-avatar-fallback {
+        width: 46px; height: 46px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2a2a2a, #111);
+        border: 1.5px solid var(--border);
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700; font-size: 18px;
+        color: var(--text); flex-shrink: 0;
+    }
+
+    .ch-info { flex: 1; min-width: 0; }
+    .ch-name {
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text);
+        text-decoration: none;
+        display: block;
+        margin-bottom: 2px;
+    }
+    .ch-name:hover { color: var(--text); text-decoration: underline; }
+    .ch-subs { font-size: 0.78rem; color: var(--muted2); }
+
+    .ch-actions { display: flex; gap: 8px; align-items: center; margin-left: auto; }
+
+    .btn-subscribe {
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 99px;
+        padding: 9px 22px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex; align-items: center; gap: 7px;
+        box-shadow: 0 2px 12px rgba(255,0,51,0.2);
+    }
+    .btn-subscribe:hover { background: #e0002d; transform: translateY(-1px); }
+
+    .btn-unsubscribe {
+        background: rgba(255,255,255,0.06);
+        color: var(--muted2);
+        border: 1px solid var(--border);
+        border-radius: 99px;
+        padding: 9px 22px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex; align-items: center; gap: 7px;
+    }
+    .btn-unsubscribe:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+
+    .btn-signin-sub {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 99px;
+        padding: 9px 20px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.85rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+        display: inline-flex; align-items: center; gap: 7px;
+    }
+    .btn-signin-sub:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+
+    .owner-actions { display: flex; gap: 7px; }
+    .btn-edit-sm {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--border);
+        color: var(--muted2);
+        border-radius: 8px;
+        padding: 7px 14px;
+        font-size: 0.8rem;
+        text-decoration: none;
+        transition: all 0.2s;
+        display: inline-flex; align-items: center; gap: 5px;
+    }
+    .btn-edit-sm:hover { background: rgba(255,255,255,0.09); color: var(--text); }
+    .btn-del-sm {
+        background: rgba(255,0,51,0.07);
+        border: 1px solid rgba(255,0,51,0.15);
+        color: #ff6680;
+        border-radius: 8px;
+        padding: 7px 14px;
+        font-size: 0.8rem;
+        text-decoration: none;
+        transition: all 0.2s;
+        display: inline-flex; align-items: center; gap: 5px;
+    }
+    .btn-del-sm:hover { background: rgba(255,0,51,0.12); color: #ff4466; }
+
+    /* ── DESCRIPTION ── */
+    .desc-box {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 16px 18px;
+        font-size: 0.875rem;
+        color: var(--muted2);
+        line-height: 1.7;
+        cursor: pointer;
+        transition: border-color 0.2s;
+    }
+    .desc-box:hover { border-color: rgba(255,255,255,0.12); }
+    .desc-preview { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+    .desc-full { display: none; }
+    .desc-box.expanded .desc-preview { display: none; }
+    .desc-box.expanded .desc-full { display: block; }
+    .desc-toggle {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text);
+        margin-top: 8px;
+        display: block;
+    }
+
+    /* ── COMMENTS ── */
+    .comments-section { margin-top: 32px; }
+
+    .comments-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+    .comments-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .comment-form-wrap {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+        align-items: flex-start;
+    }
+    .comment-form-wrap .ch-avatar-fallback { width: 36px; height: 36px; font-size: 14px; flex-shrink: 0; }
+
+    .comment-textarea {
+        flex: 1;
+        background: var(--input-bg);
+        border: 1px solid var(--border);
+        border-bottom: 2px solid transparent;
+        border-radius: 0;
+        color: var(--text);
+        padding: 10px 0;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.875rem;
+        outline: none;
+        resize: none;
+        transition: border-color 0.2s;
+        background: transparent;
+        border-top: none; border-left: none; border-right: none;
+        border-bottom: 1px solid rgba(255,255,255,0.12);
+        min-height: 38px;
+    }
+    .comment-textarea:focus { border-bottom-color: rgba(255,255,255,0.5); }
+    .comment-textarea::placeholder { color: #444; }
+
+    .comment-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 10px;
+    }
+    .btn-comment-cancel {
+        background: transparent; border: none; color: var(--muted2);
+        padding: 8px 14px; border-radius: 99px;
+        font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+        cursor: pointer; transition: all 0.2s;
+    }
+    .btn-comment-cancel:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+
+    .btn-comment-submit {
+        background: rgba(255,255,255,0.08);
+        border: 1px solid var(--border);
+        color: var(--muted2);
+        padding: 8px 18px; border-radius: 99px;
+        font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 500;
+        cursor: pointer; transition: all 0.2s;
+    }
+    .btn-comment-submit.ready {
+        background: rgba(255,255,255,0.1); color: var(--text);
+        border-color: rgba(255,255,255,0.15);
+    }
+
+    /* Comment cards */
+    .comment-item {
+        display: flex;
+        gap: 12px;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--border);
+        animation: fadeUp 0.3s ease both;
+    }
+    .comment-item:last-child { border-bottom: none; }
+    .comment-avatar { flex-shrink: 0; }
+    .comment-avatar .ch-avatar,
+    .comment-avatar .ch-avatar-fallback { width: 36px; height: 36px; font-size: 14px; }
+
+    .comment-body { flex: 1; min-width: 0; }
+    .comment-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 5px;
+        flex-wrap: wrap;
+    }
+    .comment-username {
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text);
+    }
+    .comment-time {
+        font-size: 0.75rem;
+        color: var(--muted2);
+    }
+    .comment-edited { font-size: 0.72rem; color: var(--muted); }
+
+    .comment-text {
+        font-size: 0.875rem;
+        color: #ccc;
+        line-height: 1.65;
+        word-break: break-word;
+    }
+
+    .comment-edit-btns {
+        display: flex;
+        gap: 6px;
+        margin-left: auto;
+        flex-shrink: 0;
+    }
+    .btn-cm-icon {
+        background: transparent; border: none;
+        color: var(--muted); padding: 4px 8px; border-radius: 6px;
+        font-size: 0.85rem; cursor: pointer; text-decoration: none;
+        transition: all 0.2s; display: inline-flex; align-items: center;
+    }
+    .btn-cm-icon:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+    .btn-cm-icon.danger:hover { background: rgba(255,0,51,0.08); color: #ff6680; }
+
+    .no-comments {
+        text-align: center;
+        padding: 48px 0;
+        color: var(--muted2);
+    }
+    .no-comments i { font-size: 2.2rem; display: block; margin-bottom: 10px; color: var(--muted); }
+    .no-comments p { font-size: 0.875rem; }
+
+    /* ── SIDEBAR ── */
+    .sidebar-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 14px;
+    }
+
+    .related-item {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 12px;
+        text-decoration: none;
+        padding: 8px;
+        border-radius: 12px;
+        transition: background 0.2s;
+        cursor: pointer;
+    }
+    .related-item:hover { background: rgba(255,255,255,0.04); }
+
+    .related-thumb {
+        width: 120px;
+        min-width: 120px;
+        aspect-ratio: 16/9;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #1a1a1a;
+        flex-shrink: 0;
+    }
+    .related-thumb img {
+        width: 100%; height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .related-item:hover .related-thumb img { transform: scale(1.04); }
+
+    .related-info { flex: 1; min-width: 0; }
+    .related-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--text);
+        line-height: 1.4;
+        margin-bottom: 4px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .related-meta { font-size: 0.75rem; color: var(--muted2); line-height: 1.5; }
+
+    @media (max-width: 767px) {
+        .video-title { font-size: 1rem; }
+        .channel-bar { flex-direction: column; align-items: flex-start; }
+        .ch-actions { margin-left: 0; }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
+<div class="video-page">
+<div class="container-fluid px-2 px-md-3">
+<div class="row g-3">
 
-<div class="container-fluid px-3 px-md-4 py-3">
+    <!-- ═══ MAIN COLUMN ═══ -->
+    <div class="col-lg-8">
 
-    <div class="row">
+        <!-- Player -->
+        <div class="player-wrap">
+            <video controls poster="{% if video.thumbnail %}{{ video.thumbnail.url }}{% endif %}" preload="metadata">
+                <source src="{{ video.video_file.url }}" type="video/mp4">
+                Your browser does not support video playback.
+            </video>
+        </div>
 
-        <!-- Main video column -->
-        <div class="col-lg-8">
+        <!-- Title -->
+        <h1 class="video-title">{{ video.title }}</h1>
 
-            <!-- Video Player -->
-            <div class="ratio ratio-16x9 bg-black rounded-3 overflow-hidden mb-3">
-                <video controls class="w-100 h-100" poster="{% if video.thumbnail %}{{ video.thumbnail.url }}{% endif %}">
-                    <source src="{{ video.video_file.url }}" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
+        <!-- Meta + Actions -->
+        <div class="meta-row">
+            <div class="meta-stats">
+                <span>{{ video.views }} views</span>
+                <span class="meta-dot">·</span>
+                <span>{{ video.uploaded_at|date:"d M Y" }}</span>
+                <span class="meta-dot">·</span>
+                <span>{{ video.uploaded_at|timesince }} ago</span>
             </div>
 
-            <!-- Video Info -->
-            <div class="mb-4">
-                <h4 class="fw-medium mb-2">{{ video.title }}</h4>
-
-                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
-                    <div>
-                        <p class="text-secondary mb-0 small">
-                            {{ video.views }} views •
-                            {{ video.uploaded_at|date:"d M Y" }} •
-                            {{ video.uploaded_at|timesince }} ago
-                        </p>
-                    </div>
-
-                    <!-- Like / Dislike + Share / Save -->
-                    <div class="d-flex gap-2 flex-wrap">
-                        <form method="post" action="#" class="d-inline">
-                            {% csrf_token %}
-                            <input type="hidden" name="reaction" value="like">
-                            <button type="submit" class="btn btn-outline-light btn-sm {% if user_reaction == 'like' %}active{% endif %}">
-                                <i class="bi bi-hand-thumbs-up-fill me-1"></i> Like
-                            </button>
-                        </form>
-
-                        <form method="post" action="#" class="d-inline">
-                            {% csrf_token %}
-                            <input type="hidden" name="reaction" value="dislike">
-                            <button type="submit" class="btn btn-outline-light btn-sm {% if user_reaction == 'dislike' %}active{% endif %}">
-                                <i class="bi bi-hand-thumbs-down-fill me-1"></i> Dislike
-                            </button>
-                        </form>
-
-                        <button class="btn btn-outline-light btn-sm">
-                            <i class="bi bi-share me-1"></i> Share
-                        </button>
-                        <button class="btn btn-outline-light btn-sm">
-                            <i class="bi bi-bookmark me-1"></i> Save
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Channel Info + Subscribe / Unsubscribe + Owner Actions -->
-                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3 p-3 bg-dark rounded-3 mb-3">
-                    <div class="d-flex align-items-center gap-3 flex-grow-1">
-                        {% if video.uploader.profile_picture %}
-                            <img src="{{ video.uploader.profile_picture.url }}"
-                                 alt="{{ video.uploader.username }}'s profile"
-                                 class="rounded-circle"
-                                 width="48" height="48"
-                                 style="object-fit: cover; border: 1px solid #444;">
-                        {% else %}
-                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center fw-bold"
-                                 style="width: 48px; height: 48px; font-size: 20px;">
-                                {{ video.uploader.username|slice:":1"|upper }}
-                            </div>
-                        {% endif %}
-
-                        <div>
-                            <h6 class="mb-0">
-                                <a href="#" class="text-white text-decoration-none">
-                                    {{ video.uploader.username }}
-                                </a>
-                            </h6>
-                            <small class="text-secondary">
-                                {{ video.uploader.subscribers_list.count }} subscriber{{ video.uploader.subscribers_list.count|pluralize }}
-                            </small>
-                        </div>
-                    </div>
-
-                    <div class="mt-3 mt-md-0 ms-md-auto">
-                        {% if user.is_authenticated %}
-                            <form method="post" action="{% url 'toggle_subscription' video.uploader.pk %}">
-                                {% csrf_token %}
-                                {% if is_subscribed %}
-                                    <button type="submit" class="btn btn-outline-secondary rounded-pill px-5 py-2 fw-medium">
-                                        <i class="bi bi-bell-slash-fill me-2"></i> Unsubscribe
-                                    </button>
-                                {% else %}
-                                    <button type="submit" class="btn btn-danger rounded-pill px-5 py-2 fw-medium">
-                                        <i class="bi bi-bell-fill me-2"></i> Subscribe
-                                    </button>
-                                {% endif %}
-                            </form>
-                        {% else %}
-                            <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-outline-light rounded-pill px-5 py-2">
-                                <i class="bi bi-box-arrow-in-right me-2"></i> Sign in to subscribe
-                            </a>
-                        {% endif %}
-                    </div>
-
-                    {% if user.is_authenticated and user == video.uploader %}
-                        <div class="d-flex gap-2 mt-3 mt-md-0 ms-3">
-                            <a href="{% url 'video_update' video.pk %}" class="btn btn-outline-primary rounded-pill px-4">
-                                <i class="bi bi-pencil me-1"></i> Edit
-                            </a>
-                            <a href="{% url 'video_delete' video.pk %}" class="btn btn-outline-danger rounded-pill px-4">
-                                <i class="bi bi-trash me-1"></i> Delete
-                            </a>
-                        </div>
-                    {% endif %}
-                </div>
-
-                <!-- Description -->
-                <div class="bg-dark p-3 rounded-3">
-                    <p class="mb-0">{{ video.description|linebreaks|default:"No description provided." }}</p>
-                </div>
+            <div class="action-group">
+                <form method="post" action="#" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="reaction" value="like">
+                    <button type="submit" class="action-btn {% if user_reaction == 'like' %}active{% endif %}">
+                        <i class="bi bi-hand-thumbs-up{% if user_reaction == 'like' %}-fill{% endif %}"></i> Like
+                    </button>
+                </form>
+                <form method="post" action="#" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="reaction" value="dislike">
+                    <button type="submit" class="action-btn {% if user_reaction == 'dislike' %}active{% endif %}">
+                        <i class="bi bi-hand-thumbs-down{% if user_reaction == 'dislike' %}-fill{% endif %}"></i> Dislike
+                    </button>
+                </form>
+                <button class="action-btn" id="shareBtn">
+                    <i class="bi bi-share"></i> Share
+                </button>
+                <button class="action-btn">
+                    <i class="bi bi-bookmark"></i> Save
+                </button>
             </div>
+        </div>
 
-            <!-- Comments Section -->
-            <div class="mt-5">
-                <h5 class="mb-4 d-flex justify-content-between align-items-center">
-                    <span>Comments ({{ video.comments.count }})</span>
-                    {% if user.is_authenticated %}
-                        <button class="btn btn-sm btn-outline-light" data-bs-toggle="collapse" data-bs-target="#add-comment-form">
-                            <i class="bi bi-plus-circle me-1"></i> Add Comment
-                        </button>
-                    {% endif %}
-                </h5>
-
-                {% if user.is_authenticated %}
-                    <div class="collapse mb-4" id="add-comment-form">
-                        <form method="post" action="{% url 'comment_create' video.pk %}">
-                            {% csrf_token %}
-                            <div class="input-group input-group-lg">
-                                <textarea name="text" class="form-control bg-dark border-secondary text-white"
-                                          rows="3" placeholder="Add a public comment..." required></textarea>
-                                <button class="btn btn-danger" type="submit">
-                                    <i class="bi bi-send-fill"></i>
-                                </button>
-                            </div>
-                        </form>
+        <!-- Channel Bar -->
+        <div class="channel-bar">
+            <div class="comment-avatar">
+                {% if video.uploader.profile_picture %}
+                    <img src="{{ video.uploader.profile_picture.url }}" class="ch-avatar" alt="{{ video.uploader.username }}">
+                {% else %}
+                    <div class="ch-avatar-fallback" style="width:46px;height:46px;font-size:18px;">
+                        {{ video.uploader.username|slice:":1"|upper }}
                     </div>
                 {% endif %}
+            </div>
 
-                {% if video.comments.count %}
-                    <div class="list-group">
-                        {% for comment in video.comments.all|dictsortreversed:"created_at" %}
-                            <div class="list-group-item bg-transparent border-secondary mb-3 p-4 rounded-3">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div class="d-flex align-items-center gap-3">
-                                        {% if comment.user.profile_picture %}
-                                            <img src="{{ comment.user.profile_picture.url }}"
-                                                 alt="{{ comment.user.username }}"
-                                                 class="rounded-circle" width="40" height="40"
-                                                 style="object-fit: cover;">
-                                        {% else %}
-                                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center fw-bold"
-                                                 style="width: 40px; height: 40px; font-size: 18px;">
-                                                {{ comment.user.username|slice:":1"|upper }}
-                                            </div>
-                                        {% endif %}
+            <div class="ch-info">
+                <a href="#" class="ch-name">{{ video.uploader.username }}</a>
+                <span class="ch-subs">
+                    {{ video.uploader.subscribers_list.count }} subscriber{{ video.uploader.subscribers_list.count|pluralize }}
+                </span>
+            </div>
 
-                                        <div>
-                                            <h6 class="mb-0 text-white">{{ comment.user.username }}</h6>
-                                            <small class="text-secondary">
-                                                {{ comment.created_at|timesince }} ago
-                                                {% if comment.updated_at > comment.created_at %}
-                                                    • edited {{ comment.updated_at|timesince }} ago
-                                                {% endif %}
-                                            </small>
-                                        </div>
+            <div class="ch-actions">
+                {% if user.is_authenticated %}
+                    {% if user != video.uploader %}
+                        <form method="post" action="{% url 'toggle_subscription' video.uploader.pk %}">
+                            {% csrf_token %}
+                            {% if is_subscribed %}
+                                <button type="submit" class="btn-unsubscribe">
+                                    <i class="bi bi-bell-slash"></i> Subscribed
+                                </button>
+                            {% else %}
+                                <button type="submit" class="btn-subscribe">
+                                    <i class="bi bi-bell-fill"></i> Subscribe
+                                </button>
+                            {% endif %}
+                        </form>
+                    {% endif %}
+
+                    {% if user == video.uploader %}
+                        <div class="owner-actions">
+                            <a href="{% url 'video_update' video.pk %}" class="btn-edit-sm">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <a href="{% url 'video_delete' video.pk %}" class="btn-del-sm">
+                                <i class="bi bi-trash3"></i> Delete
+                            </a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'login' %}?next={{ request.path }}" class="btn-signin-sub">
+                        <i class="bi bi-box-arrow-in-right"></i> Sign in to subscribe
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div class="desc-box" id="descBox">
+            <div class="desc-preview">{{ video.description|default:"No description provided." }}</div>
+            <div class="desc-full">{{ video.description|linebreaks|default:"No description provided." }}</div>
+            <span class="desc-toggle" id="descToggle">Show more</span>
+        </div>
+
+        <!-- Comments -->
+        <div class="comments-section">
+            <div class="comments-header">
+                <span class="comments-title">{{ video.comments.count }} Comment{{ video.comments.count|pluralize }}</span>
+            </div>
+
+            {% if user.is_authenticated %}
+                <div class="comment-form-wrap">
+                    <div class="ch-avatar-fallback">
+                        {{ user.username|slice:":1"|upper }}
+                    </div>
+                    <div style="flex:1;">
+                        <form method="post" action="{% url 'comment_create' video.pk %}">
+                            {% csrf_token %}
+                            <textarea name="text"
+                                      class="comment-textarea w-100"
+                                      rows="1"
+                                      placeholder="Add a comment..."
+                                      id="commentInput"
+                                      required></textarea>
+                            <div class="comment-actions" id="commentActions" style="display:none!important;">
+                                <button type="button" class="btn-comment-cancel" id="cancelComment">Cancel</button>
+                                <button type="submit" class="btn-comment-submit" id="submitComment">Comment</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            {% else %}
+                <div style="font-size:0.875rem;color:var(--muted2);margin-bottom:20px;">
+                    <a href="{% url 'login' %}?next={{ request.path }}" style="color:#ff6680;text-decoration:none;">Sign in</a>
+                    to leave a comment.
+                </div>
+            {% endif %}
+
+            {% if video.comments.count %}
+                <div id="commentsList">
+                    {% for comment in video.comments.all|dictsortreversed:"created_at" %}
+                        <div class="comment-item">
+                            <div class="comment-avatar">
+                                {% if comment.user.profile_picture %}
+                                    <img src="{{ comment.user.profile_picture.url }}" class="ch-avatar" alt="">
+                                {% else %}
+                                    <div class="ch-avatar-fallback">
+                                        {{ comment.user.username|slice:":1"|upper }}
                                     </div>
-
+                                {% endif %}
+                            </div>
+                            <div class="comment-body">
+                                <div class="comment-meta">
+                                    <span class="comment-username">{{ comment.user.username }}</span>
+                                    <span class="comment-time">{{ comment.created_at|timesince }} ago</span>
+                                    {% if comment.updated_at > comment.created_at %}
+                                        <span class="comment-edited">(edited)</span>
+                                    {% endif %}
                                     {% if user.is_authenticated and user == comment.user %}
-                                        <div class="d-flex gap-2">
-                                            <a href="{% url 'comment_edit' comment.pk %}" class="btn btn-sm btn-outline-primary">
+                                        <div class="comment-edit-btns">
+                                            <a href="{% url 'comment_edit' comment.pk %}" class="btn-cm-icon">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
-                                            <a href="{% url 'comment_delete' comment.pk %}" class="btn btn-sm btn-outline-danger">
-                                                <i class="bi bi-trash"></i>
+                                            <a href="{% url 'comment_delete' comment.pk %}" class="btn-cm-icon danger">
+                                                <i class="bi bi-trash3"></i>
                                             </a>
                                         </div>
                                     {% endif %}
                                 </div>
-
-                                <p class="mb-0 text-light">{{ comment.text|linebreaks }}</p>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="text-center py-5 text-secondary">
-                        <i class="bi bi-chat-square-dots fs-1 mb-3 d-block"></i>
-                        <p>No comments yet. Be the first to share your thoughts!</p>
-                    </div>
-                {% endif %}
-            </div>
-
-        </div>
-
-        <!-- Recommended videos sidebar -->
-        <div class="col-lg-4">
-            <div class="sticky-top" style="top: 76px;">
-                <h5 class="mb-3">Up next</h5>
-
-                {% for related in related_videos|slice:":8" %}
-                    <div class="row mb-3 g-2">
-                        <div class="col-4">
-                            <a href="{{ related.get_absolute_url }}">
-                                {% if related.thumbnail %}
-                                    <img src="{{ related.thumbnail.url }}" class="rounded-3 w-100" alt="{{ related.title }}" style="aspect-ratio: 16/9; object-fit: cover;">
-                                {% else %}
-                                    <div class="ratio ratio-16x9 bg-dark rounded-3"></div>
-                                {% endif %}
-                            </a>
-                        </div>
-                        <div class="col-8">
-                            <h6 class="small fw-medium mb-1">
-                                <a href="{{ related.get_absolute_url }}" class="text-white text-decoration-none">
-                                    {{ related.title|truncatechars:60 }}
-                                </a>
-                            </h6>
-                            <p class="text-secondary small mb-0">{{ related.uploader.username }}</p>
-                            <p class="text-secondary small mb-0">
-                                {{ related.views }} views • {{ related.uploaded_at|timesince }} ago
-                            </p>
-                        </div>
-                    </div>
-                {% endfor %}
-
-                {% if not related_videos %}
-                    <!-- Fallback: show recent videos if no related -->
-                    {% for related in recent_videos|slice:":8" %}
-                        <div class="row mb-3 g-2">
-                            <div class="col-4">
-                                <a href="{{ related.get_absolute_url }}">
-                                    {% if related.thumbnail %}
-                                        <img src="{{ related.thumbnail.url }}" class="rounded-3 w-100" alt="{{ related.title }}" style="aspect-ratio: 16/9; object-fit: cover;">
-                                    {% else %}
-                                        <div class="ratio ratio-16x9 bg-dark rounded-3"></div>
-                                    {% endif %}
-                                </a>
-                            </div>
-                            <div class="col-8">
-                                <h6 class="small fw-medium mb-1">
-                                    <a href="{{ related.get_absolute_url }}" class="text-white text-decoration-none">
-                                        {{ related.title|truncatechars:60 }}
-                                    </a>
-                                </h6>
-                                <p class="text-secondary small mb-0">{{ related.uploader.username }}</p>
-                                <p class="text-secondary small mb-0">
-                                    {{ related.views }} views • {{ related.uploaded_at|timesince }} ago
-                                </p>
+                                <div class="comment-text">{{ comment.text }}</div>
                             </div>
                         </div>
                     {% endfor %}
-                {% endif %}
-            </div>
+                </div>
+            {% else %}
+                <div class="no-comments">
+                    <i class="bi bi-chat-square-dots"></i>
+                    <p>No comments yet — be the first to share your thoughts!</p>
+                </div>
+            {% endif %}
         </div>
 
     </div>
 
+    <!-- ═══ SIDEBAR ═══ -->
+    <div class="col-lg-4">
+        <div class="sticky-top" style="top:76px;">
+            <div class="sidebar-title">Up next</div>
+
+            {% with videos=related_videos|default:recent_videos %}
+                {% for v in videos|slice:":10" %}
+                    <a href="{{ v.get_absolute_url }}" class="related-item">
+                        <div class="related-thumb">
+                            {% if v.thumbnail %}
+                                <img src="{{ v.thumbnail.url }}" alt="{{ v.title }}">
+                            {% else %}
+                                <div style="width:100%;height:100%;background:#1a1a1a;display:flex;align-items:center;justify-content:center;">
+                                    <i class="bi bi-play-circle" style="color:#444;font-size:1.5rem;"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="related-info">
+                            <div class="related-title">{{ v.title|truncatechars:65 }}</div>
+                            <div class="related-meta">
+                                {{ v.uploader.username }}<br>
+                                {{ v.views }} views · {{ v.uploaded_at|timesince }} ago
+                            </div>
+                        </div>
+                    </a>
+                {% empty %}
+                    <p style="font-size:0.82rem;color:var(--muted2);">No videos to show.</p>
+                {% endfor %}
+            {% endwith %}
+        </div>
+    </div>
+
+</div>
+</div>
 </div>
 
+<!-- Share toast -->
+<div id="shareToast" style="
+    position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:#1a1a1a; border:1px solid rgba(255,255,255,0.1); border-radius:10px;
+    padding:11px 22px; font-size:0.85rem; color:#f0f0f0;
+    box-shadow:0 8px 32px rgba(0,0,0,0.4);
+    opacity:0; transition:all 0.3s ease; pointer-events:none; white-space:nowrap; z-index:9999;">
+    <i class="bi bi-check-circle-fill" style="color:#00c853;margin-right:8px;"></i>Link copied to clipboard!
+</div>
+
+<script>
+    // ── Description expand/collapse ──
+    const descBox    = document.getElementById('descBox');
+    const descToggle = document.getElementById('descToggle');
+    descBox.addEventListener('click', () => {
+        const expanded = descBox.classList.toggle('expanded');
+        descToggle.textContent = expanded ? 'Show less' : 'Show more';
+    });
+
+    // ── Comment box expand ──
+    const commentInput   = document.getElementById('commentInput');
+    const commentActions = document.getElementById('commentActions');
+    const cancelComment  = document.getElementById('cancelComment');
+    const submitComment  = document.getElementById('submitComment');
+
+    if (commentInput) {
+        commentInput.addEventListener('focus', () => {
+            commentActions.style.setProperty('display', 'flex', 'important');
+            commentInput.rows = 3;
+        });
+        commentInput.addEventListener('input', () => {
+            submitComment.classList.toggle('ready', commentInput.value.trim().length > 0);
+        });
+        cancelComment.addEventListener('click', () => {
+            commentInput.value = '';
+            commentInput.rows = 1;
+            commentActions.style.setProperty('display', 'none', 'important');
+            submitComment.classList.remove('ready');
+        });
+    }
+
+    // ── Share button ──
+    const shareBtn  = document.getElementById('shareBtn');
+    const shareToast = document.getElementById('shareToast');
+
+    shareBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            shareToast.style.opacity = '1';
+            shareToast.style.transform = 'translateX(-50%) translateY(0)';
+            setTimeout(() => {
+                shareToast.style.opacity = '0';
+                shareToast.style.transform = 'translateX(-50%) translateY(20px)';
+            }, 2500);
+        });
+    });
+</script>
 {% endblock %}

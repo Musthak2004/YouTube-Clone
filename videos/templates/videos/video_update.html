@@ -1,165 +1,517 @@
 {% extends 'base.html' %}
-{% block title %}Edit Video - YouClone{% endblock %}
+{% block title %}Edit Video — YouClone{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --accent:     #ff0033;
+        --accent-dim: rgba(255,0,51,0.1);
+        --card:       #111111;
+        --border:     rgba(255,255,255,0.07);
+        --input-bg:   #0c0c0c;
+        --muted:      #555;
+        --muted2:     #999;
+        --text:       #f0f0f0;
+    }
+
+    .edit-page {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 8px 0 60px;
+        animation: fadeUp 0.4s ease both;
+    }
+    @keyframes fadeUp {
+        from { opacity:0; transform:translateY(18px); }
+        to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── HEADER ── */
+    .back-link {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 0.82rem; color: var(--muted);
+        text-decoration: none; margin-bottom: 20px;
+        transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--text); }
+
+    .page-header { margin-bottom: 28px; }
+    .page-header h1 {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.8rem; font-weight: 700;
+        letter-spacing: -0.5px; margin-bottom: 4px;
+    }
+    .page-header p { font-size: 0.9rem; color: var(--muted2); }
+
+    /* ── CURRENT THUMB PREVIEW ── */
+    .current-thumb-bar {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin-bottom: 28px;
+    }
+    .current-thumb-bar img {
+        width: 96px; aspect-ratio: 16/9;
+        object-fit: cover; border-radius: 8px;
+        border: 1px solid var(--border);
+    }
+    .current-thumb-info { flex: 1; }
+    .current-thumb-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.9rem; font-weight: 600;
+        margin-bottom: 3px;
+        display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .current-thumb-meta { font-size: 0.78rem; color: var(--muted2); }
+
+    /* ── CARD ── */
+    .edit-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 36px 32px;
+        box-shadow: 0 32px 80px rgba(0,0,0,0.45);
+        position: relative; overflow: hidden;
+    }
+    .edit-card::before {
+        content: '';
+        position: absolute; top: 0; left: 10%; right: 10%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255,165,0,0.3), transparent);
+    }
+
+    /* ── SECTION SEP ── */
+    .section-sep {
+        font-size: 0.7rem; font-family: 'Outfit', sans-serif;
+        font-weight: 600; text-transform: uppercase;
+        letter-spacing: 1.2px; color: var(--muted);
+        margin: 26px 0 16px;
+        display: flex; align-items: center; gap: 10px;
+    }
+    .section-sep:first-child { margin-top: 0; }
+    .section-sep::before, .section-sep::after {
+        content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ── FIELDS ── */
+    .field-group { margin-bottom: 18px; }
+    .field-label {
+        display: flex; align-items: center; gap: 6px;
+        font-size: 0.8rem; font-weight: 500; color: var(--muted2);
+        margin-bottom: 8px;
+    }
+    .optional-tag {
+        font-size: 0.68rem; background: rgba(255,255,255,0.06);
+        border-radius: 4px; padding: 1px 6px; color: var(--muted); margin-left: auto;
+    }
+    .field-wrap { position: relative; }
+    .field-icon {
+        position: absolute; left: 13px; top: 50%;
+        transform: translateY(-50%); color: var(--muted);
+        font-size: 0.95rem; pointer-events: none; transition: color 0.2s;
+    }
+    .field-wrap:focus-within .field-icon { color: #ff9955; }
+
+    .field-input {
+        width: 100%; background: var(--input-bg);
+        border: 1px solid var(--border); border-radius: 10px;
+        color: var(--text); padding: 11px 14px 11px 38px;
+        font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+        outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field-input::placeholder { color: #333; }
+    .field-input:focus {
+        border-color: rgba(255,150,50,0.35);
+        box-shadow: 0 0 0 3px rgba(255,150,50,0.07);
+    }
+
+    .field-textarea {
+        width: 100%; background: var(--input-bg);
+        border: 1px solid var(--border); border-radius: 10px;
+        color: var(--text); padding: 11px 14px;
+        font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+        outline: none; resize: vertical; min-height: 90px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field-textarea::placeholder { color: #333; }
+    .field-textarea:focus {
+        border-color: rgba(255,150,50,0.35);
+        box-shadow: 0 0 0 3px rgba(255,150,50,0.07);
+    }
+
+    .char-count {
+        font-size: 0.72rem; color: var(--muted);
+        text-align: right; margin-top: 5px; transition: color 0.2s;
+    }
+    .char-count.warn { color: #ff8c00; }
+    .char-count.over { color: var(--accent); }
+
+    /* ── DROP ZONES ── */
+    .drop-zone {
+        position: relative; border: 1.5px dashed rgba(255,255,255,0.1);
+        border-radius: 14px; background: var(--input-bg);
+        transition: all 0.25s ease; cursor: pointer; overflow: hidden;
+    }
+    .drop-zone:hover, .drop-zone.dragging {
+        border-color: rgba(255,150,50,0.35);
+        background: rgba(255,150,50,0.04);
+    }
+    .drop-zone input[type="file"] {
+        position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 10;
+    }
+    .drop-inner {
+        padding: 30px 24px; text-align: center; pointer-events: none;
+        transition: transform 0.25s;
+    }
+    .drop-zone:hover .drop-inner,
+    .drop-zone.dragging .drop-inner { transform: scale(1.01); }
+    .drop-icon {
+        font-size: 2.2rem; color: var(--muted); margin-bottom: 10px;
+        display: block; transition: color 0.25s;
+    }
+    .drop-zone:hover .drop-icon,
+    .drop-zone.dragging .drop-icon { color: #ff9955; }
+    .drop-title {
+        font-family: 'Outfit', sans-serif; font-size: 0.9rem;
+        font-weight: 600; color: var(--text); margin-bottom: 4px;
+    }
+    .drop-hint { font-size: 0.76rem; color: var(--muted2); }
+    .drop-keep {
+        font-size: 0.72rem; color: var(--muted); margin-top: 6px;
+        display: inline-flex; align-items: center; gap: 5px;
+    }
+    .drop-keep i { color: #00c853; }
+
+    /* Selected state */
+    .file-selected-bar {
+        display: none; align-items: center; gap: 12px;
+        padding: 12px 18px;
+        background: rgba(255,150,50,0.06);
+        border-top: 1px solid rgba(255,150,50,0.1);
+    }
+    .file-selected-bar.show { display: flex; }
+    .file-selected-bar i { font-size: 1.4rem; color: #ff9955; }
+    .file-name { font-size: 0.83rem; color: var(--text); font-weight: 500; }
+    .file-size { font-size: 0.73rem; color: var(--muted2); }
+
+    /* Thumb preview */
+    .thumb-new-preview {
+        display: none; padding: 0 16px 14px;
+    }
+    .thumb-new-preview.show { display: block; }
+    .thumb-new-preview img {
+        width: 100%; max-height: 160px; object-fit: cover;
+        border-radius: 9px; border: 1px solid var(--border);
+    }
+    .thumb-change-hint {
+        font-size: 0.72rem; color: var(--muted2); text-align: center; margin-top: 5px;
+    }
+
+    /* ── FIELD ERROR ── */
+    .field-error {
+        font-size: 0.77rem; color: #ff4466; margin-top: 6px;
+        display: flex; align-items: center; gap: 5px;
+    }
+
+    /* ── GLOBAL ERROR ── */
+    .alert-error {
+        background: rgba(255,0,51,0.08); border: 1px solid rgba(255,0,51,0.18);
+        border-radius: 10px; padding: 12px 16px; font-size: 0.84rem; color: #ff6680;
+        margin-bottom: 22px; display: flex; align-items: flex-start; gap: 9px;
+    }
+
+    /* ── CHANGE INDICATOR ── */
+    .unsaved-badge {
+        display: none;
+        background: rgba(255,150,50,0.1);
+        border: 1px solid rgba(255,150,50,0.2);
+        border-radius: 99px; padding: 3px 12px;
+        font-size: 0.72rem; color: #ff9955;
+        font-family: 'Outfit', sans-serif; font-weight: 500;
+        margin-left: 10px; vertical-align: middle;
+    }
+    .unsaved-badge.show { display: inline-block; }
+
+    /* ── BUTTONS ── */
+    .btn-row {
+        display: flex; gap: 10px; margin-top: 28px;
+    }
+    .btn-save {
+        flex: 1; background: linear-gradient(135deg, #cc5500, #ff7730);
+        color: #fff; border: none; border-radius: 11px; padding: 13px;
+        font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 600;
+        cursor: pointer; transition: all 0.25s ease;
+        box-shadow: 0 4px 24px rgba(255,120,50,0.22);
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-save:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 30px rgba(255,120,50,0.36);
+    }
+    .btn-cancel {
+        background: rgba(255,255,255,0.05);
+        color: var(--muted2); border: 1px solid var(--border);
+        border-radius: 11px; padding: 13px 24px;
+        font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+        cursor: pointer; text-decoration: none;
+        transition: all 0.2s; display: flex; align-items: center; gap: 7px;
+    }
+    .btn-cancel:hover {
+        background: rgba(255,255,255,0.08); color: var(--text);
+        border-color: rgba(255,255,255,0.14);
+    }
+
+    @media (max-width: 600px) {
+        .edit-card { padding: 24px 16px; }
+        .btn-row { flex-direction: column; }
+        .current-thumb-bar { flex-direction: column; align-items: flex-start; }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
+<div class="edit-page">
 
-<script src="https://cdn.tailwindcss.com"></script>
+    <!-- Back -->
+    <a href="{% url 'video_list' %}" class="back-link">
+        <i class="bi bi-arrow-left"></i> Back to videos
+    </a>
 
-<div class="min-h-screen bg-gradient-to-br from-gray-950 via-black to-gray-900 py-12 px-4 sm:px-6 lg:px-8 relative">
-    <div class="absolute inset-0 bg-black/70 backdrop-blur-3xl z-0"
-         style="background-image: url('{% if video.thumbnail %}{{ video.thumbnail.url }}{% else %}https://images.unsplash.com/photo-1611162617210-7d7a39e9b1d7?w=2000{% endif %}'); background-size: cover; background-position: center; filter: blur(100px) brightness(0.3);"></div>
+    <!-- Header -->
+    <div class="page-header">
+        <h1>
+            Edit Video
+            <span class="unsaved-badge" id="unsavedBadge">Unsaved changes</span>
+        </h1>
+        <p>Update your video details below</p>
+    </div>
 
-    <div class="relative z-10 max-w-3xl mx-auto">
-        <div class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-white tracking-tight drop-shadow-lg">
-                Edit Video
-            </h1>
-            <p class="mt-3 text-gray-400 text-xl">
-                Update your masterpiece
-            </p>
+    <!-- Current video chip -->
+    {% if video.thumbnail %}
+    <div class="current-thumb-bar">
+        <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}">
+        <div class="current-thumb-info">
+            <div class="current-thumb-title">{{ video.title }}</div>
+            <div class="current-thumb-meta">
+                <i class="bi bi-eye" style="margin-right:4px;"></i>{{ video.views }} views ·
+                Uploaded {{ video.uploaded_at|timesince }} ago
+            </div>
         </div>
+        <a href="{{ video.get_absolute_url }}" style="font-size:0.8rem;color:var(--muted2);text-decoration:none;flex-shrink:0;" target="_blank">
+            <i class="bi bi-box-arrow-up-right"></i> View
+        </a>
+    </div>
+    {% endif %}
 
-        <div class="bg-gray-900/40 backdrop-blur-2xl border border-gray-800/40 rounded-3xl shadow-2xl shadow-black/70 p-8 md:p-12">
-            <form method="post" enctype="multipart/form-data" class="space-y-10">
-                {% csrf_token %}
+    <!-- Card -->
+    <div class="edit-card">
 
-                {% if form.non_field_errors %}
-                    <div class="bg-red-950/60 border border-red-800/50 text-red-200 px-6 py-5 rounded-2xl">
-                        {{ form.non_field_errors|join:"<br>" }}
-                    </div>
+        {% if form.non_field_errors %}
+            <div class="alert-error">
+                <i class="bi bi-exclamation-circle-fill" style="flex-shrink:0;margin-top:2px;"></i>
+                <span>{{ form.non_field_errors|join:" · " }}</span>
+            </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" id="editForm">
+            {% csrf_token %}
+
+            <!-- ─ Info ─ -->
+            <div class="section-sep">Video Info</div>
+
+            <!-- Title -->
+            <div class="field-group">
+                <label class="field-label" for="{{ form.title.id_for_label }}">
+                    <i class="bi bi-type"></i> Title
+                </label>
+                <div class="field-wrap">
+                    <input type="text"
+                           name="{{ form.title.name }}"
+                           class="field-input"
+                           id="{{ form.title.id_for_label }}"
+                           placeholder="Video title"
+                           maxlength="100"
+                           required
+                           value="{{ form.title.value|default:'' }}">
+                    <i class="bi bi-pencil field-icon"></i>
+                </div>
+                <div class="char-count" id="titleCount">{{ form.title.value|default:''|length }} / 100</div>
+                {% if form.title.errors %}
+                    <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.title.errors|join:", " }}</div>
                 {% endif %}
+            </div>
 
-                <!-- Title -->
-                <div class="relative group">
-                    <input type="text" name="{{ form.title.name }}" id="{{ form.title.id_for_label }}"
-                           value="{{ form.title.value|default:'' }}" placeholder=" "
-                           class="peer w-full px-5 pt-8 pb-3 bg-gray-950/60 border border-gray-700 rounded-2xl text-white text-lg outline-none transition-all duration-300 focus:border-red-600 focus:ring-4 focus:ring-red-600/20 focus:bg-gray-950/80 group-hover:border-gray-500">
-                    <label for="{{ form.title.id_for_label }}"
-                           class="absolute left-5 top-2 text-gray-500 text-sm transition-all duration-300 peer-placeholder-shown:top-5 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-sm peer-focus:text-red-500">
-                        Video Title
-                    </label>
-                    {% if form.title.errors %}<p class="mt-2 text-sm text-red-400">{{ form.title.errors|join:", " }}</p>{% endif %}
-                </div>
+            <!-- Description -->
+            <div class="field-group">
+                <label class="field-label" for="{{ form.description.id_for_label }}">
+                    <i class="bi bi-card-text"></i> Description
+                    <span class="optional-tag">optional</span>
+                </label>
+                <textarea name="{{ form.description.name }}"
+                          class="field-textarea"
+                          id="{{ form.description.id_for_label }}"
+                          placeholder="Describe your video..."
+                          maxlength="500">{{ form.description.value|default:'' }}</textarea>
+                <div class="char-count" id="descCount">{{ form.description.value|default:''|length }} / 500</div>
+                {% if form.description.errors %}
+                    <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.description.errors|join:", " }}</div>
+                {% endif %}
+            </div>
 
-                <!-- Description -->
-                <div class="relative group">
-                    <textarea name="{{ form.description.name }}" id="{{ form.description.id_for_label }}" rows="5" placeholder=" "
-                              class="peer w-full px-5 pt-8 pb-3 bg-gray-950/60 border border-gray-700 rounded-2xl text-white text-lg outline-none transition-all duration-300 focus:border-red-600 focus:ring-4 focus:ring-red-600/20 focus:bg-gray-950/80 group-hover:border-gray-500 resize-y"></textarea>
-                    <label for="{{ form.description.id_for_label }}"
-                           class="absolute left-5 top-2 text-gray-500 text-sm transition-all duration-300 peer-placeholder-shown:top-5 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-sm peer-focus:text-red-500">
-                        Description (optional)
-                    </label>
-                    {% if form.description.errors %}<p class="mt-2 text-sm text-red-400">{{ form.description.errors|join:", " }}</p>{% endif %}
-                </div>
+            <!-- ─ Files ─ -->
+            <div class="section-sep">Replace Files</div>
 
-                <!-- Video File - Premium Drag & Drop -->
-                <div class="space-y-3">
-                    <label class="block text-sm font-medium text-gray-300">
-                        Replace Video File (optional)
-                    </label>
-                    <div id="video-drop-zone" class="relative border-2 border-dashed border-gray-700 rounded-2xl p-10 text-center transition-all duration-300 hover:border-red-600/70 hover:bg-gray-950/50 group">
-                        <input type="file" name="{{ form.video_file.name }}" id="{{ form.video_file.id_for_label }}"
-                               class="absolute inset-0 opacity-0 cursor-pointer z-10" accept="video/*">
-                        <div class="pointer-events-none">
-                            <i class="bi bi-cloud-upload text-5xl text-gray-500 group-hover:text-red-500 transition-colors"></i>
-                            <p class="mt-4 text-gray-300 text-lg font-medium">
-                                Drag & drop video here or click to browse
-                            </p>
-                            <p class="mt-2 text-sm text-gray-500">
-                                Leave blank to keep current video
-                            </p>
-                        </div>
+            <!-- Video File -->
+            <div class="field-group">
+                <label class="field-label" for="{{ form.video_file.id_for_label }}">
+                    <i class="bi bi-camera-video"></i> Replace Video File
+                    <span class="optional-tag">optional</span>
+                </label>
+                <div class="drop-zone" id="videoDrop">
+                    <input type="file"
+                           name="{{ form.video_file.name }}"
+                           id="{{ form.video_file.id_for_label }}"
+                           accept="video/*">
+                    <div class="drop-inner" id="videoDropInner">
+                        <i class="bi bi-cloud-arrow-up drop-icon"></i>
+                        <div class="drop-title">Drag & drop a new video</div>
+                        <div class="drop-hint">MP4, WebM, MOV · Max 500MB</div>
+                        <div class="drop-keep"><i class="bi bi-check-circle-fill"></i> Current video kept if left blank</div>
                     </div>
-                    {% if form.video_file.errors %}<p class="text-sm text-red-400">{{ form.video_file.errors|join:", " }}</p>{% endif %}
-                </div>
-
-                <!-- Thumbnail - With Preview -->
-                <div class="space-y-3">
-                    <label class="block text-sm font-medium text-gray-300">
-                        Replace Thumbnail (optional)
-                    </label>
-                    <div id="thumbnail-drop-zone" class="relative border-2 border-dashed border-gray-700 rounded-2xl p-10 text-center transition-all duration-300 hover:border-red-600/70 hover:bg-gray-950/50 group">
-                        <input type="file" name="{{ form.thumbnail.name }}" id="{{ form.thumbnail.id_for_label }}"
-                               class="absolute inset-0 opacity-0 cursor-pointer z-10" accept="image/*">
-                        <div class="pointer-events-none">
-                            <i class="bi bi-image text-5xl text-gray-500 group-hover:text-red-500 transition-colors"></i>
-                            <p class="mt-4 text-gray-300 text-lg font-medium">
-                                Drag & drop thumbnail or click to browse
-                            </p>
-                            <p class="mt-2 text-sm text-gray-500">
-                                Leave blank to keep current (recommended 1280×720)
-                            </p>
+                    <div class="file-selected-bar" id="videoInfo">
+                        <i class="bi bi-file-play"></i>
+                        <div>
+                            <div class="file-name" id="videoName">—</div>
+                            <div class="file-size" id="videoSize">—</div>
                         </div>
-                        <!-- Preview area -->
-                        <div id="thumbnail-preview" class="mt-6 hidden">
-                            <img id="preview-img" class="mx-auto max-h-48 rounded-xl border border-gray-700 shadow-lg" alt="Thumbnail preview">
-                        </div>
+                        <i class="bi bi-check-circle-fill ms-auto" style="color:#00c853;font-size:1.1rem;"></i>
                     </div>
-                    {% if form.thumbnail.errors %}<p class="text-sm text-red-400">{{ form.thumbnail.errors|join:", " }}</p>{% endif %}
                 </div>
+                {% if form.video_file.errors %}
+                    <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.video_file.errors|join:", " }}</div>
+                {% endif %}
+            </div>
 
-                <!-- Buttons -->
-                <div class="flex flex-col sm:flex-row gap-5 pt-8">
-                    <button type="submit"
-                            class="flex-1 bg-gradient-to-r from-red-600 via-red-500 to-red-700 hover:from-red-700 hover:via-red-600 hover:to-red-800 text-white font-semibold text-lg py-5 px-8 rounded-2xl shadow-2xl shadow-red-900/40 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-red-900/60 focus:outline-none focus:ring-4 focus:ring-red-600/30">
-                        <i class="bi bi-save me-2 text-xl"></i> Save Changes
-                    </button>
-
-                    <a href="{{ object.get_absolute_url }}"
-                       class="flex-1 bg-gray-800/80 hover:bg-gray-700/80 text-gray-200 font-semibold text-lg py-5 px-8 rounded-2xl border border-gray-700 transition-all duration-300 text-center shadow-lg">
-                        Cancel
-                    </a>
+            <!-- Thumbnail -->
+            <div class="field-group">
+                <label class="field-label" for="{{ form.thumbnail.id_for_label }}">
+                    <i class="bi bi-image"></i> Replace Thumbnail
+                    <span class="optional-tag">optional</span>
+                </label>
+                <div class="drop-zone" id="thumbDrop">
+                    <input type="file"
+                           name="{{ form.thumbnail.name }}"
+                           id="{{ form.thumbnail.id_for_label }}"
+                           accept="image/*">
+                    <div class="drop-inner" id="thumbDropInner">
+                        <i class="bi bi-image drop-icon"></i>
+                        <div class="drop-title">Upload a new thumbnail</div>
+                        <div class="drop-hint">Recommended 1280×720 · JPG, PNG</div>
+                        <div class="drop-keep"><i class="bi bi-check-circle-fill"></i> Current thumbnail kept if left blank</div>
+                    </div>
                 </div>
-            </form>
-        </div>
+                <div class="thumb-new-preview" id="thumbNewPreview">
+                    <img id="thumbNewImg" src="" alt="New thumbnail preview">
+                    <div class="thumb-change-hint">New thumbnail selected — click above to change</div>
+                </div>
+                {% if form.thumbnail.errors %}
+                    <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.thumbnail.errors|join:", " }}</div>
+                {% endif %}
+            </div>
 
-        <div class="text-center mt-10">
-            <a href="{% url 'video_list' %}" class="text-gray-400 hover:text-gray-300 transition-colors text-lg">
-                ← Back to videos
-            </a>
-        </div>
+            <!-- Buttons -->
+            <div class="btn-row">
+                <button type="submit" class="btn-save">
+                    <i class="bi bi-check2-circle"></i> Save Changes
+                </button>
+                <a href="{{ object.get_absolute_url }}" class="btn-cancel">
+                    <i class="bi bi-x"></i> Cancel
+                </a>
+            </div>
+
+        </form>
     </div>
 </div>
 
-<!-- Simple JS for file preview & drag-drop feel -->
 <script>
-    function handleFileSelect(inputId, previewId) {
-        const input = document.getElementById(inputId);
-        const preview = document.getElementById(previewId);
+    // ── Unsaved changes indicator ──
+    const unsavedBadge = document.getElementById('unsavedBadge');
+    const originalTitle = document.getElementById('{{ form.title.id_for_label }}').value;
+    const originalDesc  = document.getElementById('{{ form.description.id_for_label }}').value;
 
-        input.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = document.getElementById('preview-img');
-                    img.src = event.target.result;
-                    preview.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // Drag & drop visual feedback
-        ['dragenter', 'dragover'].forEach(eventName => {
-            input.parentElement.addEventListener(eventName, e => {
-                e.preventDefault();
-                e.stopPropagation();
-                input.parentElement.classList.add('border-red-600', 'bg-red-950/20');
-            });
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            input.parentElement.addEventListener(eventName, e => {
-                e.preventDefault();
-                e.stopPropagation();
-                input.parentElement.classList.remove('border-red-600', 'bg-red-950/20');
-            });
-        });
+    function checkChanges() {
+        const titleChanged = document.getElementById('{{ form.title.id_for_label }}').value !== originalTitle;
+        const descChanged  = document.getElementById('{{ form.description.id_for_label }}').value !== originalDesc;
+        unsavedBadge.classList.toggle('show', titleChanged || descChanged);
     }
 
-    // Initialize for thumbnail preview
-    handleFileSelect('{{ form.thumbnail.id_for_label }}', 'thumbnail-preview');
-</script>
+    document.getElementById('{{ form.title.id_for_label }}').addEventListener('input', checkChanges);
+    document.getElementById('{{ form.description.id_for_label }}').addEventListener('input', checkChanges);
 
+    // ── Char counters ──
+    function setupCounter(inputId, countId, max) {
+        const el    = document.getElementById(inputId);
+        const count = document.getElementById(countId);
+        if (!el) return;
+        el.addEventListener('input', () => {
+            const len = el.value.length;
+            count.textContent = `${len} / ${max}`;
+            count.className = 'char-count' + (len > max * 0.9 ? (len >= max ? ' over' : ' warn') : '');
+        });
+    }
+    setupCounter('{{ form.title.id_for_label }}',       'titleCount', 100);
+    setupCounter('{{ form.description.id_for_label }}', 'descCount',  500);
+
+    // ── Drag & Drop ──
+    function setupDrop(zoneId) {
+        const zone = document.getElementById(zoneId);
+        zone.addEventListener('dragenter', e => { e.preventDefault(); zone.classList.add('dragging'); });
+        zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('dragging'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('dragging'));
+        zone.addEventListener('drop',      e => { e.preventDefault(); zone.classList.remove('dragging'); });
+    }
+    setupDrop('videoDrop');
+    setupDrop('thumbDrop');
+
+    // ── Video selected ──
+    document.getElementById('{{ form.video_file.id_for_label }}').addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+        document.getElementById('videoName').textContent = file.name;
+        document.getElementById('videoSize').textContent = (file.size / (1024*1024)).toFixed(1) + ' MB';
+        document.getElementById('videoDropInner').style.display = 'none';
+        document.getElementById('videoInfo').classList.add('show');
+        unsavedBadge.classList.add('show');
+    });
+
+    // ── Thumbnail preview ──
+    document.getElementById('{{ form.thumbnail.id_for_label }}').addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.getElementById('thumbNewImg').src = e.target.result;
+            document.getElementById('thumbDropInner').style.padding = '10px 20px';
+            document.getElementById('thumbNewPreview').classList.add('show');
+            unsavedBadge.classList.add('show');
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // ── Warn on leave with unsaved changes ──
+    window.addEventListener('beforeunload', e => {
+        if (unsavedBadge.classList.contains('show')) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+
+    // ── Don't warn when submitting ──
+    document.getElementById('editForm').addEventListener('submit', () => {
+        window.onbeforeunload = null;
+    });
+</script>
 {% endblock %}

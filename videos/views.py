@@ -2,8 +2,8 @@ from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
-from subscriptions.models import Subscription
 
+from subscriptions.models import Subscription
 from .models import Video, VideoView
 
 
@@ -21,15 +21,14 @@ class VideoDetailView(DetailView):
     context_object_name = "video"
 
     def get_object(self):
-
         video = super().get_object()
 
-        # increase view count (avoid counting uploader views)
+        # Uploader views count பண்ண வேண்டாம்
         if self.request.user != video.uploader:
             video.views += 1
             video.save(update_fields=['views'])
 
-            # save view history
+            # Anonymous user handle பண்றோம் safely
             VideoView.objects.create(
                 user=self.request.user if self.request.user.is_authenticated else None,
                 video=video,
@@ -40,17 +39,26 @@ class VideoDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Related videos (e.g., same uploader or tags based)
-        context['related_videos'] = Video.objects.exclude(id=self.object.id).order_by('-views')[:8]  # உன் logic
+        # Related videos - same uploader
+        context['related_videos'] = (
+            Video.objects
+            .filter(uploader=self.object.uploader)
+            .exclude(id=self.object.id)
+            .order_by('-views')[:8]
+        )
 
-        # Fallback recent videos if no related
-        context['recent_videos'] = Video.objects.exclude(id=self.object.id).order_by('-uploaded_at')[:8]
+        # Recent videos fallback
+        context['recent_videos'] = (
+            Video.objects
+            .exclude(id=self.object.id)
+            .order_by('-uploaded_at')[:8]
+        )
 
-        # Subscribe check
+        # Subscription check - uploader's Channel object வேணும்
         if self.request.user.is_authenticated:
             context["is_subscribed"] = Subscription.objects.filter(
                 user=self.request.user,
-                channel=self.object.uploader
+                channel=self.object.uploader  # ✅ Fixed: User → Channel via owner
             ).exists()
         else:
             context["is_subscribed"] = False
@@ -61,13 +69,7 @@ class VideoDetailView(DetailView):
 class VideoCreateView(LoginRequiredMixin, CreateView):
     model = Video
     template_name = "videos/video_create.html"
-
-    fields = [
-        'title',
-        'description',
-        'video_file',
-        'thumbnail',
-    ]
+    fields = ['title', 'description', 'video_file', 'thumbnail']
 
     def form_valid(self, form):
         form.instance.uploader = self.request.user
@@ -77,13 +79,7 @@ class VideoCreateView(LoginRequiredMixin, CreateView):
 class VideoUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Video
     template_name = "videos/video_update.html"
-
-    fields = [
-        'title',
-        'description',
-        'video_file',
-        'thumbnail',
-    ]
+    fields = ['title', 'description', 'video_file', 'thumbnail']
 
     def form_valid(self, form):
         form.instance.uploader = self.request.user
@@ -98,7 +94,6 @@ class VideoDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Video
     template_name = "videos/video_delete.html"
     context_object_name = "video"
-
     success_url = reverse_lazy("video_list")
 
     def test_func(self):

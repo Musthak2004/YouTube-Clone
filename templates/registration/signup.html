@@ -1,183 +1,634 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Create account - YouClone</title>
+    <title>Create account — YouClone</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
     <style>
+        :root {
+            --bg:       #080808;
+            --card:     #101010;
+            --border:   rgba(255,255,255,0.07);
+            --accent:   #ff0033;
+            --text:     #f0f0f0;
+            --muted:    #666;
+            --muted2:   #999;
+            --input-bg: #0c0c0c;
+            --error:    #ff4466;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
-            color: #f1f1f1;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 40px 20px 60px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* ── ORBS ── */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(110px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .orb-1 { width: 500px; height: 500px; background: rgba(255,0,51,0.05); top: -150px; right: -100px; animation: drift 12s ease-in-out infinite; }
+        .orb-2 { width: 350px; height: 350px; background: rgba(255,80,40,0.04); bottom: -100px; left: -80px; animation: drift 9s ease-in-out infinite reverse; }
+        @keyframes drift {
+            0%,100% { transform: translate(0,0); }
+            50%      { transform: translate(25px,-25px); }
+        }
+
+        /* ── WRAP ── */
+        .signup-wrap {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 480px;
+            animation: fadeUp 0.5s ease both;
+        }
+        @keyframes fadeUp {
+            from { opacity:0; transform:translateY(22px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+
+        /* ── BRAND ── */
+        .brand-top {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .brand-icon {
+            font-size: 2.5rem;
+            color: var(--accent);
+            filter: drop-shadow(0 0 14px rgba(255,0,51,0.4));
+            display: block;
+            margin-bottom: 8px;
+        }
+        .brand-name {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: -0.4px;
+        }
+        .brand-name span { color: var(--muted); font-weight: 300; }
+
+        /* ── CARD ── */
+        .signup-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 36px 32px;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.55);
+            position: relative;
+            overflow: hidden;
+        }
+        .signup-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 10%; right: 10%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,0,51,0.35), transparent);
+        }
+
+        .card-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .card-sub {
+            font-size: 0.83rem;
+            color: var(--muted2);
+            margin-bottom: 26px;
+        }
+
+        /* ── AVATAR PREVIEW ── */
+        .avatar-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .avatar-ring {
+            width: 82px; height: 82px;
+            border-radius: 50%;
+            border: 2px dashed rgba(255,0,51,0.25);
             display: flex;
             align-items: center;
             justify-content: center;
+            background: rgba(255,0,51,0.05);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 10px;
         }
-        .card {
-            background: #181818;
-            border: 1px solid #303030;
-            max-width: 460px;
-            width: 100%;
+        .avatar-ring:hover {
+            border-color: rgba(255,0,51,0.5);
+            background: rgba(255,0,51,0.08);
         }
-        .btn-red {
-            background-color: #c00;
-            border-color: #c00;
-        }
-        .btn-red:hover {
-            background-color: #a00;
-            border-color: #a00;
-        }
-        .form-label {
-            font-weight: 500;
-        }
-        .profile-preview {
-            width: 100px;
-            height: 100px;
+        .avatar-ring i { font-size: 1.8rem; color: rgba(255,0,51,0.4); transition: color 0.2s; }
+        .avatar-ring:hover i { color: var(--accent); }
+        #avatarPreview {
+            position: absolute;
+            inset: 0;
+            width: 100%; height: 100%;
             object-fit: cover;
             border-radius: 50%;
-            border: 2px solid #444;
-            margin-bottom: 10px;
+            display: none;
+        }
+        .avatar-hint { font-size: 0.78rem; color: var(--muted2); }
+
+        /* ── FIELD ── */
+        .field-group { margin-bottom: 16px; }
+
+        .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        .field-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #999;
+            margin-bottom: 7px;
+            letter-spacing: 0.2px;
+        }
+        .field-label i { font-size: 0.85rem; color: var(--muted); }
+
+        .optional-tag {
+            font-size: 0.68rem;
+            background: rgba(255,255,255,0.06);
+            border-radius: 4px;
+            padding: 1px 6px;
+            color: var(--muted);
+            margin-left: auto;
+        }
+
+        .field-wrap { position: relative; }
+
+        .field-icon {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 0.9rem;
+            pointer-events: none;
+            transition: color 0.2s;
+        }
+
+        .field-input {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            padding: 11px 13px 11px 37px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .field-input::placeholder { color: #333; }
+        .field-input:focus {
+            border-color: rgba(255,0,51,0.3);
+            box-shadow: 0 0 0 3px rgba(255,0,51,0.07);
+        }
+        .field-wrap:focus-within .field-icon { color: #ff6680; }
+
+        /* textarea */
+        .field-textarea {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            padding: 11px 14px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            outline: none;
+            resize: vertical;
+            min-height: 80px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .field-textarea::placeholder { color: #333; }
+        .field-textarea:focus {
+            border-color: rgba(255,0,51,0.3);
+            box-shadow: 0 0 0 3px rgba(255,0,51,0.07);
+        }
+
+        /* file input hidden */
+        #id_profile_picture { display: none; }
+
+        /* pwd toggle */
+        .pwd-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 0.95rem;
+            padding: 0;
+            transition: color 0.2s;
+        }
+        .pwd-toggle:hover { color: var(--text); }
+
+        /* ── PASSWORD STRENGTH ── */
+        .strength-bar {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+        }
+        .strength-seg {
+            height: 3px;
+            flex: 1;
+            border-radius: 99px;
+            background: rgba(255,255,255,0.07);
+            transition: background 0.3s ease;
+        }
+        .strength-label {
+            font-size: 0.72rem;
+            color: var(--muted2);
+            margin-top: 5px;
+        }
+
+        /* ── FIELD ERROR ── */
+        .field-error {
+            font-size: 0.77rem;
+            color: var(--error);
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* ── GLOBAL ERROR ── */
+        .alert-error {
+            background: rgba(255,0,51,0.08);
+            border: 1px solid rgba(255,0,51,0.18);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 0.84rem;
+            color: #ff6680;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+        }
+
+        /* ── SUBMIT ── */
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #ff0033, #ff4444);
+            color: #fff;
+            border: none;
+            border-radius: 11px;
+            padding: 13px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 24px rgba(255,0,51,0.22);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 30px rgba(255,0,51,0.36);
+        }
+
+        /* ── TERMS ── */
+        .terms-text {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 14px;
+            line-height: 1.6;
+        }
+        .terms-text a { color: var(--muted2); text-decoration: none; transition: color 0.2s; }
+        .terms-text a:hover { color: var(--text); }
+
+        /* ── DIVIDER ── */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 22px 0;
+        }
+        .divider-line { flex: 1; height: 1px; background: var(--border); }
+        .divider-text { font-size: 0.74rem; color: var(--muted); }
+
+        /* ── LOGIN LINK ── */
+        .login-row {
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--muted2);
+        }
+        .login-link {
+            color: #ff4466;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .login-link:hover { color: var(--accent); }
+
+        /* ── SECTION SEPARATOR ── */
+        .section-sep {
+            font-size: 0.7rem;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--muted);
+            margin: 20px 0 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-sep::before, .section-sep::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        @media (max-width: 480px) {
+            .signup-card { padding: 26px 18px; }
+            .field-row { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-<div class="container py-5">
-    <div class="text-center mb-5">
-        <i class="bi bi-youtube text-danger" style="font-size: 5.5rem;"></i>
-        <h3 class="mt-2 fw-bold">YouClone</h3>
-        <p class="text-secondary">Create your YouClone account</p>
-    </div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
 
-    <div class="card mx-auto shadow">
-        <div class="card-body p-4 p-md-5">
+    <div class="signup-wrap">
 
-            <h5 class="text-center mb-4">Sign up</h5>
+        <!-- Brand -->
+        <div class="brand-top">
+            <i class="bi bi-youtube brand-icon"></i>
+            <div class="brand-name">YouTube<span>Clone</span></div>
+        </div>
 
+        <!-- Card -->
+        <div class="signup-card">
+            <div class="card-title">Create your account</div>
+            <div class="card-sub">Join millions of creators and viewers today</div>
+
+            <!-- Global errors -->
             {% if form.non_field_errors %}
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ form.non_field_errors|join:"<br>" }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <div class="alert-error">
+                    <i class="bi bi-exclamation-circle-fill" style="margin-top:2px;flex-shrink:0;"></i>
+                    <span>{{ form.non_field_errors|join:" · " }}</span>
                 </div>
             {% endif %}
 
-            <form method="post" enctype="multipart/form-data">
+            <form method="post" enctype="multipart/form-data" id="signupForm">
                 {% csrf_token %}
 
-                <!-- Username -->
-                <div class="mb-3">
-                    <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
-                    <input type="text"
-                           name="{{ form.username.name }}"
-                           class="form-control bg-dark border-secondary text-white"
-                           id="{{ form.username.id_for_label }}"
-                           placeholder="Choose a username"
-                           autofocus
-                           required
-                           value="{{ form.username.value|default:'' }}">
-                    {% if form.username.errors %}
-                        <div class="text-danger small mt-1">{{ form.username.errors|join:", " }}</div>
-                    {% endif %}
-                </div>
-
-                <!-- Email -->
-                <div class="mb-3">
-                    <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
-                    <input type="email"
-                           name="{{ form.email.name }}"
-                           class="form-control bg-dark border-secondary text-white"
-                           id="{{ form.email.id_for_label }}"
-                           placeholder="Enter your email"
-                           required
-                           value="{{ form.email.value|default:'' }}">
-                    {% if form.email.errors %}
-                        <div class="text-danger small mt-1">{{ form.email.errors|join:", " }}</div>
-                    {% endif %}
-                </div>
-
-                <!-- Profile Picture -->
-                <div class="mb-4">
-                    <label for="{{ form.profile_picture.id_for_label }}" class="form-label">Profile Picture</label>
-                    <input type="file"
-                           name="{{ form.profile_picture.name }}"
-                           class="form-control bg-dark border-secondary text-white"
+                <!-- Avatar Upload -->
+                <div class="avatar-section">
+                    <div class="avatar-ring" id="avatarTrigger" title="Upload profile picture">
+                        <i class="bi bi-camera"></i>
+                        <img id="avatarPreview" src="" alt="preview">
+                    </div>
+                    <span class="avatar-hint">Click to upload profile picture <span style="color:var(--muted);">(optional)</span></span>
+                    <input type="file" name="{{ form.profile_picture.name }}"
                            id="{{ form.profile_picture.id_for_label }}"
                            accept="image/*">
                     {% if form.profile_picture.errors %}
-                        <div class="text-danger small mt-1">{{ form.profile_picture.errors|join:", " }}</div>
+                        <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.profile_picture.errors|join:", " }}</div>
                     {% endif %}
-                    <small class="text-secondary">Optional - Upload a profile picture (jpg, png)</small>
+                </div>
+
+                <!-- Account Info -->
+                <div class="section-sep">Account Info</div>
+
+                <div class="field-row">
+                    <!-- Username -->
+                    <div class="field-group">
+                        <label class="field-label" for="{{ form.username.id_for_label }}">
+                            <i class="bi bi-at"></i> Username
+                        </label>
+                        <div class="field-wrap">
+                            <input type="text"
+                                   name="{{ form.username.name }}"
+                                   class="field-input"
+                                   id="{{ form.username.id_for_label }}"
+                                   placeholder="your_name"
+                                   autofocus required
+                                   value="{{ form.username.value|default:'' }}">
+                            <i class="bi bi-person field-icon"></i>
+                        </div>
+                        {% if form.username.errors %}
+                            <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.username.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Email -->
+                    <div class="field-group">
+                        <label class="field-label" for="{{ form.email.id_for_label }}">
+                            <i class="bi bi-envelope"></i> Email
+                        </label>
+                        <div class="field-wrap">
+                            <input type="email"
+                                   name="{{ form.email.name }}"
+                                   class="field-input"
+                                   id="{{ form.email.id_for_label }}"
+                                   placeholder="you@email.com"
+                                   required
+                                   value="{{ form.email.value|default:'' }}">
+                            <i class="bi bi-envelope field-icon"></i>
+                        </div>
+                        {% if form.email.errors %}
+                            <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.email.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
                 </div>
 
                 <!-- Bio -->
-                <div class="mb-4">
-                    <label for="{{ form.bio.id_for_label }}" class="form-label">Bio</label>
+                <div class="field-group">
+                    <label class="field-label" for="{{ form.bio.id_for_label }}">
+                        <i class="bi bi-pencil"></i> Bio
+                        <span class="optional-tag">optional</span>
+                    </label>
                     <textarea name="{{ form.bio.name }}"
-                              class="form-control bg-dark border-secondary text-white"
+                              class="field-textarea"
                               id="{{ form.bio.id_for_label }}"
-                              rows="3"
-                              placeholder="Tell us about yourself... (optional)"></textarea>
+                              placeholder="Tell the world a little about yourself...">{{ form.bio.value|default:'' }}</textarea>
                     {% if form.bio.errors %}
-                        <div class="text-danger small mt-1">{{ form.bio.errors|join:", " }}</div>
+                        <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.bio.errors|join:", " }}</div>
                     {% endif %}
                 </div>
 
                 <!-- Password -->
-                <div class="mb-3">
-                    <label for="{{ form.password1.id_for_label }}" class="form-label">Password</label>
-                    <input type="password"
-                           name="{{ form.password1.name }}"
-                           class="form-control bg-dark border-secondary text-white"
-                           id="{{ form.password1.id_for_label }}"
-                           placeholder="Create a strong password"
-                           required>
+                <div class="section-sep">Security</div>
+
+                <div class="field-group">
+                    <label class="field-label" for="{{ form.password1.id_for_label }}">
+                        <i class="bi bi-lock"></i> Password
+                    </label>
+                    <div class="field-wrap">
+                        <input type="password"
+                               name="{{ form.password1.name }}"
+                               class="field-input"
+                               id="{{ form.password1.id_for_label }}"
+                               placeholder="Create a strong password"
+                               required
+                               id="pwd1">
+                        <i class="bi bi-lock field-icon"></i>
+                        <button type="button" class="pwd-toggle" data-target="{{ form.password1.id_for_label }}">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <!-- Strength bar -->
+                    <div class="strength-bar" id="strengthBar">
+                        <div class="strength-seg" id="seg1"></div>
+                        <div class="strength-seg" id="seg2"></div>
+                        <div class="strength-seg" id="seg3"></div>
+                        <div class="strength-seg" id="seg4"></div>
+                    </div>
+                    <div class="strength-label" id="strengthLabel"></div>
                     {% if form.password1.errors %}
-                        <div class="text-danger small mt-1">{{ form.password1.errors|join:", " }}</div>
+                        <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.password1.errors|join:", " }}</div>
                     {% endif %}
                 </div>
 
                 <!-- Confirm Password -->
-                <div class="mb-4">
-                    <label for="{{ form.password2.id_for_label }}" class="form-label">Confirm Password</label>
-                    <input type="password"
-                           name="{{ form.password2.name }}"
-                           class="form-control bg-dark border-secondary text-white"
-                           id="{{ form.password2.id_for_label }}"
-                           placeholder="Confirm your password"
-                           required>
+                <div class="field-group">
+                    <label class="field-label" for="{{ form.password2.id_for_label }}">
+                        <i class="bi bi-shield-check"></i> Confirm Password
+                    </label>
+                    <div class="field-wrap">
+                        <input type="password"
+                               name="{{ form.password2.name }}"
+                               class="field-input"
+                               id="{{ form.password2.id_for_label }}"
+                               placeholder="Repeat your password"
+                               required>
+                        <i class="bi bi-lock field-icon"></i>
+                        <button type="button" class="pwd-toggle" data-target="{{ form.password2.id_for_label }}">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
                     {% if form.password2.errors %}
-                        <div class="text-danger small mt-1">{{ form.password2.errors|join:", " }}</div>
+                        <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.password2.errors|join:", " }}</div>
                     {% endif %}
                 </div>
 
-                <div class="d-grid mb-3">
-                    <button type="submit" class="btn btn-red btn-lg">Create account</button>
-                </div>
+                <!-- Submit -->
+                <button type="submit" class="btn-submit">
+                    <i class="bi bi-person-plus-fill"></i> Create account
+                </button>
 
-                <p class="text-center small text-secondary mb-3">
-                    By continuing, you agree to YouClone's Terms of Service and Privacy Policy.
+                <p class="terms-text">
+                    By creating an account you agree to our
+                    <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
                 </p>
-
             </form>
 
-            <hr class="border-secondary my-4">
+            <div class="divider">
+                <div class="divider-line"></div>
+                <span class="divider-text">Already a member?</span>
+                <div class="divider-line"></div>
+            </div>
 
-            <p class="text-center mb-0">
+            <div class="login-row">
                 Already have an account?
-                <a href="{% url 'login' %}" class="text-danger text-decoration-none fw-medium">Sign in</a>
-            </p>
-
+                <a href="{% url 'login' %}" class="login-link">Sign in →</a>
+            </div>
         </div>
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        // ── Avatar preview ──
+        const avatarTrigger = document.getElementById('avatarTrigger');
+        const fileInput     = document.getElementById('{{ form.profile_picture.id_for_label }}');
+        const avatarPreview = document.getElementById('avatarPreview');
 
+        avatarTrigger.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                avatarPreview.src = e.target.result;
+                avatarPreview.style.display = 'block';
+                avatarTrigger.querySelector('i').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // ── Password toggle ──
+        document.querySelectorAll('.pwd-toggle').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.dataset.target;
+                const input    = document.getElementById(targetId);
+                const icon     = btn.querySelector('i');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.className = 'bi bi-eye-slash';
+                } else {
+                    input.type = 'password';
+                    icon.className = 'bi bi-eye';
+                }
+            });
+        });
+
+        // ── Password strength ──
+        const pwdInput      = document.getElementById('{{ form.password1.id_for_label }}');
+        const segs          = [seg1, seg2, seg3, seg4];
+        const strengthLabel = document.getElementById('strengthLabel');
+        const levels = [
+            { color: '#ff4444', label: 'Weak' },
+            { color: '#ff8c00', label: 'Fair' },
+            { color: '#f5c518', label: 'Good' },
+            { color: '#00c853', label: 'Strong' },
+        ];
+
+        function calcStrength(pwd) {
+            let score = 0;
+            if (pwd.length >= 8)               score++;
+            if (/[A-Z]/.test(pwd))             score++;
+            if (/[0-9]/.test(pwd))             score++;
+            if (/[^A-Za-z0-9]/.test(pwd))      score++;
+            return score;
+        }
+
+        pwdInput.addEventListener('input', () => {
+            const val   = pwdInput.value;
+            const score = val ? calcStrength(val) : 0;
+
+            segs.forEach((seg, i) => {
+                seg.style.background = i < score ? levels[score - 1].color : 'rgba(255,255,255,0.07)';
+            });
+
+            strengthLabel.textContent = val ? levels[score - 1]?.label || '' : '';
+            strengthLabel.style.color = score > 0 ? levels[score - 1].color : 'var(--muted2)';
+        });
+    </script>
 </body>
 </html>

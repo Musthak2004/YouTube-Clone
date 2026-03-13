@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block title %}Create Channel - YouClone{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h2 class="fw-bold mb-2">Create Your Channel</h2>
+                <p class="text-secondary">
+                    Setup your channel and start sharing videos!
+                </p>
+            </div>
+
+            <!-- Form Card -->
+            <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden">
+                <div class="card-body p-5">
+
+                    <form method="post" enctype="multipart/form-data" class="space-y-5">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                            <div class="alert alert-danger alert-dismissible fade show mb-4">
+                                Please fix the errors below.
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endif %}
+
+                        <!-- Channel Name -->
+                        <div class="form-floating mb-4">
+                            {{ form.name }}
+                            <label for="#">Channel Name</label>
+                            {% if form.name.errors %}
+                                <div class="invalid-feedback d-block">{{ form.name.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Description -->
+                        <div class="form-floating mb-5">
+                            {{ form.description }}
+                            <label for="#">Channel Description (optional)</label>
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback d-block">{{ form.description.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Banner Upload with Preview -->
+                        <div class="mb-5">
+                            <label class="form-label fw-medium mb-2">Channel Banner (optional)</label>
+                            <div class="position-relative border border-secondary rounded-3 overflow-hidden" style="height: 200px; background: #1a1a1a;">
+                                <!-- Preview -->
+                                <img id="banner-preview" class="w-100 h-100 object-fit-cover" style="display: none;" alt="Banner preview">
+                                <!-- Placeholder -->
+                                <div id="banner-placeholder" class="w-100 h-100 d-flex align-items-center justify-content-center text-secondary">
+                                    <div class="text-center">
+                                        <i class="bi bi-image fs-1 mb-2"></i>
+                                        <p class="mb-0">No banner selected</p>
+                                        <small>Recommended: 2560×1440 px</small>
+                                    </div>
+                                </div>
+
+                                <!-- File Input -->
+                                {{ form.banner }}
+                                <label for="{{ form.banner.id_for_label }}" class="position-absolute inset-0 d-flex align-items-center justify-content-center cursor-pointer bg-black bg-opacity-50 opacity-0 hover-opacity-100 transition-opacity">
+                                    <span class="btn btn-outline-light rounded-pill px-4 py-2">
+                                        <i class="bi bi-upload me-2"></i> Choose Banner
+                                    </span>
+                                </label>
+                            </div>
+                            {% if form.banner.errors %}
+                                <div class="text-danger small mt-2">{{ form.banner.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-danger btn-lg rounded-pill py-3 fw-medium shadow-lg">
+                                <i class="bi bi-plus-circle-fill me-2"></i> Create Channel
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'channel_list' %}" class="text-secondary text-decoration-none">
+                    ← Back to channels
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- JS for Banner Preview -->
+<script>
+    const bannerInput = document.getElementById('{{ form.banner.id_for_label }}');
+    const previewImg = document.getElementById('banner-preview');
+    const placeholder = document.getElementById('banner-placeholder');
+
+    bannerInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                previewImg.src = event.target.result;
+                previewImg.style.display = 'block';
+                placeholder.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+
+{% endblock %}

@@ -13,11 +13,10 @@ class Video(models.Model):
     )
 
     channel = models.ForeignKey(
-        Channel,
+        'channels.Channel',
         on_delete=models.CASCADE,
-        related_name="videos",
-        null=True,
-        blank=True
+        related_name='videos',
+        null=True, blank=True  # optional ஆக வைக்கலாம்
     )
 
     title = models.CharField(max_length=255)

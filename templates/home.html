@@ -1,157 +1,633 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Bootstrap 5.3 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-          crossorigin="anonymous">
-
-    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
-    <!-- Google Roboto Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-
-    <title>YouTube Clone - Watch, Share & Enjoy</title>
+    <title>YouTube Clone — Watch, Share & Enjoy</title>
 
     <style>
+        :root {
+            --bg: #080808;
+            --bg2: #101010;
+            --card: #141414;
+            --border: rgba(255,255,255,0.07);
+            --accent: #ff0033;
+            --accent2: #ff6b35;
+            --text: #f0f0f0;
+            --muted: #888;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: 'Roboto', Arial, sans-serif;
-            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
-            color: #f1f1f1;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── NOISE TEXTURE OVERLAY ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        /* ── NAVBAR ── */
+        .top-nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 18px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(to bottom, rgba(8,8,8,0.95), transparent);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .brand-icon {
+            color: var(--accent);
+            font-size: 1.8rem;
+            filter: drop-shadow(0 0 10px rgba(255,0,51,0.5));
+        }
+
+        .brand-name {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: -0.3px;
+        }
+
+        .brand-name span { color: var(--muted); font-weight: 300; }
+
+        .nav-actions { display: flex; gap: 10px; align-items: center; }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 20px;
+            border-radius: 99px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255,255,255,0.07);
+            border-color: rgba(255,255,255,0.2);
+            color: var(--text);
+        }
+
+        .btn-red {
+            background: var(--accent);
+            border: 1px solid var(--accent);
+            color: #fff;
+            padding: 8px 22px;
+            border-radius: 99px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 0 20px rgba(255,0,51,0.25);
+        }
+
+        .btn-red:hover {
+            background: #e0002d;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 28px rgba(255,0,51,0.4);
+        }
+
+        /* ── HERO ── */
+        .hero {
+            position: relative;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-        }
-        .hero {
-            flex: 1;
-            display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 2rem;
+            padding: 100px 24px 60px;
+            z-index: 1;
         }
-        .hero-content {
-            max-width: 700px;
+
+        /* Radial glow bg */
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(255,0,51,0.08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: -1;
         }
-        .logo-big {
-            font-size: 5.5rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
+
+        /* Floating orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: -1;
+            animation: drift 8s ease-in-out infinite;
         }
-        .logo-red {
-            color: #ff0000;
+
+        .orb-1 {
+            width: 400px; height: 400px;
+            background: rgba(255, 0, 51, 0.06);
+            top: 10%; left: 10%;
+            animation-delay: 0s;
         }
-        .tagline {
-            font-size: 1.5rem;
+
+        .orb-2 {
+            width: 300px; height: 300px;
+            background: rgba(255, 107, 53, 0.05);
+            top: 40%; right: 5%;
+            animation-delay: -3s;
+        }
+
+        .orb-3 {
+            width: 250px; height: 250px;
+            background: rgba(255, 0, 51, 0.04);
+            bottom: 10%; left: 20%;
+            animation-delay: -5s;
+        }
+
+        @keyframes drift {
+            0%, 100% { transform: translate(0, 0); }
+            33%       { transform: translate(20px, -20px); }
+            66%       { transform: translate(-15px, 15px); }
+        }
+
+        /* ── BADGE ── */
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,0,51,0.1);
+            border: 1px solid rgba(255,0,51,0.2);
+            border-radius: 99px;
+            padding: 6px 16px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: #ff6680;
+            margin-bottom: 32px;
+            letter-spacing: 0.3px;
+            animation: fadeUp 0.6s ease both;
+        }
+
+        .badge-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: pulse 2s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%       { opacity: 0.5; transform: scale(0.7); }
+        }
+
+        /* ── HEADING ── */
+        .hero-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(3rem, 9vw, 7rem);
+            font-weight: 800;
+            line-height: 1.0;
+            letter-spacing: -3px;
+            margin-bottom: 28px;
+            animation: fadeUp 0.6s 0.1s ease both;
+        }
+
+        .hero-title .line-red {
+            background: linear-gradient(135deg, #ff0033, #ff6b35);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-title .line-dim { color: rgba(240,240,240,0.35); }
+
+        .hero-sub {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            color: var(--muted);
+            max-width: 520px;
+            line-height: 1.65;
+            margin-bottom: 44px;
             font-weight: 300;
-            margin-bottom: 2.5rem;
-            opacity: 0.9;
+            animation: fadeUp 0.6s 0.2s ease both;
         }
-        .btn-custom {
-            padding: 0.75rem 2rem;
-            font-size: 1.1rem;
-            border-radius: 9999px;
-            transition: all 0.3s;
+
+        /* ── CTA BUTTONS ── */
+        .cta-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 60px;
+            animation: fadeUp 0.6s 0.3s ease both;
         }
-        .btn-primary-custom {
-            background-color: #ff0000;
-            border-color: #ff0000;
+
+        .btn-cta-primary {
+            background: linear-gradient(135deg, #ff0033, #ff4444);
+            color: #fff;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 99px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 32px rgba(255,0,51,0.3);
         }
-        .btn-primary-custom:hover {
-            background-color: #cc0000;
-            border-color: #cc0000;
+
+        .btn-cta-primary:hover {
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(255,0,51,0.45);
+        }
+
+        .btn-cta-secondary {
+            background: rgba(255,255,255,0.05);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 14px 32px;
+            border-radius: 99px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-cta-secondary:hover {
+            background: rgba(255,255,255,0.09);
+            border-color: rgba(255,255,255,0.18);
+            color: var(--text);
             transform: translateY(-2px);
         }
-        .btn-outline-custom {
-            border-color: #aaaaaa;
-            color: #ffffff;
+
+        /* ── STATS ── */
+        .stats-row {
+            display: flex;
+            gap: 48px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeUp 0.6s 0.4s ease both;
         }
-        .btn-outline-custom:hover {
-            background-color: #303030;
-            color: white;
+
+        .stat-item {
+            text-align: center;
         }
+
+        .stat-number {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-top: 2px;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── FEATURES ── */
+        .features {
+            position: relative;
+            z-index: 1;
+            padding: 80px 24px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px 28px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,0,51,0.3), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: rgba(255,0,51,0.15);
+            transform: translateY(-4px);
+            background: #181818;
+        }
+
+        .feature-card:hover::before { opacity: 1; }
+
+        .feature-icon {
+            width: 48px; height: 48px;
+            background: rgba(255,0,51,0.1);
+            border: 1px solid rgba(255,0,51,0.15);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: #ff4466;
+            margin-bottom: 20px;
+        }
+
+        .feature-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .feature-desc {
+            font-size: 0.875rem;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        /* ── FOOTER ── */
         footer {
-            background: #0f0f0f;
-            border-top: 1px solid #303030;
-            padding: 1.5rem 0;
-            font-size: 0.9rem;
-            color: #aaaaaa;
+            position: relative;
+            z-index: 1;
+            border-top: 1px solid var(--border);
+            padding: 28px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        footer .foot-brand {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.875rem;
+            color: var(--muted);
+        }
+
+        footer .foot-brand strong { color: var(--text); }
+
+        footer .foot-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        footer .foot-links a {
+            font-size: 0.8rem;
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        footer .foot-links a:hover { color: var(--text); }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Welcome back chip ── */
+        .welcome-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 99px;
+            padding: 8px 18px 8px 10px;
+            margin-bottom: 36px;
+            animation: fadeUp 0.6s ease both;
+        }
+
+        .welcome-avatar {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff0033, #ff6b35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: #fff;
+        }
+
+        .welcome-text {
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .welcome-text strong { color: var(--text); }
+
+        @media (max-width: 600px) {
+            .top-nav { padding: 16px 20px; }
+            footer { justify-content: center; text-align: center; }
+            .stats-row { gap: 28px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Simple top bar (optional - minimal) -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary">
-        <div class="container-fluid px-4">
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
-                <i class="bi bi-youtube text-danger fs-2 me-2"></i>
-                <span class="fs-4 fw-bold">YouTube-Clone</span>
-            </a>
-            <div class="ms-auto">
-                {% if user.is_authenticated %}
-                    <span class="text-white me-3">Hi, {{ user.username }}</span>
-                    <form method="post" action="{% url 'logout' %}" class="d-inline">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-custom btn-sm">Logout</button>
-                    </form>
-                {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-outline-custom me-2 btn-sm">Sign in</a>
-                    <a href="{% url 'signup' %}" class="btn btn-primary-custom btn-sm">Create account</a>
-                {% endif %}
-            </div>
+    <!-- ═══ NAVBAR ═══ -->
+    <nav class="top-nav">
+        <a class="brand" href="{% url 'home' %}">
+            <i class="bi bi-youtube brand-icon"></i>
+            <span class="brand-name">YouTube<span>Clone</span></span>
+        </a>
+
+        <div class="nav-actions">
+            {% if user.is_authenticated %}
+                <span style="font-size:0.85rem;color:var(--muted);">Hi, <strong style="color:var(--text);">{{ user.username }}</strong></span>
+                <a href="{% url 'video_list' %}" class="btn-ghost">
+                    <i class="bi bi-play-circle"></i> Browse
+                </a>
+                <form method="post" action="{% url 'logout' %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-ghost" style="color:#ff4757;border-color:rgba(255,71,87,0.2);">
+                        Sign out
+                    </button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn-ghost">Sign in</a>
+                <a href="{% url 'signup' %}" class="btn-red">
+                    <i class="bi bi-person-plus"></i> Sign up
+                </a>
+            {% endif %}
         </div>
     </nav>
 
-    <!-- Hero Section - Main Welcome Area -->
+    <!-- ═══ HERO ═══ -->
     <section class="hero">
-        <div class="hero-content">
-            <h1 class="logo-big">
-                <span class="logo-red">YouTube-</span>Clone
-            </h1>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
 
-            <p class="tagline">
-                Watch, share, and connect with millions of videos — anytime, anywhere.
-            </p>
-
-            <div class="d-flex justify-content-center gap-3 flex-wrap">
-                {% if user.is_authenticated %}
-                    <a href="{% url 'video_list' %}" class="btn btn-primary-custom btn-lg btn-custom">
-                        <i class="bi bi-play-circle-fill me-2"></i> Explore Videos
-                    </a>
-                {% else %}
-                    <a href="{% url 'signup' %}" class="btn btn-primary-custom btn-lg btn-custom">
-                        <i class="bi bi-person-plus-fill me-2"></i> Sign Up — It's Free
-                    </a>
-                    <a href="{% url 'login' %}" class="btn btn-outline-custom btn-lg btn-custom">
-                        <i class="bi bi-box-arrow-in-right me-2"></i> Sign In
-                    </a>
-                {% endif %}
+        {% if user.is_authenticated %}
+            <!-- Logged in state -->
+            <div class="welcome-chip">
+                <div class="welcome-avatar">{{ user.username|slice:":1"|upper }}</div>
+                <span class="welcome-text">Welcome back, <strong>{{ user.username }}</strong></span>
             </div>
 
-            {% if user.is_authenticated %}
-                <p class="mt-4 text-secondary">
-                    Welcome back, {{ user.username }}! Ready to dive into some awesome content?
-                </p>
-            {% endif %}
-        </div>
+            <h1 class="hero-title">
+                <span class="line-red">Ready to</span><br>
+                <span>watch?</span>
+            </h1>
+
+            <p class="hero-sub">
+                Your subscriptions are waiting. Dive into fresh videos from creators you love.
+            </p>
+
+            <div class="cta-group">
+                <a href="{% url 'video_list' %}" class="btn-cta-primary">
+                    <i class="bi bi-play-fill"></i> Explore Videos
+                </a>
+                <a href="{% url 'video_create' %}" class="btn-cta-secondary">
+                    <i class="bi bi-cloud-arrow-up"></i> Upload
+                </a>
+            </div>
+
+        {% else %}
+            <!-- Logged out state -->
+            <div class="hero-badge">
+                <span class="badge-dot"></span>
+                Open Source · Built with Django
+            </div>
+
+            <h1 class="hero-title">
+                <span class="line-red">Watch.</span><br>
+                <span>Share.</span><br>
+                <span class="line-dim">Connect.</span>
+            </h1>
+
+            <p class="hero-sub">
+                Stream millions of videos, follow creators, and share moments that matter — all in one place.
+            </p>
+
+            <div class="cta-group">
+                <a href="{% url 'signup' %}" class="btn-cta-primary">
+                    <i class="bi bi-person-plus-fill"></i> Get started free
+                </a>
+                <a href="{% url 'login' %}" class="btn-cta-secondary">
+                    <i class="bi bi-box-arrow-in-right"></i> Sign in
+                </a>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-item">
+                    <div class="stat-number">∞</div>
+                    <div class="stat-label">Videos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">Free</div>
+                    <div class="stat-label">Always</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">Open</div>
+                    <div class="stat-label">Source</div>
+                </div>
+            </div>
+        {% endif %}
     </section>
 
-    <!-- Footer -->
-    <footer class="text-center">
-        <div class="container">
-            <p>© 2026 YouTube Clone Project — Made with ❤️ in Django</p>
+    <!-- ═══ FEATURES (only for guests) ═══ -->
+    {% if not user.is_authenticated %}
+    <section class="features">
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="bi bi-play-circle"></i></div>
+                <div class="feature-title">Stream Anything</div>
+                <div class="feature-desc">Watch videos in crisp quality. Browse by category, trending, or subscriptions — all without ads.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="bi bi-cloud-arrow-up"></i></div>
+                <div class="feature-title">Upload & Share</div>
+                <div class="feature-desc">Create your channel and upload your videos. Reach your audience with just a few clicks.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="bi bi-people"></i></div>
+                <div class="feature-title">Follow Creators</div>
+                <div class="feature-desc">Subscribe to your favourite channels and never miss a new upload from the creators you love.</div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer>
+        <div class="foot-brand">
+            © 2026 <strong>YouTube Clone</strong> — Made with ❤️ in Django
+        </div>
+        <div class="foot-links">
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+            <a href="#">About</a>
         </div>
     </footer>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>

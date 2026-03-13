@@ -1,137 +1,419 @@
 {% extends 'base.html' %}
-{% block title %}YouClone - Home{% endblock %}
+{% block title %}YouClone — Home{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --card:   #111111;
+        --card2:  #161616;
+        --border: rgba(255,255,255,0.07);
+        --muted:  #555;
+        --muted2: #888;
+        --text:   #f0f0f0;
+        --accent: #ff0033;
+    }
+
+    .list-page { padding: 4px 0 60px; }
+
+    /* ── FILTER CHIPS ── */
+    .filter-row {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        margin-bottom: 24px;
+        scrollbar-width: none;
+    }
+    .filter-row::-webkit-scrollbar { display: none; }
+
+    .chip {
+        flex-shrink: 0;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid var(--border);
+        color: var(--muted2);
+        border-radius: 99px;
+        padding: 7px 16px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.82rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+    .chip:hover {
+        background: rgba(255,255,255,0.1);
+        color: var(--text);
+        border-color: rgba(255,255,255,0.14);
+    }
+    .chip.active {
+        background: var(--text);
+        color: #000;
+        border-color: var(--text);
+        font-weight: 600;
+    }
+
+    /* ── VIDEO GRID ── */
+    .videos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 20px;
+    }
+
+    /* ── VIDEO CARD ── */
+    .video-card {
+        cursor: pointer;
+        animation: fadeUp 0.4s ease both;
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(12px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* stagger cards */
+    .video-card:nth-child(1)  { animation-delay: 0.04s; }
+    .video-card:nth-child(2)  { animation-delay: 0.08s; }
+    .video-card:nth-child(3)  { animation-delay: 0.12s; }
+    .video-card:nth-child(4)  { animation-delay: 0.16s; }
+    .video-card:nth-child(5)  { animation-delay: 0.20s; }
+    .video-card:nth-child(6)  { animation-delay: 0.24s; }
+    .video-card:nth-child(7)  { animation-delay: 0.28s; }
+    .video-card:nth-child(8)  { animation-delay: 0.32s; }
+    .video-card:nth-child(n+9){ animation-delay: 0.35s; }
+
+    /* Thumbnail */
+    .thumb-wrap {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #1a1a1a;
+        aspect-ratio: 16/9;
+        margin-bottom: 12px;
+    }
+
+    .thumb-wrap img {
+        width: 100%; height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.4s ease;
+    }
+
+    .video-card:hover .thumb-wrap img { transform: scale(1.04); }
+
+    .thumb-placeholder {
+        width: 100%; height: 100%;
+        display: flex; align-items: center; justify-content: center;
+        background: #1a1a1a;
+    }
+    .thumb-placeholder i { font-size: 2rem; color: #333; }
+
+    /* Duration badge */
+    .duration-badge {
+        position: absolute;
+        bottom: 7px; right: 8px;
+        background: rgba(0,0,0,0.82);
+        color: #fff;
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 2px 7px;
+        border-radius: 5px;
+        font-family: 'Outfit', sans-serif;
+        letter-spacing: 0.3px;
+        pointer-events: none;
+    }
+
+    /* Hover overlay */
+    .thumb-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0);
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.3s;
+    }
+    .thumb-overlay i {
+        font-size: 2.5rem;
+        color: rgba(255,255,255,0);
+        transition: all 0.3s ease;
+        filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+    }
+    .video-card:hover .thumb-overlay { background: rgba(0,0,0,0.22); }
+    .video-card:hover .thumb-overlay i { color: rgba(255,255,255,0.9); }
+
+    /* Card body */
+    .card-body-row {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .uploader-avatar {
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 1.5px solid var(--border);
+        transition: border-color 0.2s;
+    }
+    .video-card:hover .uploader-avatar { border-color: rgba(255,255,255,0.2); }
+
+    .avatar-fallback {
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2a2a2a, #111);
+        border: 1.5px solid var(--border);
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700; font-size: 14px;
+        color: var(--text); flex-shrink: 0;
+    }
+
+    .card-meta { flex: 1; min-width: 0; }
+
+    .video-title-text {
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 600;
+        line-height: 1.4;
+        color: var(--text);
+        text-decoration: none;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-bottom: 4px;
+        transition: color 0.2s;
+        display: block;
+    }
+    .video-title-text:hover { color: var(--text); }
+
+    .uploader-name {
+        font-size: 0.78rem;
+        color: var(--muted2);
+        text-decoration: none;
+        display: block;
+        margin-bottom: 2px;
+        transition: color 0.2s;
+    }
+    .uploader-name:hover { color: var(--text); }
+
+    .video-stats {
+        font-size: 0.75rem;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .stat-dot { color: #333; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 80px 20px;
+        animation: fadeUp 0.4s ease both;
+    }
+    .empty-icon {
+        width: 72px; height: 72px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 18px;
+        font-size: 1.8rem;
+        color: var(--muted2);
+    }
+    .empty-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+    .empty-sub { font-size: 0.875rem; color: var(--muted2); margin-bottom: 20px; }
+    .btn-upload-cta {
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 99px;
+        padding: 10px 24px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex; align-items: center; gap: 7px;
+        transition: all 0.2s;
+        box-shadow: 0 4px 16px rgba(255,0,51,0.2);
+    }
+    .btn-upload-cta:hover { background: #e0002d; color: #fff; transform: translateY(-1px); }
+
+    /* ── PAGINATION ── */
+    .pager {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+        margin-top: 48px;
+        flex-wrap: wrap;
+    }
+
+    .page-btn {
+        min-width: 38px; height: 38px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--muted2);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.85rem;
+        display: inline-flex; align-items: center; justify-content: center;
+        text-decoration: none;
+        transition: all 0.2s;
+        padding: 0 10px;
+        cursor: pointer;
+    }
+    .page-btn:hover {
+        background: rgba(255,255,255,0.09);
+        color: var(--text);
+        border-color: rgba(255,255,255,0.14);
+    }
+    .page-btn.active {
+        background: var(--text);
+        color: #000;
+        border-color: var(--text);
+        font-weight: 700;
+        cursor: default;
+    }
+    .page-btn.disabled {
+        opacity: 0.3;
+        pointer-events: none;
+    }
+
+    @media (max-width: 600px) {
+        .videos-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
+<div class="list-page">
+<div class="container-fluid px-3 px-md-4">
 
-<div class="container-fluid px-3 px-md-4 py-3">
-
-    <!-- Category / Filter chips (optional - YouTube style) -->
-    <div class="d-flex flex-wrap gap-2 mb-4 overflow-auto pb-2">
-        <button class="btn btn-light btn-sm rounded-pill px-3 active fw-medium">All</button>
-        <button class="btn btn-dark btn-sm rounded-pill px-3">Music</button>
-        <button class="btn btn-dark btn-sm rounded-pill px-3">Gaming</button>
-        <button class="btn btn-dark btn-sm rounded-pill px-3">Movies</button>
-        <button class="btn btn-dark btn-sm rounded-pill px-3">Tech</button>
-        <button class="btn btn-dark btn-sm rounded-pill px-3">Live</button>
+    <!-- Filter chips -->
+    <div class="filter-row">
+        <button class="chip active">All</button>
+        <button class="chip">Music</button>
+        <button class="chip">Gaming</button>
+        <button class="chip">Movies</button>
+        <button class="chip">Tech</button>
+        <button class="chip">Sports</button>
+        <button class="chip">Comedy</button>
+        <button class="chip">Education</button>
+        <button class="chip">Live</button>
+        <button class="chip">New</button>
     </div>
 
-    <!-- Videos Grid -->
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-3 g-md-4">
+    <!-- Grid -->
+    <div class="videos-grid">
 
         {% for video in videos %}
+        <div class="video-card">
+            <!-- Thumbnail -->
+            <a href="{{ video.get_absolute_url }}" class="thumb-wrap" style="display:block;">
+                {% if video.thumbnail %}
+                    <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" loading="lazy">
+                {% else %}
+                    <div class="thumb-placeholder">
+                        <i class="bi bi-play-circle"></i>
+                    </div>
+                {% endif %}
+                <div class="thumb-overlay">
+                    <i class="bi bi-play-circle-fill"></i>
+                </div>
+            </a>
 
-        <div class="col">
-            <div class="video-card card bg-transparent border-0 text-white h-100 shadow-sm">
-
-                <!-- Thumbnail + link -->
-                <a href="{{ video.get_absolute_url }}" class="position-relative d-block">
-                    {% if video.thumbnail %}
-                        <img src="{{ video.thumbnail.url }}"
-                             class="card-img-top rounded-3"
-                             alt="{{ video.title }}"
-                             style="aspect-ratio: 16/9; object-fit: cover; background: #000;">
+            <!-- Info row -->
+            <div class="card-body-row">
+                <a href="#">
+                    {% if video.uploader.profile_picture %}
+                        <img src="{{ video.uploader.profile_picture.url }}"
+                             class="uploader-avatar"
+                             alt="{{ video.uploader.username }}">
                     {% else %}
-                        <div class="ratio ratio-16x9 bg-dark rounded-3 d-flex align-items-center justify-content-center">
-                            <span class="text-muted">No thumbnail</span>
+                        <div class="avatar-fallback">
+                            {{ video.uploader.username|slice:":1"|upper }}
                         </div>
                     {% endif %}
                 </a>
 
-                <!-- Video details -->
-                <div class="card-body p-0 mt-3 d-flex">
-                    <!-- Channel avatar with profile picture -->
-                    <a href="{ video.get_absolute_url }}" class="me-3 flex-shrink-0">
-                        {% if video.uploader.profile_picture %}
-                            <img src="{{ video.uploader.profile_picture.url }}"
-                                 alt="{{ video.uploader.username }}'s profile"
-                                 class="rounded-circle"
-                                 width="36" height="36"
-                                 style="object-fit: cover; border: 1px solid #444;">
-                        {% else %}
-                            <!-- Default avatar - first letter of username -->
-                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center fw-bold"
-                                 style="width: 36px; height: 36px; font-size: 18px;">
-                                {{ video.uploader.username|slice:":1"|upper }}
-                            </div>
-                        {% endif %}
+                <div class="card-meta">
+                    <a href="{{ video.get_absolute_url }}" class="video-title-text">
+                        {{ video.title|truncatechars:65 }}
                     </a>
-
-                    <div class="flex-grow-1">
-                        <h6 class="mb-1 fw-medium video-title" style="line-height: 1.4;">
-                            <a href="{{ video.get_absolute_url }}" class="text-white text-decoration-none">
-                                {{ video.title|truncatechars:65 }}
-                            </a>
-                        </h6>
-
-                        <p class="mb-1 small text-secondary">
-                            {{ video.uploader.username }}
-                        </p>
-
-                        <p class="text-secondary small mb-0">
-                            {{ video.views }} views •
-                            {{ video.uploaded_at|timesince }} ago
-                        </p>
+                    <a href="#" class="uploader-name">{{ video.uploader.username }}</a>
+                    <div class="video-stats">
+                        <span>{{ video.views }} views</span>
+                        <span class="stat-dot">·</span>
+                        <span>{{ video.uploaded_at|timesince }} ago</span>
                     </div>
                 </div>
-
             </div>
         </div>
-
         {% empty %}
-            <div class="col-12 text-center py-5 my-5">
-                <i class="bi bi-camera-video fs-1 text-secondary mb-3 d-block"></i>
-                <h5 class="text-secondary">No videos available yet</h5>
-                <p class="text-muted">Upload your first video to get started!</p>
-            </div>
+        <div class="empty-state">
+            <div class="empty-icon"><i class="bi bi-camera-video"></i></div>
+            <div class="empty-title">No videos yet</div>
+            <p class="empty-sub">Be the first one to upload and share something amazing.</p>
+            {% if user.is_authenticated %}
+                <a href="{% url 'video_create' %}" class="btn-upload-cta">
+                    <i class="bi bi-cloud-arrow-up"></i> Upload a video
+                </a>
+            {% endif %}
+        </div>
         {% endfor %}
 
     </div>
 
     <!-- Pagination -->
     {% if is_paginated %}
-    <nav aria-label="Video pagination" class="mt-5">
-        <ul class="pagination pagination-sm justify-content-center">
-            {% if page_obj.has_previous %}
-            <li class="page-item">
-                <a class="page-link bg-dark border-secondary text-white" href="?page=1" aria-label="First">
-                    « First
-                </a>
-            </li>
-            <li class="page-item">
-                <a class="page-link bg-dark border-secondary text-white" href="?page={{ page_obj.previous_page_number }}">
-                    Previous
-                </a>
-            </li>
-            {% endif %}
+    <div class="pager">
+        {% if page_obj.has_previous %}
+            <a href="?page=1" class="page-btn" title="First">«</a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="page-btn">
+                <i class="bi bi-chevron-left" style="font-size:0.8rem;"></i>
+            </a>
+        {% else %}
+            <span class="page-btn disabled">«</span>
+            <span class="page-btn disabled"><i class="bi bi-chevron-left" style="font-size:0.8rem;"></i></span>
+        {% endif %}
 
-            {% for num in page_obj.paginator.page_range %}
-                {% if page_obj.number == num %}
-                    <li class="page-item active">
-                        <span class="page-link bg-danger border-danger">{{ num }}</span>
-                    </li>
-                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                    <li class="page-item">
-                        <a class="page-link bg-dark border-secondary text-white" href="?page={{ num }}">{{ num }}</a>
-                    </li>
-                {% endif %}
-            {% endfor %}
-
-            {% if page_obj.has_next %}
-            <li class="page-item">
-                <a class="page-link bg-dark border-secondary text-white" href="?page={{ page_obj.next_page_number }}">
-                    Next
-                </a>
-            </li>
-            <li class="page-item">
-                <a class="page-link bg-dark border-secondary text-white" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
-                    Last »
-                </a>
-            </li>
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <span class="page-btn active">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?page={{ num }}" class="page-btn">{{ num }}</a>
             {% endif %}
-        </ul>
-    </nav>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="page-btn">
+                <i class="bi bi-chevron-right" style="font-size:0.8rem;"></i>
+            </a>
+            <a href="?page={{ page_obj.paginator.num_pages }}" class="page-btn" title="Last">»</a>
+        {% else %}
+            <span class="page-btn disabled"><i class="bi bi-chevron-right" style="font-size:0.8rem;"></i></span>
+            <span class="page-btn disabled">»</span>
+        {% endif %}
+    </div>
     {% endif %}
 
 </div>
+</div>
 
+<script>
+    // Filter chips toggle
+    document.querySelectorAll('.chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+        });
+    });
+</script>
 {% endblock %}

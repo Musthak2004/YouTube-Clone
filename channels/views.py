@@ -1,53 +1,50 @@
-from django.views.generic import ListView, DetailView, UpdateView, DeleteView
+from django.views.generic import ListView, DetailView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
+
+from .forms import ChannelForm
 from .models import Channel
-from videos.models import Video
 
 
-# Channel List
 class ChannelListView(ListView):
     model = Channel
     template_name = 'channels/channel_list.html'
     context_object_name = 'channels'
     ordering = ['-created_at']
+    paginate_by = 10
 
 
-# Channel Detail
 class ChannelDetailView(DetailView):
     model = Channel
-    template_name = "channels/channel_detail.html"
-    context_object_name = "channel"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        channel = self.get_object()
-
-        videos = Video.objects.filter(channel=channel).order_by("-created_at")
-
-        context["videos"] = videos
-        context["video_count"] = videos.count()
-        context["subscriber_count"] = channel.subscribers.count()
-
-        return context
+    template_name = 'channels/channel_detail.html'
+    context_object_name = 'channel'
 
 
-# Channel Update
+class ChannelCreateView(LoginRequiredMixin, CreateView):
+    model = Channel
+    form_class = ChannelForm
+    template_name = 'channels/channel_create.html'
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
+
 class ChannelUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Channel
-    fields = ['name', 'description', 'banner']
-    template_name = 'channels/channel_form.html'
+    form_class = ChannelForm
+    template_name = 'channels/channel_update.html'
 
     def test_func(self):
         channel = self.get_object()
         return self.request.user == channel.owner
 
 
-# Channel Delete
 class ChannelDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Channel
-    template_name = 'channels/channel_confirm_delete.html'
+    template_name = 'channels/channel_delete.html'
+    context_object_name = 'channel'
     success_url = reverse_lazy('channel_list')
 
     def test_func(self):
