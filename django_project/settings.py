@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'comments.apps.CommentsConfig',
     'subscriptions.apps.SubscriptionsConfig',
     'channels.apps.ChannelsConfig',
+    'search.apps.SearchConfig',
 
     'crispy_forms',
     'crispy_bootstrap5',

@@ -47,7 +47,6 @@
 
         /* ─── NAVBAR ─── */
         .navbar {
-            background-color: var(--bg-primary) !important;
             border-bottom: 1px solid var(--border-subtle);
             height: var(--navbar-h);
             backdrop-filter: blur(20px);
@@ -137,6 +136,7 @@
             cursor: pointer;
             transition: background var(--transition), color var(--transition);
             position: relative;
+            text-decoration: none;
         }
 
         .nav-icon-btn:hover {
@@ -146,10 +146,8 @@
 
         .badge-dot {
             position: absolute;
-            top: 6px;
-            right: 6px;
-            width: 8px;
-            height: 8px;
+            top: 6px; right: 6px;
+            width: 8px; height: 8px;
             background: var(--accent);
             border-radius: 50%;
             border: 2px solid var(--bg-primary);
@@ -157,10 +155,8 @@
 
         /* ─── PROFILE AVATAR ─── */
         .profile-avatar {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            object-fit: cover;
+            width: 34px; height: 34px;
+            border-radius: 50%; object-fit: cover;
             border: 2px solid var(--border-subtle);
             transition: border-color var(--transition);
         }
@@ -168,17 +164,13 @@
         .profile-avatar:hover { border-color: var(--accent); }
 
         .avatar-fallback {
-            width: 34px;
-            height: 34px;
+            width: 34px; height: 34px;
             border-radius: 50%;
             background: linear-gradient(135deg, #333, #1a1a1a);
             border: 2px solid var(--border-subtle);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             font-family: 'Outfit', sans-serif;
-            font-weight: 600;
-            font-size: 14px;
+            font-weight: 600; font-size: 14px;
             color: var(--text-primary);
             transition: border-color var(--transition);
         }
@@ -223,57 +215,43 @@
         /* ─── SIDEBAR ─── */
         .sidebar {
             position: fixed;
-            top: var(--navbar-h);
-            left: 0;
-            bottom: 0;
+            top: var(--navbar-h); left: 0; bottom: 0;
             width: var(--sidebar-w);
             background-color: var(--bg-primary);
             border-right: 1px solid var(--border-subtle);
-            overflow-y: auto;
-            overflow-x: hidden;
+            overflow-y: auto; overflow-x: hidden;
             transition: width var(--transition);
             z-index: 1000;
         }
 
         .sidebar-mini { width: var(--sidebar-mini-w); }
-
         .sidebar-mini .sidebar-text,
         .sidebar-mini .sidebar-section-label { display: none; }
-
         .sidebar-mini .sidebar-item {
             justify-content: center;
-            padding: 14px;
-            margin: 2px 6px;
+            padding: 14px; margin: 2px 6px;
         }
-
         .sidebar-mini .sidebar-item i { margin-right: 0; }
 
-        .sidebar-section {
-            padding: 20px 12px 8px;
-        }
+        .sidebar-section { padding: 20px 12px 8px; }
 
         .sidebar-section-label {
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
+            font-size: 0.7rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1.2px;
             color: var(--text-muted);
-            padding: 0 10px;
-            margin-bottom: 4px;
+            padding: 0 10px; margin-bottom: 4px;
             font-family: 'Outfit', sans-serif;
         }
 
         .sidebar-item {
-            display: flex;
-            align-items: center;
+            display: flex; align-items: center;
             padding: 10px 16px;
             color: var(--text-secondary);
             text-decoration: none;
             transition: all var(--transition);
             border-radius: var(--radius-sm);
             margin: 1px 8px;
-            font-size: 0.875rem;
-            font-weight: 400;
+            font-size: 0.875rem; font-weight: 400;
             white-space: nowrap;
         }
 
@@ -291,12 +269,9 @@
         .sidebar-item.active i { color: var(--accent); }
 
         .sidebar-item i {
-            width: 22px;
-            text-align: center;
-            margin-right: 18px;
-            font-size: 1.2rem;
-            flex-shrink: 0;
-            transition: color var(--transition);
+            width: 22px; text-align: center;
+            margin-right: 18px; font-size: 1.2rem;
+            flex-shrink: 0; transition: color var(--transition);
         }
 
         .sidebar-item:hover i { color: var(--text-primary); }
@@ -322,8 +297,7 @@
 
         .sidebar-signout {
             width: calc(100% - 16px);
-            text-align: left;
-            border: none;
+            text-align: left; border: none;
             background: transparent;
             color: #ff4757 !important;
         }
@@ -337,9 +311,15 @@
             padding: 32px 28px;
             transition: margin-left var(--transition);
             min-height: calc(100vh - var(--navbar-h));
+            animation: pageFade 0.3s ease;
         }
 
         .main-content-mini { margin-left: var(--sidebar-mini-w); }
+
+        @keyframes pageFade {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
 
         /* ─── SIGN IN BUTTON ─── */
         .btn-signin {
@@ -349,12 +329,10 @@
             border-radius: 99px;
             padding: 7px 18px;
             font-size: 0.85rem;
-            font-family: 'DM Sans', sans-serif;
-            font-weight: 500;
+            font-family: 'DM Sans', sans-serif; font-weight: 500;
             transition: all var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 7px;
+            display: flex; align-items: center; gap: 7px;
+            text-decoration: none;
         }
 
         .btn-signin:hover {
@@ -366,12 +344,9 @@
         /* ─── TOAST NOTIFICATIONS ─── */
         #toast-container {
             position: fixed;
-            bottom: 28px;
-            right: 28px;
+            bottom: 28px; right: 28px;
             z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            display: flex; flex-direction: column; gap: 10px;
         }
 
         .yt-toast {
@@ -391,20 +366,9 @@
             to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* ─── PAGE FADE IN ─── */
-        .main-content { animation: pageFade 0.3s ease; }
-
-        @keyframes pageFade {
-            from { opacity: 0; transform: translateY(6px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
         /* ─── MOBILE ─── */
         @media (max-width: 991.98px) {
-            .sidebar {
-                width: 0;
-                overflow: hidden;
-            }
+            .sidebar { width: 0; overflow: hidden; }
             .sidebar.show { width: var(--sidebar-w); box-shadow: 4px 0 40px rgba(0,0,0,0.7); }
             .main-content { margin-left: 0; padding: 20px 16px; }
             .search-wrap { max-width: 100%; margin: 0 12px; }
@@ -414,12 +378,11 @@
             .search-wrap { display: none; }
         }
 
-        /* ─── MISC UTILITIES ─── */
         .text-accent { color: var(--accent); }
         .bg-elevated { background: var(--bg-elevated); }
     </style>
 
-    <title>{% block title %}YouTube Clone{% endblock %}</title>
+    <title>{% block title %}YouClone{% endblock %}</title>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -433,16 +396,20 @@
                 <button class="nav-icon-btn" id="sidebarToggle" type="button" title="Menu">
                     <i class="bi bi-list fs-5"></i>
                 </button>
-                <a class="navbar-brand d-flex align-items-center gap-1" href="{% url 'video_list' %}">
+                <a class="navbar-brand d-flex align-items: center gap-1" href="{% url 'video_list' %}">
                     <i class="bi bi-youtube fs-4 brand-icon"></i>
-                    <span class="fs-5">YouTube<span style="color:var(--text-muted);font-weight:300">Clone</span></span>
+                    <span class="fs-5">You<span style="color:var(--text-muted);font-weight:300">Clone</span></span>
                 </a>
             </div>
 
             <!-- Center: Search -->
             <div class="search-wrap d-none d-md-flex">
-                <form class="search-inner w-100" role="search">
-                    <input class="search-input" type="search" placeholder="Search videos..." aria-label="Search">
+                <form class="search-inner w-100" method="get" action="{% url 'search' %}">
+                    <input class="search-input" type="search" name="q"
+                           value="{{ request.GET.q }}"
+                           placeholder="Search videos, channels..."
+                           aria-label="Search"
+                           autocomplete="off">
                     <button class="search-btn" type="submit">
                         <i class="bi bi-search"></i>
                     </button>
@@ -453,9 +420,9 @@
             <div class="d-flex align-items-center gap-1 flex-shrink-0 ms-auto">
 
                 <!-- Mobile search -->
-                <button class="nav-icon-btn d-flex d-md-none" title="Search">
+                <a href="{% url 'search' %}" class="nav-icon-btn d-flex d-md-none" title="Search">
                     <i class="bi bi-search"></i>
-                </button>
+                </a>
 
                 {% if user.is_authenticated %}
                 <!-- Upload -->
@@ -502,6 +469,11 @@
                                 </a>
                             </li>
                         {% endif %}
+                        <li>
+                            <a class="dropdown-item" href="{% url 'search' %}">
+                                <i class="bi bi-search"></i> Search
+                            </a>
+                        </li>
                         <li><a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Settings</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
@@ -527,15 +499,14 @@
     <!-- ═══ SIDEBAR ═══ -->
     <div class="sidebar" id="sidebar">
 
-        <!-- Main Nav -->
         <div class="sidebar-section">
             <a href="{% url 'video_list' %}" class="sidebar-item {% if request.resolver_match.url_name == 'video_list' %}active{% endif %}">
                 <i class="bi bi-house{% if request.resolver_match.url_name == 'video_list' %}-fill{% endif %}"></i>
                 <span class="sidebar-text">Home</span>
             </a>
-            <a href="#" class="sidebar-item">
-                <i class="bi bi-lightning"></i>
-                <span class="sidebar-text">Shorts</span>
+            <a href="{% url 'search' %}" class="sidebar-item {% if request.resolver_match.url_name == 'search' %}active{% endif %}">
+                <i class="bi bi-search"></i>
+                <span class="sidebar-text">Search</span>
             </a>
             <a href="{% url 'subscription_list' %}" class="sidebar-item {% if request.resolver_match.url_name == 'subscription_list' %}active{% endif %}">
                 <i class="bi bi-collection-play{% if request.resolver_match.url_name == 'subscription_list' %}-fill{% endif %}"></i>
@@ -545,7 +516,6 @@
 
         <hr class="sidebar-divider">
 
-        <!-- Library -->
         <div class="sidebar-section">
             <div class="sidebar-section-label">Library</div>
             <a href="#" class="sidebar-item">
@@ -565,7 +535,6 @@
         {% if user.is_authenticated %}
         <hr class="sidebar-divider">
 
-        <!-- Upload -->
         <div class="sidebar-section">
             <a href="{% url 'video_create' %}" class="sidebar-item sidebar-upload-btn {% if request.resolver_match.url_name == 'video_create' %}active{% endif %}">
                 <i class="bi bi-cloud-arrow-up"></i>
@@ -575,7 +544,6 @@
 
         <hr class="sidebar-divider">
 
-        <!-- Account -->
         <div class="sidebar-section">
             <div class="sidebar-section-label">Account</div>
             <a href="#" class="sidebar-item">
@@ -590,6 +558,7 @@
                 </button>
             </form>
         </div>
+
         {% else %}
         <hr class="sidebar-divider">
         <div class="sidebar-section">
@@ -635,7 +604,6 @@
             }
         });
 
-        // Close sidebar on outside click (mobile)
         document.addEventListener('click', (e) => {
             if (!isMobile()) return;
             if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
