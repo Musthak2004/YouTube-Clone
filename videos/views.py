@@ -2,11 +2,47 @@ from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
+from django.views import View
 
 from subscriptions.models import Subscription
-from .models import Video, VideoView
+from .models import Video, VideoView, VideoReaction
 
+class LikedVideosView(LoginRequiredMixin, ListView):
+    template_name = 'videos/liked_videos.html'
+    context_object_name = 'videos'
+    paginate_by = 12
+
+    def get_queryset(self):
+        return Video.objects.filter(
+            reactions__user=self.request.user,      # reaction → reactions
+            reactions__reaction='like'
+        ).order_by('-reactions__id')                # reactions_id → reactions__id (double underscore)
+
+class VideoReactionView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        video    = get_object_or_404(Video, pk=pk)
+        reaction = request.POST.get('reaction')  # 'like' or 'dislike'
+
+        if reaction not in ('like', 'dislike'):
+            return redirect(video.get_absolute_url())
+
+        obj, created = VideoReaction.objects.get_or_create(
+            user=request.user,
+            video=video,
+            defaults={'reaction': reaction}
+        )
+
+        if not created:
+            if obj.reaction == reaction:
+                # Same button மறுபடியும் click — toggle off (delete)
+                obj.delete()
+            else:
+                # Like → Dislike or vice versa
+                obj.reaction = reaction
+                obj.save()
+
+        return redirect(video.get_absolute_url())
 
 class VideoListView(ListView):
     model = Video

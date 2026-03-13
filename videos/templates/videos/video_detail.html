@@ -21,7 +21,6 @@
         to   { opacity:1; transform:translateY(0); }
     }
 
-    /* ── PLAYER ── */
     .player-wrap {
         position: relative;
         border-radius: 16px;
@@ -32,7 +31,6 @@
     }
     .player-wrap video { display: block; width: 100%; }
 
-    /* ── VIDEO TITLE ROW ── */
     .video-title {
         font-family: 'Outfit', sans-serif;
         font-size: 1.2rem;
@@ -48,7 +46,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        margin-bottom: 16px;
+        margin-bottom: 12px;
     }
 
     .meta-stats {
@@ -60,12 +58,7 @@
     }
     .meta-dot { color: var(--muted); }
 
-    /* ── ACTION BUTTONS ── */
-    .action-group {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
+    .action-group { display: flex; gap: 8px; flex-wrap: wrap; }
 
     .action-btn {
         display: inline-flex;
@@ -83,17 +76,51 @@
         text-decoration: none;
         transition: all 0.2s ease;
     }
-    .action-btn:hover {
-        background: rgba(255,255,255,0.1);
-        border-color: rgba(255,255,255,0.15);
-        color: var(--text);
-    }
-    .action-btn.active {
-        background: rgba(255,0,51,0.12);
-        border-color: rgba(255,0,51,0.25);
-        color: #ff6680;
-    }
+    .action-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.15); color: var(--text); }
+    .action-btn.active { background: rgba(255,0,51,0.12); border-color: rgba(255,0,51,0.25); color: #ff6680; }
     .action-btn i { font-size: 0.95rem; }
+
+    /* ── TAGS CHIPS ── */
+    .tags-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 0 14px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 14px;
+    }
+    .tags-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--muted);
+        margin-right: 2px;
+        white-space: nowrap;
+    }
+    .tag-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        padding: 5px 13px;
+        border-radius: 99px;
+        font-size: 0.76rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--border);
+        color: var(--muted2);
+        font-family: 'Outfit', sans-serif;
+    }
+    .tag-chip:hover {
+        background: rgba(255,0,51,0.08);
+        border-color: rgba(255,0,51,0.2);
+        color: #ff6680;
+        transform: translateY(-1px);
+    }
+    .tag-chip i { font-size: 0.65rem; }
 
     /* ── CHANNEL BAR ── */
     .channel-bar {
@@ -108,33 +135,20 @@
         margin-bottom: 14px;
     }
 
-    .ch-avatar {
-        width: 46px; height: 46px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 1.5px solid var(--border);
-        flex-shrink: 0;
-    }
+    .ch-avatar { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--border); flex-shrink: 0; }
     .ch-avatar-fallback {
-        width: 46px; height: 46px;
-        border-radius: 50%;
+        width: 46px; height: 46px; border-radius: 50%;
         background: linear-gradient(135deg, #2a2a2a, #111);
         border: 1.5px solid var(--border);
         display: flex; align-items: center; justify-content: center;
-        font-family: 'Outfit', sans-serif;
-        font-weight: 700; font-size: 18px;
+        font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 18px;
         color: var(--text); flex-shrink: 0;
     }
 
     .ch-info { flex: 1; min-width: 0; }
     .ch-name {
-        font-family: 'Outfit', sans-serif;
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: var(--text);
-        text-decoration: none;
-        display: block;
-        margin-bottom: 2px;
+        font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 600;
+        color: var(--text); text-decoration: none; display: block; margin-bottom: 2px;
     }
     .ch-name:hover { color: var(--text); text-decoration: underline; }
     .ch-subs { font-size: 0.78rem; color: var(--muted2); }
@@ -142,179 +156,90 @@
     .ch-actions { display: flex; gap: 8px; align-items: center; margin-left: auto; }
 
     .btn-subscribe {
-        background: var(--accent);
-        color: #fff;
-        border: none;
-        border-radius: 99px;
-        padding: 9px 22px;
-        font-family: 'Outfit', sans-serif;
-        font-size: 0.85rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s ease;
+        background: var(--accent); color: #fff; border: none; border-radius: 99px;
+        padding: 9px 22px; font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600;
+        cursor: pointer; transition: all 0.2s ease;
         display: inline-flex; align-items: center; gap: 7px;
         box-shadow: 0 2px 12px rgba(255,0,51,0.2);
     }
     .btn-subscribe:hover { background: #e0002d; transform: translateY(-1px); }
 
     .btn-unsubscribe {
-        background: rgba(255,255,255,0.06);
-        color: var(--muted2);
-        border: 1px solid var(--border);
-        border-radius: 99px;
-        padding: 9px 22px;
-        font-family: 'Outfit', sans-serif;
-        font-size: 0.85rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
+        background: rgba(255,255,255,0.06); color: var(--muted2);
+        border: 1px solid var(--border); border-radius: 99px;
+        padding: 9px 22px; font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 500;
+        cursor: pointer; transition: all 0.2s ease;
         display: inline-flex; align-items: center; gap: 7px;
     }
     .btn-unsubscribe:hover { background: rgba(255,255,255,0.1); color: var(--text); }
 
     .btn-signin-sub {
-        background: transparent;
-        border: 1px solid var(--border);
-        color: var(--text);
-        border-radius: 99px;
-        padding: 9px 20px;
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.85rem;
-        cursor: pointer;
-        text-decoration: none;
-        transition: all 0.2s;
-        display: inline-flex; align-items: center; gap: 7px;
+        background: transparent; border: 1px solid var(--border); color: var(--text);
+        border-radius: 99px; padding: 9px 20px; font-family: 'DM Sans', sans-serif;
+        font-size: 0.85rem; cursor: pointer; text-decoration: none;
+        transition: all 0.2s; display: inline-flex; align-items: center; gap: 7px;
     }
     .btn-signin-sub:hover { background: rgba(255,255,255,0.05); color: var(--text); }
 
     .owner-actions { display: flex; gap: 7px; }
     .btn-edit-sm {
-        background: rgba(255,255,255,0.05);
-        border: 1px solid var(--border);
-        color: var(--muted2);
-        border-radius: 8px;
-        padding: 7px 14px;
-        font-size: 0.8rem;
-        text-decoration: none;
-        transition: all 0.2s;
-        display: inline-flex; align-items: center; gap: 5px;
+        background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--muted2);
+        border-radius: 8px; padding: 7px 14px; font-size: 0.8rem; text-decoration: none;
+        transition: all 0.2s; display: inline-flex; align-items: center; gap: 5px;
     }
     .btn-edit-sm:hover { background: rgba(255,255,255,0.09); color: var(--text); }
     .btn-del-sm {
-        background: rgba(255,0,51,0.07);
-        border: 1px solid rgba(255,0,51,0.15);
-        color: #ff6680;
-        border-radius: 8px;
-        padding: 7px 14px;
-        font-size: 0.8rem;
-        text-decoration: none;
-        transition: all 0.2s;
-        display: inline-flex; align-items: center; gap: 5px;
+        background: rgba(255,0,51,0.07); border: 1px solid rgba(255,0,51,0.15); color: #ff6680;
+        border-radius: 8px; padding: 7px 14px; font-size: 0.8rem; text-decoration: none;
+        transition: all 0.2s; display: inline-flex; align-items: center; gap: 5px;
     }
     .btn-del-sm:hover { background: rgba(255,0,51,0.12); color: #ff4466; }
 
-    /* ── DESCRIPTION ── */
     .desc-box {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        padding: 16px 18px;
-        font-size: 0.875rem;
-        color: var(--muted2);
-        line-height: 1.7;
-        cursor: pointer;
-        transition: border-color 0.2s;
+        background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+        padding: 16px 18px; font-size: 0.875rem; color: var(--muted2); line-height: 1.7;
+        cursor: pointer; transition: border-color 0.2s;
     }
     .desc-box:hover { border-color: rgba(255,255,255,0.12); }
     .desc-preview { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
     .desc-full { display: none; }
     .desc-box.expanded .desc-preview { display: none; }
     .desc-box.expanded .desc-full { display: block; }
-    .desc-toggle {
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: var(--text);
-        margin-top: 8px;
-        display: block;
-    }
+    .desc-toggle { font-size: 0.8rem; font-weight: 600; color: var(--text); margin-top: 8px; display: block; }
 
-    /* ── COMMENTS ── */
     .comments-section { margin-top: 32px; }
+    .comments-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .comments-title { font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 600; }
 
-    .comments-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 20px;
-    }
-    .comments-title {
-        font-family: 'Outfit', sans-serif;
-        font-size: 1rem;
-        font-weight: 600;
-    }
-
-    .comment-form-wrap {
-        display: flex;
-        gap: 12px;
-        margin-bottom: 24px;
-        align-items: flex-start;
-    }
+    .comment-form-wrap { display: flex; gap: 12px; margin-bottom: 24px; align-items: flex-start; }
     .comment-form-wrap .ch-avatar-fallback { width: 36px; height: 36px; font-size: 14px; flex-shrink: 0; }
 
     .comment-textarea {
-        flex: 1;
-        background: var(--input-bg);
-        border: 1px solid var(--border);
-        border-bottom: 2px solid transparent;
-        border-radius: 0;
-        color: var(--text);
-        padding: 10px 0;
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.875rem;
-        outline: none;
-        resize: none;
+        flex: 1; color: var(--text); padding: 10px 0;
+        font-family: 'DM Sans', sans-serif; font-size: 0.875rem; outline: none; resize: none;
+        background: transparent; border: none;
+        border-bottom: 1px solid rgba(255,255,255,0.12); min-height: 38px;
         transition: border-color 0.2s;
-        background: transparent;
-        border-top: none; border-left: none; border-right: none;
-        border-bottom: 1px solid rgba(255,255,255,0.12);
-        min-height: 38px;
     }
     .comment-textarea:focus { border-bottom-color: rgba(255,255,255,0.5); }
     .comment-textarea::placeholder { color: #444; }
 
-    .comment-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 8px;
-        margin-top: 10px;
-    }
+    .comment-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
     .btn-comment-cancel {
         background: transparent; border: none; color: var(--muted2);
-        padding: 8px 14px; border-radius: 99px;
-        font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
-        cursor: pointer; transition: all 0.2s;
+        padding: 8px 14px; border-radius: 99px; font-family: 'DM Sans', sans-serif;
+        font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
     }
     .btn-comment-cancel:hover { background: rgba(255,255,255,0.05); color: var(--text); }
-
     .btn-comment-submit {
-        background: rgba(255,255,255,0.08);
-        border: 1px solid var(--border);
-        color: var(--muted2);
-        padding: 8px 18px; border-radius: 99px;
-        font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 500;
-        cursor: pointer; transition: all 0.2s;
+        background: rgba(255,255,255,0.08); border: 1px solid var(--border); color: var(--muted2);
+        padding: 8px 18px; border-radius: 99px; font-family: 'Outfit', sans-serif;
+        font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.2s;
     }
-    .btn-comment-submit.ready {
-        background: rgba(255,255,255,0.1); color: var(--text);
-        border-color: rgba(255,255,255,0.15);
-    }
+    .btn-comment-submit.ready { background: rgba(255,255,255,0.1); color: var(--text); border-color: rgba(255,255,255,0.15); }
 
-    /* Comment cards */
     .comment-item {
-        display: flex;
-        gap: 12px;
-        padding: 14px 0;
-        border-bottom: 1px solid var(--border);
+        display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--border);
         animation: fadeUp 0.3s ease both;
     }
     .comment-item:last-child { border-bottom: none; }
@@ -323,103 +248,42 @@
     .comment-avatar .ch-avatar-fallback { width: 36px; height: 36px; font-size: 14px; }
 
     .comment-body { flex: 1; min-width: 0; }
-    .comment-meta {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 5px;
-        flex-wrap: wrap;
-    }
-    .comment-username {
-        font-family: 'Outfit', sans-serif;
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: var(--text);
-    }
-    .comment-time {
-        font-size: 0.75rem;
-        color: var(--muted2);
-    }
+    .comment-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; flex-wrap: wrap; }
+    .comment-username { font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600; color: var(--text); }
+    .comment-time { font-size: 0.75rem; color: var(--muted2); }
     .comment-edited { font-size: 0.72rem; color: var(--muted); }
-
-    .comment-text {
-        font-size: 0.875rem;
-        color: #ccc;
-        line-height: 1.65;
-        word-break: break-word;
-    }
-
-    .comment-edit-btns {
-        display: flex;
-        gap: 6px;
-        margin-left: auto;
-        flex-shrink: 0;
-    }
+    .comment-text { font-size: 0.875rem; color: #ccc; line-height: 1.65; word-break: break-word; }
+    .comment-edit-btns { display: flex; gap: 6px; margin-left: auto; flex-shrink: 0; }
     .btn-cm-icon {
-        background: transparent; border: none;
-        color: var(--muted); padding: 4px 8px; border-radius: 6px;
-        font-size: 0.85rem; cursor: pointer; text-decoration: none;
+        background: transparent; border: none; color: var(--muted); padding: 4px 8px;
+        border-radius: 6px; font-size: 0.85rem; cursor: pointer; text-decoration: none;
         transition: all 0.2s; display: inline-flex; align-items: center;
     }
     .btn-cm-icon:hover { background: rgba(255,255,255,0.06); color: var(--text); }
     .btn-cm-icon.danger:hover { background: rgba(255,0,51,0.08); color: #ff6680; }
 
-    .no-comments {
-        text-align: center;
-        padding: 48px 0;
-        color: var(--muted2);
-    }
+    .no-comments { text-align: center; padding: 48px 0; color: var(--muted2); }
     .no-comments i { font-size: 2.2rem; display: block; margin-bottom: 10px; color: var(--muted); }
     .no-comments p { font-size: 0.875rem; }
 
-    /* ── SIDEBAR ── */
-    .sidebar-title {
-        font-family: 'Outfit', sans-serif;
-        font-size: 0.95rem;
-        font-weight: 600;
-        margin-bottom: 14px;
-    }
+    .sidebar-title { font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 600; margin-bottom: 14px; }
 
     .related-item {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 12px;
-        text-decoration: none;
-        padding: 8px;
-        border-radius: 12px;
-        transition: background 0.2s;
-        cursor: pointer;
+        display: flex; gap: 10px; margin-bottom: 12px; text-decoration: none;
+        padding: 8px; border-radius: 12px; transition: background 0.2s; cursor: pointer;
     }
     .related-item:hover { background: rgba(255,255,255,0.04); }
-
     .related-thumb {
-        width: 120px;
-        min-width: 120px;
-        aspect-ratio: 16/9;
-        border-radius: 8px;
-        overflow: hidden;
-        background: #1a1a1a;
-        flex-shrink: 0;
+        width: 120px; min-width: 120px; aspect-ratio: 16/9;
+        border-radius: 8px; overflow: hidden; background: #1a1a1a; flex-shrink: 0;
     }
-    .related-thumb img {
-        width: 100%; height: 100%;
-        object-fit: cover;
-        transition: transform 0.3s ease;
-    }
+    .related-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
     .related-item:hover .related-thumb img { transform: scale(1.04); }
-
     .related-info { flex: 1; min-width: 0; }
     .related-title {
-        font-family: 'Outfit', sans-serif;
-        font-size: 0.82rem;
-        font-weight: 600;
-        color: var(--text);
-        line-height: 1.4;
-        margin-bottom: 4px;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+        font-family: 'Outfit', sans-serif; font-size: 0.82rem; font-weight: 600;
+        color: var(--text); line-height: 1.4; margin-bottom: 4px;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
     .related-meta { font-size: 0.75rem; color: var(--muted2); line-height: 1.5; }
 
@@ -427,6 +291,7 @@
         .video-title { font-size: 1rem; }
         .channel-bar { flex-direction: column; align-items: flex-start; }
         .ch-actions { margin-left: 0; }
+        .tags-row { padding: 8px 0 12px; }
     }
 </style>
 {% endblock %}
@@ -461,14 +326,14 @@
             </div>
 
             <div class="action-group">
-                <form method="post" action="#" class="d-inline">
+                <form method="post" action="{% url 'video_reaction' video.pk %}" class="d-inline">
                     {% csrf_token %}
                     <input type="hidden" name="reaction" value="like">
                     <button type="submit" class="action-btn {% if user_reaction == 'like' %}active{% endif %}">
                         <i class="bi bi-hand-thumbs-up{% if user_reaction == 'like' %}-fill{% endif %}"></i> Like
                     </button>
                 </form>
-                <form method="post" action="#" class="d-inline">
+                <form method="post" action="{% url 'video_reaction' video.pk %}" class="d-inline">
                     {% csrf_token %}
                     <input type="hidden" name="reaction" value="dislike">
                     <button type="submit" class="action-btn {% if user_reaction == 'dislike' %}active{% endif %}">
@@ -484,6 +349,18 @@
             </div>
         </div>
 
+        <!-- ── TAGS CHIPS ── -->
+        {% if video_tags %}
+        <div class="tags-row">
+            <span class="tags-label">Tags</span>
+            {% for tag_map in video_tags %}
+            <a href="{% url 'tag_videos' tag_map.tag.pk %}" class="tag-chip">
+                <i class="bi bi-hash"></i>{{ tag_map.tag.name }}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <!-- Channel Bar -->
         <div class="channel-bar">
             <div class="comment-avatar">
@@ -497,16 +374,20 @@
             </div>
 
             <div class="ch-info">
-                <a href="{{ video.uploader.channel.get_absolute_url }}" class="ch-name">{{ video.uploader.channel.username }}</a>
-                <span class="ch-subs">
-                    {{ subscriber_count }} subscriber{{ subscriber_count|pluralize }}
-                </span>
+                {% if video.uploader.channel %}
+                    <a href="{% url 'channel_detail' video.uploader.channel.pk %}" class="ch-name">
+                        {{ video.uploader.channel.name }}
+                    </a>
+                {% else %}
+                    <span class="ch-name">{{ video.uploader.username }}</span>
+                {% endif %}
+                <span class="ch-subs">{{ subscriber_count }} subscriber{{ subscriber_count|pluralize }}</span>
             </div>
 
             <div class="ch-actions">
                 {% if user.is_authenticated %}
                     {% if user != video.uploader %}
-                        <form method="post" action="{% url 'toggle_subscription' video.uploader.pk %}">
+                        <form method="post" action="{% url 'subscribe' video.uploader.pk %}">
                             {% csrf_token %}
                             {% if is_subscribed %}
                                 <button type="submit" class="btn-unsubscribe">
@@ -519,7 +400,6 @@
                             {% endif %}
                         </form>
                     {% endif %}
-
                     {% if user == video.uploader %}
                         <div class="owner-actions">
                             <a href="{% url 'video_update' video.pk %}" class="btn-edit-sm">
@@ -553,7 +433,7 @@
 
             {% if user.is_authenticated %}
                 <div class="comment-form-wrap">
-                    <div class="ch-avatar-fallback">
+                    <div class="ch-avatar-fallback" style="width:36px;height:36px;font-size:14px;">
                         {{ user.username|slice:":1"|upper }}
                     </div>
                     <div style="flex:1;">
@@ -587,9 +467,7 @@
                                 {% if comment.user.profile_picture %}
                                     <img src="{{ comment.user.profile_picture.url }}" class="ch-avatar" alt="">
                                 {% else %}
-                                    <div class="ch-avatar-fallback">
-                                        {{ comment.user.username|slice:":1"|upper }}
-                                    </div>
+                                    <div class="ch-avatar-fallback">{{ comment.user.username|slice:":1"|upper }}</div>
                                 {% endif %}
                             </div>
                             <div class="comment-body">
@@ -703,7 +581,7 @@
     }
 
     // ── Share button ──
-    const shareBtn  = document.getElementById('shareBtn');
+    const shareBtn   = document.getElementById('shareBtn');
     const shareToast = document.getElementById('shareToast');
 
     shareBtn.addEventListener('click', () => {
