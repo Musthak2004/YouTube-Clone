@@ -1,76 +1,295 @@
 {% extends 'base.html' %}
-{% block title %}My Subscriptions - YouClone{% endblock %}
+{% block title %}My Subscriptions — YouClone{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --card:   #111111;
+        --border: rgba(255,255,255,0.07);
+        --muted:  #555;
+        --muted2: #888;
+        --text:   #f0f0f0;
+        --accent: #ff0033;
+    }
+
+    .subs-page {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 8px 0 60px;
+        animation: fadeUp 0.4s ease both;
+    }
+    @keyframes fadeUp {
+        from { opacity:0; transform:translateY(14px); }
+        to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── HEADER ── */
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .page-header h1 {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.6rem;
+        font-weight: 700;
+        letter-spacing: -0.4px;
+        margin: 0;
+    }
+    .count-chip {
+        background: rgba(255,255,255,0.06);
+        border: 1px solid var(--border);
+        border-radius: 99px;
+        padding: 5px 14px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--muted2);
+    }
+
+    /* ── GRID ── */
+    .subs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+        gap: 16px;
+    }
+
+    /* ── CARD ── */
+    .sub-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 22px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+        animation: fadeUp 0.4s ease both;
+        position: relative;
+        overflow: hidden;
+    }
+    .sub-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 10%; right: 10%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+        transition: background 0.3s;
+    }
+    .sub-card:hover {
+        border-color: rgba(255,255,255,0.13);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+    .sub-card:hover::before {
+        background: linear-gradient(90deg, transparent, rgba(255,0,51,0.2), transparent);
+    }
+
+    /* stagger */
+    .sub-card:nth-child(1) { animation-delay: 0.04s; }
+    .sub-card:nth-child(2) { animation-delay: 0.08s; }
+    .sub-card:nth-child(3) { animation-delay: 0.12s; }
+    .sub-card:nth-child(4) { animation-delay: 0.16s; }
+    .sub-card:nth-child(5) { animation-delay: 0.20s; }
+    .sub-card:nth-child(6) { animation-delay: 0.24s; }
+    .sub-card:nth-child(n+7) { animation-delay: 0.28s; }
+
+    /* ── CHANNEL ROW ── */
+    .ch-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .ch-avatar {
+        width: 62px; height: 62px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--border);
+        flex-shrink: 0;
+        transition: border-color 0.2s;
+    }
+    .sub-card:hover .ch-avatar { border-color: rgba(255,255,255,0.18); }
+
+    .ch-avatar-fallback {
+        width: 62px; height: 62px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2a2a2a, #111);
+        border: 2px solid var(--border);
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700; font-size: 22px;
+        color: var(--text); flex-shrink: 0;
+        transition: border-color 0.2s;
+    }
+    .sub-card:hover .ch-avatar-fallback { border-color: rgba(255,255,255,0.18); }
+
+    .ch-info { flex: 1; min-width: 0; }
+    .ch-name {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1rem; font-weight: 600;
+        color: var(--text); text-decoration: none;
+        display: block; margin-bottom: 3px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        transition: color 0.2s;
+    }
+    .ch-name:hover { color: var(--text); text-decoration: underline; }
+
+    .ch-since {
+        font-size: 0.75rem;
+        color: var(--muted2);
+        display: flex; align-items: center; gap: 5px;
+    }
+
+    /* new badge */
+    .new-badge {
+        display: inline-block;
+        background: rgba(255,0,51,0.1);
+        border: 1px solid rgba(255,0,51,0.2);
+        color: #ff6680;
+        font-size: 0.65rem;
+        font-weight: 600;
+        border-radius: 4px;
+        padding: 1px 6px;
+        font-family: 'Outfit', sans-serif;
+        letter-spacing: 0.3px;
+    }
+
+    /* ── UNSUB BUTTON ── */
+    .btn-unsub {
+        width: 100%;
+        background: transparent;
+        border: 1px solid rgba(255,0,51,0.18);
+        color: #ff6680;
+        border-radius: 99px;
+        padding: 10px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.83rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex; align-items: center; justify-content: center; gap: 7px;
+        margin-top: auto;
+    }
+    .btn-unsub:hover {
+        background: rgba(255,0,51,0.08);
+        border-color: rgba(255,0,51,0.35);
+        color: #ff4455;
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+        text-align: center;
+        padding: 80px 24px;
+    }
+    .empty-icon-wrap {
+        width: 80px; height: 80px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 2rem; color: var(--muted2);
+    }
+    .empty-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.2rem; font-weight: 600; margin-bottom: 8px;
+    }
+    .empty-sub {
+        font-size: 0.875rem; color: var(--muted2);
+        line-height: 1.65; margin-bottom: 24px;
+    }
+    .btn-explore {
+        background: rgba(255,255,255,0.07);
+        border: 1px solid var(--border);
+        color: var(--text); border-radius: 99px;
+        padding: 11px 28px;
+        font-family: 'Outfit', sans-serif; font-size: 0.9rem; font-weight: 600;
+        text-decoration: none; transition: all 0.2s;
+        display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-explore:hover {
+        background: rgba(255,255,255,0.11);
+        border-color: rgba(255,255,255,0.16);
+        color: var(--text); transform: translateY(-1px);
+    }
+
+    @media (max-width: 600px) {
+        .subs-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
+<div class="subs-page">
 
-<div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-5">
-        <h2 class="fw-bold">My Subscriptions</h2>
-        <span class="badge bg-secondary fs-6">
+    <!-- Header -->
+    <div class="page-header">
+        <h1>My Subscriptions</h1>
+        <span class="count-chip">
             {{ subscriptions.count }} channel{{ subscriptions.count|pluralize }}
         </span>
     </div>
 
     {% if subscriptions %}
-        <div class="row g-4">
+        <div class="subs-grid">
             {% for sub in subscriptions %}
-                <div class="col-12 col-md-6 col-lg-4">
-                    <div class="card bg-dark border-secondary shadow-sm h-100 rounded-4 overflow-hidden">
-                        <div class="card-body d-flex flex-column p-4">
-                            <!-- Channel Info -->
-                            <div class="d-flex align-items-center gap-4 mb-4">
-                                {% if sub.channel.profile_picture %}
-                                    <img src="{{ sub.channel.profile_picture.url }}"
-                                         alt="{{ sub.channel.username }}"
-                                         class="rounded-circle shadow"
-                                         width="80" height="80"
-                                         style="object-fit: cover; border: 3px solid #333;">
-                                {% else %}
-                                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center fw-bold shadow"
-                                         style="width: 80px; height: 80px; font-size: 36px;">
-                                        {{ sub.channel.username|slice:":1"|upper }}
-                                    </div>
-                                {% endif %}
+            <div class="sub-card">
 
-                                <div class="flex-grow-1">
-                                    <h5 class="card-title mb-1">
-                                        <a href="#" class="text-white text-decoration-none hover-text-primary">
-                                            {{ sub.channel.username }}
-                                        </a>
-                                    </h5>
-                                    <small class="text-secondary d-block">
-                                        Subscribed {{ sub.subscribed_at|timesince }} ago
-                                    </small>
-                                </div>
-                            </div>
+                <!-- Channel info -->
+                <div class="ch-row">
+                    {% if sub.channel.profile_picture %}
+                        <img src="{{ sub.channel.profile_picture.url }}"
+                             class="ch-avatar"
+                             alt="{{ sub.channel.username }}">
+                    {% else %}
+                        <div class="ch-avatar-fallback">
+                            {{ sub.channel.username|slice:":1"|upper }}
+                        </div>
+                    {% endif %}
 
-                            <!-- Unsubscribe -->
-                            <div class="mt-auto">
-                                <form method="post" action="{% url 'toggle_subscription' sub.channel.pk %}">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-outline-danger w-100 rounded-pill py-3">
-                                        <i class="bi bi-bell-slash me-2"></i> Unsubscribe
-                                    </button>
-                                </form>
-                            </div>
+                    <div class="ch-info">
+                        <a href="#" class="ch-name">{{ sub.channel.username }}</a>
+                        <div class="ch-since">
+                            <i class="bi bi-bell-fill" style="font-size:0.7rem;color:var(--muted);"></i>
+                            {{ sub.subscribed_at|timesince }} ago
+                            {% if sub.subscribed_at|timesince|slice:":1" == "0" or "hour" in sub.subscribed_at|timesince or "minute" in sub.subscribed_at|timesince %}
+                                <span class="new-badge">NEW</span>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
+
+                <!-- Unsubscribe -->
+                <form method="post" action="{% url 'toggle_subscription' sub.channel.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-unsub">
+                        <i class="bi bi-bell-slash"></i> Unsubscribe
+                    </button>
+                </form>
+
+            </div>
             {% endfor %}
         </div>
+
     {% else %}
-        <div class="text-center py-5 my-5">
-            <i class="bi bi-bell-slash fs-1 text-secondary mb-4 d-block"></i>
-            <h4 class="text-secondary mb-3">No subscriptions yet</h4>
-            <p class="text-muted lead mb-4">
-                You haven't subscribed to any channels.<br>
+        <div class="empty-state">
+            <div class="empty-icon-wrap">
+                <i class="bi bi-bell-slash"></i>
+            </div>
+            <div class="empty-title">No subscriptions yet</div>
+            <p class="empty-sub">
+                You haven't followed any channels.<br>
                 Discover creators and hit subscribe!
             </p>
-            <a href="{% url 'video_list' %}" class="btn btn-outline-light btn-lg px-5 py-3 rounded-pill">
-                Explore Videos
+            <a href="{% url 'video_list' %}" class="btn-explore">
+                <i class="bi bi-compass"></i> Explore Videos
             </a>
         </div>
     {% endif %}
-</div>
 
+</div>
 {% endblock %}

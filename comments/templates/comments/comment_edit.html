@@ -1,58 +1,317 @@
 {% extends 'base.html' %}
-{% block title %}Edit Comment - YouClone{% endblock %}
+{% block title %}Edit Comment — YouClone{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --card:   #111111;
+        --border: rgba(255,255,255,0.07);
+        --muted:  #555;
+        --muted2: #888;
+        --text:   #f0f0f0;
+        --blue:   #4488ff;
+        --blue-dim: rgba(68,136,255,0.08);
+        --blue-border: rgba(68,136,255,0.2);
+    }
+
+    .edit-comment-page {
+        max-width: 660px;
+        margin: 0 auto;
+        padding: 8px 0 60px;
+        animation: fadeUp 0.4s ease both;
+    }
+    @keyframes fadeUp {
+        from { opacity:0; transform:translateY(16px); }
+        to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── BACK ── */
+    .back-link {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 0.82rem; color: var(--muted);
+        text-decoration: none; margin-bottom: 24px; transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--text); }
+
+    /* ── VIDEO CHIP ── */
+    .video-chip {
+        display: flex; align-items: center; gap: 12px;
+        background: var(--card); border: 1px solid var(--border);
+        border-radius: 12px; padding: 12px 16px;
+        margin-bottom: 20px; text-decoration: none;
+        transition: border-color 0.2s;
+    }
+    .video-chip:hover { border-color: rgba(255,255,255,0.14); }
+    .video-chip-icon {
+        width: 36px; height: 36px; border-radius: 8px;
+        background: rgba(255,255,255,0.05);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1rem; color: var(--muted2); flex-shrink: 0;
+    }
+    .video-chip-label { font-size: 0.7rem; color: var(--muted2); margin-bottom: 2px; }
+    .video-chip-title {
+        font-family: 'Outfit', sans-serif; font-size: 0.88rem; font-weight: 600;
+        color: var(--text); white-space: nowrap; overflow: hidden;
+        text-overflow: ellipsis; max-width: 460px;
+    }
+    .video-chip-arrow { margin-left: auto; color: var(--muted); font-size: 0.85rem; flex-shrink: 0; }
+
+    /* ── CARD ── */
+    .edit-card {
+        background: var(--card); border: 1px solid var(--border);
+        border-radius: 20px; padding: 32px 28px;
+        box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+        position: relative; overflow: hidden;
+    }
+    .edit-card::before {
+        content: '';
+        position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(68,136,255,0.25), transparent);
+    }
+
+    /* ── HEADER ── */
+    .card-header-row {
+        display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+    }
+    .user-avatar {
+        width: 40px; height: 40px; border-radius: 50%;
+        background: linear-gradient(135deg, #2a2a2a, #111);
+        border: 1.5px solid var(--border);
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 15px;
+        color: var(--text); flex-shrink: 0;
+    }
+    .header-title {
+        font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 600; margin-bottom: 2px;
+    }
+    .header-sub { font-size: 0.78rem; color: var(--muted2); }
+
+    /* ── ORIGINAL COMMENT ── */
+    .original-box {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid var(--border);
+        border-left: 3px solid rgba(255,255,255,0.1);
+        border-radius: 0 10px 10px 0;
+        padding: 11px 14px; margin-bottom: 20px;
+        position: relative;
+    }
+    .original-label {
+        font-size: 0.68rem; text-transform: uppercase;
+        letter-spacing: 1px; color: var(--muted);
+        font-family: 'Outfit', sans-serif; font-weight: 600; margin-bottom: 5px;
+    }
+    .original-text {
+        font-size: 0.83rem; color: #888; font-style: italic; line-height: 1.6;
+    }
+
+    /* ── UNSAVED BADGE ── */
+    .unsaved-badge {
+        display: none;
+        background: var(--blue-dim); border: 1px solid var(--blue-border);
+        border-radius: 99px; padding: 3px 11px;
+        font-size: 0.7rem; color: #7aabff;
+        font-family: 'Outfit', sans-serif; font-weight: 500;
+        margin-left: 8px; vertical-align: middle;
+    }
+    .unsaved-badge.show { display: inline-block; }
+
+    /* ── ERROR ── */
+    .alert-error {
+        background: rgba(255,0,51,0.07); border: 1px solid rgba(255,0,51,0.18);
+        border-radius: 10px; padding: 11px 15px; font-size: 0.83rem;
+        color: #ff6680; margin-bottom: 18px;
+        display: flex; align-items: flex-start; gap: 8px;
+    }
+
+    /* ── TEXTAREA ── */
+    .field-label {
+        display: flex; align-items: center; gap: 6px;
+        font-size: 0.8rem; font-weight: 500; color: var(--muted2); margin-bottom: 8px;
+    }
+    .comment-textarea {
+        width: 100%; background: #0c0c0c;
+        border: 1px solid var(--border); border-radius: 12px;
+        color: var(--text); padding: 14px 16px;
+        font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+        outline: none; resize: vertical; min-height: 130px;
+        transition: border-color 0.2s, box-shadow 0.2s; line-height: 1.65;
+    }
+    .comment-textarea:focus {
+        border-color: rgba(68,136,255,0.3);
+        box-shadow: 0 0 0 3px rgba(68,136,255,0.07);
+    }
+
+    .textarea-footer {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-top: 8px; margin-bottom: 20px;
+    }
+    .char-count { font-size: 0.72rem; color: var(--muted); transition: color 0.2s; }
+    .char-count.warn { color: #ff8c00; }
+    .char-count.over { color: #ff0033; }
+    .tip-text { font-size: 0.72rem; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+
+    /* ── BUTTONS ── */
+    .btn-row { display: flex; gap: 10px; }
+
+    .btn-save {
+        flex: 1;
+        background: linear-gradient(135deg, #2255cc, #4488ff);
+        color: #fff; border: none; border-radius: 11px; padding: 13px;
+        font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 600;
+        cursor: pointer; transition: all 0.25s ease;
+        box-shadow: 0 4px 20px rgba(68,136,255,0.2);
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-save:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 28px rgba(68,136,255,0.32);
+    }
+    .btn-save:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .btn-cancel {
+        background: rgba(255,255,255,0.05); color: var(--muted2);
+        border: 1px solid var(--border); border-radius: 11px;
+        padding: 13px 22px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+        cursor: pointer; text-decoration: none; transition: all 0.2s;
+        display: flex; align-items: center; gap: 7px;
+    }
+    .btn-cancel:hover {
+        background: rgba(255,255,255,0.08);
+        border-color: rgba(255,255,255,0.14); color: var(--text);
+    }
+
+    @media (max-width: 480px) {
+        .edit-card { padding: 22px 16px; }
+        .btn-row { flex-direction: column; }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
+<div class="edit-comment-page">
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
+    <!-- Back -->
+    <a href="{{ comment.video.get_absolute_url }}" class="back-link">
+        <i class="bi bi-arrow-left"></i> Back to video
+    </a>
 
-            <h3 class="mb-4 text-center">Edit Your Comment</h3>
-            <p class="text-center text-secondary mb-5">
-                on <a href="{{ comment.video.get_absolute_url }}" class="text-info">{{ comment.video.title }}</a>
-            </p>
+    <!-- Video chip -->
+    <a href="{{ comment.video.get_absolute_url }}" class="video-chip">
+        <div class="video-chip-icon"><i class="bi bi-play-circle"></i></div>
+        <div style="flex:1;min-width:0;">
+            <div class="video-chip-label">Editing comment on</div>
+            <div class="video-chip-title">{{ comment.video.title }}</div>
+        </div>
+        <i class="bi bi-box-arrow-up-right video-chip-arrow"></i>
+    </a>
 
-            <div class="card bg-dark border-secondary shadow-lg">
-                <div class="card-body p-5">
+    <!-- Card -->
+    <div class="edit-card">
 
-                    <form method="post">
-                        {% csrf_token %}
-
-                        {% if form.errors %}
-                            <div class="alert alert-danger">
-                                {{ form.non_field_errors|join:"<br>" }}
-                                {% for field in form %}
-                                    {% for error in field.errors %}
-                                        <div>{{ field.label }}: {{ error }}</div>
-                                    {% endfor %}
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-
-                        <div class="mb-4">
-                            <label class="form-label fw-medium">Edit Comment</label>
-                            <textarea name="{{ form.text.name }}" rows="8"
-                                      class="form-control bg-dark border-secondary text-white" required>{{ form.text.value|default:'' }}</textarea>
-                            {% if form.text.errors %}
-                                <div class="text-danger small mt-1">{{ form.text.errors|join:", " }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="d-flex gap-3">
-                            <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
-                                <i class="bi bi-save me-2"></i> Save Changes
-                            </button>
-                            <a href="{{ comment.video.get_absolute_url }}" class="btn btn-outline-secondary btn-lg">
-                                Cancel
-                            </a>
-                        </div>
-                    </form>
-
+        <!-- Header -->
+        <div class="card-header-row">
+            <div class="user-avatar">{{ request.user.username|slice:":1"|upper }}</div>
+            <div>
+                <div class="header-title">
+                    Edit Comment
+                    <span class="unsaved-badge" id="unsavedBadge">Unsaved changes</span>
+                </div>
+                <div class="header-sub">
+                    Last edited {{ comment.updated_at|timesince }} ago
                 </div>
             </div>
-
         </div>
+
+        <!-- Original comment preview -->
+        <div class="original-box">
+            <div class="original-label">Original comment</div>
+            <div class="original-text">"{{ comment.text|truncatechars:150 }}"</div>
+        </div>
+
+        {% if form.errors %}
+            <div class="alert-error">
+                <i class="bi bi-exclamation-circle-fill" style="flex-shrink:0;margin-top:2px;"></i>
+                <span>
+                    {{ form.non_field_errors|join:" · " }}
+                    {% for field in form %}{% for error in field.errors %}{{ field.label }}: {{ error }} {% endfor %}{% endfor %}
+                </span>
+            </div>
+        {% endif %}
+
+        <form method="post" id="editForm">
+            {% csrf_token %}
+
+            <div class="field-label">
+                <i class="bi bi-pencil"></i> Your updated comment
+            </div>
+            <textarea name="{{ form.text.name }}"
+                      class="comment-textarea"
+                      id="{{ form.text.id_for_label }}"
+                      maxlength="1000"
+                      required>{{ form.text.value|default:'' }}</textarea>
+
+            <div class="textarea-footer">
+                <span class="char-count" id="charCount">0 / 1000</span>
+                <span class="tip-text">
+                    <i class="bi bi-shift" style="font-size:0.75rem;"></i> Ctrl+Enter to save
+                </span>
+            </div>
+
+            {% if form.text.errors %}
+                <div style="font-size:0.77rem;color:#ff4466;margin-bottom:14px;display:flex;gap:5px;align-items:center;">
+                    <i class="bi bi-x-circle"></i>{{ form.text.errors|join:", " }}
+                </div>
+            {% endif %}
+
+            <div class="btn-row">
+                <button type="submit" class="btn-save" id="saveBtn">
+                    <i class="bi bi-check2-circle"></i> Save Changes
+                </button>
+                <a href="{{ comment.video.get_absolute_url }}" class="btn-cancel">
+                    <i class="bi bi-x"></i> Cancel
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 
+<script>
+    const textarea    = document.getElementById('{{ form.text.id_for_label }}');
+    const charCount   = document.getElementById('charCount');
+    const saveBtn     = document.getElementById('saveBtn');
+    const unsavedBadge = document.getElementById('unsavedBadge');
+    const originalVal = textarea.value.trim();
+    const MAX = 1000;
+
+    function update() {
+        const len = textarea.value.length;
+        charCount.textContent = `${len} / ${MAX}`;
+        charCount.className = 'char-count' + (len > MAX * 0.9 ? (len >= MAX ? ' over' : ' warn') : '');
+        const changed = textarea.value.trim() !== originalVal && len > 0;
+        saveBtn.disabled = !changed;
+        unsavedBadge.classList.toggle('show', changed);
+    }
+
+    // Init counter with existing text
+    update();
+
+    textarea.addEventListener('input', update);
+
+    // Ctrl+Enter to submit
+    textarea.addEventListener('keydown', e => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            if (!saveBtn.disabled) editForm.submit();
+        }
+    });
+
+    // Leave warning
+    window.addEventListener('beforeunload', e => {
+        if (unsavedBadge.classList.contains('show')) {
+            e.preventDefault(); e.returnValue = '';
+        }
+    });
+    document.getElementById('editForm').addEventListener('submit', () => {
+        window.onbeforeunload = null;
+    });
+</script>
 {% endblock %}
