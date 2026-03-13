@@ -1,85 +1,504 @@
 {% extends 'base.html' %}
-{% block title %}{% if form.instance.pk %}Edit{% else %}Create{% endif %} Channel - YouClone{% endblock %}
+{% block title %}{% if form.instance.pk %}Edit Channel{% else %}Create Channel{% endif %} — YouClone{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --card:           #111111;
+        --border:         rgba(255,255,255,0.07);
+        --muted:          #555;
+        --muted2:         #888;
+        --text:           #f0f0f0;
+        --input-bg:       #0c0c0c;
+        --purple:         #8b5cf6;
+        --purple-dim:     rgba(139,92,246,0.08);
+        --purple-border:  rgba(139,92,246,0.2);
+        --orange:         #ff7730;
+        --orange-dim:     rgba(255,119,48,0.08);
+        --orange-border:  rgba(255,119,48,0.2);
+    }
+
+    /* flip colour tokens based on mode */
+    {% if form.instance.pk %}
+    :root {
+        --theme:        var(--orange);
+        --theme-dim:    var(--orange-dim);
+        --theme-border: var(--orange-border);
+        --btn-grad:     linear-gradient(135deg, #cc5500, #ff7730);
+        --btn-glow:     rgba(255,119,48,0.22);
+        --btn-glow-h:   rgba(255,119,48,0.38);
+        --top-line:     rgba(255,119,48,0.3);
+    }
+    {% else %}
+    :root {
+        --theme:        var(--purple);
+        --theme-dim:    var(--purple-dim);
+        --theme-border: var(--purple-border);
+        --btn-grad:     linear-gradient(135deg, #6d28d9, #8b5cf6);
+        --btn-glow:     rgba(139,92,246,0.22);
+        --btn-glow-h:   rgba(139,92,246,0.38);
+        --top-line:     rgba(139,92,246,0.3);
+    }
+    {% endif %}
+
+    .ch-form-page {
+        max-width: 580px; margin: 0 auto;
+        padding: 8px 0 60px;
+        animation: fadeUp 0.4s ease both;
+    }
+    @keyframes fadeUp {
+        from { opacity:0; transform:translateY(18px); }
+        to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── BACK ── */
+    .back-link {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 0.82rem; color: var(--muted);
+        text-decoration: none; margin-bottom: 24px; transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--text); }
+
+    /* ── PAGE HEADER ── */
+    .page-header { text-align: center; margin-bottom: 28px; }
+    .page-header-icon {
+        width: 60px; height: 60px; border-radius: 50%;
+        background: var(--theme-dim); border: 1.5px solid var(--theme-border);
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 16px; font-size: 1.5rem;
+        color: var(--theme);
+    }
+    .page-header h1 {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.6rem; font-weight: 700;
+        letter-spacing: -0.4px; margin-bottom: 6px;
+    }
+    .page-header p { font-size: 0.875rem; color: var(--muted2); }
+
+    /* ── CARD ── */
+    .form-card {
+        background: var(--card); border: 1px solid var(--border);
+        border-radius: 20px; padding: 32px 28px;
+        box-shadow: 0 28px 70px rgba(0,0,0,0.4);
+        position: relative; overflow: hidden;
+    }
+    .form-card::before {
+        content: '';
+        position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
+        background: linear-gradient(90deg, transparent, var(--top-line), transparent);
+    }
+
+    /* ── UNSAVED ── */
+    .unsaved-badge {
+        display: none; background: var(--theme-dim);
+        border: 1px solid var(--theme-border); border-radius: 99px;
+        padding: 3px 11px; font-size: 0.7rem; color: var(--theme);
+        font-family: 'Outfit', sans-serif; font-weight: 500; margin-left: 8px;
+    }
+    .unsaved-badge.show { display: inline-block; }
+
+    /* ── SECTION SEP ── */
+    .section-sep {
+        font-size: 0.7rem; font-family: 'Outfit', sans-serif;
+        font-weight: 600; text-transform: uppercase;
+        letter-spacing: 1.2px; color: var(--muted);
+        margin: 24px 0 16px;
+        display: flex; align-items: center; gap: 10px;
+    }
+    .section-sep:first-child { margin-top: 0; }
+    .section-sep::before, .section-sep::after {
+        content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ── FIELDS ── */
+    .field-group { margin-bottom: 18px; }
+    .field-label {
+        display: flex; align-items: center; gap: 6px;
+        font-size: 0.8rem; font-weight: 500; color: var(--muted2); margin-bottom: 8px;
+    }
+    .optional-tag {
+        font-size: 0.68rem; background: rgba(255,255,255,0.06);
+        border-radius: 4px; padding: 1px 6px; color: var(--muted); margin-left: auto;
+    }
+    .field-wrap { position: relative; }
+    .field-icon {
+        position: absolute; left: 13px; top: 50%;
+        transform: translateY(-50%); color: var(--muted);
+        font-size: 0.95rem; pointer-events: none; transition: color 0.2s;
+    }
+    .field-wrap:focus-within .field-icon { color: var(--theme); }
+
+    .field-input {
+        width: 100%; background: var(--input-bg);
+        border: 1px solid var(--border); border-radius: 10px;
+        color: var(--text); padding: 11px 14px 11px 38px;
+        font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+        outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field-input::placeholder { color: #333; }
+    .field-input:focus {
+        border-color: var(--theme-border);
+        box-shadow: 0 0 0 3px var(--theme-dim);
+    }
+
+    .field-textarea {
+        width: 100%; background: var(--input-bg);
+        border: 1px solid var(--border); border-radius: 10px;
+        color: var(--text); padding: 11px 14px;
+        font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+        outline: none; resize: vertical; min-height: 90px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field-textarea::placeholder { color: #333; }
+    .field-textarea:focus {
+        border-color: var(--theme-border);
+        box-shadow: 0 0 0 3px var(--theme-dim);
+    }
+
+    .char-count {
+        font-size: 0.72rem; color: var(--muted);
+        text-align: right; margin-top: 5px; transition: color 0.2s;
+    }
+    .char-count.warn { color: #ff8c00; }
+    .char-count.over { color: #ff0033; }
+
+    /* ── BANNER ZONE ── */
+    /* Current banner preview (edit mode) */
+    .current-banner {
+        position: relative; border-radius: 10px; overflow: hidden;
+        height: 90px; margin-bottom: 10px;
+    }
+    .current-banner img {
+        width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .current-banner-label {
+        position: absolute; top: 8px; left: 10px;
+        font-size: 0.68rem; font-family: 'Outfit', sans-serif; font-weight: 600;
+        text-transform: uppercase; letter-spacing: 0.8px; color: #fff;
+        background: rgba(0,0,0,0.55); border-radius: 4px; padding: 2px 8px;
+    }
+
+    .banner-wrap {
+        position: relative; border-radius: 12px; overflow: hidden;
+        border: 1.5px dashed rgba(255,255,255,0.1);
+        background: #0a0a0a; height: 120px;
+        cursor: pointer; transition: all 0.25s ease;
+    }
+    .banner-wrap:hover {
+        border-color: var(--theme-border);
+        background: var(--theme-dim);
+    }
+    .banner-wrap.has-image {
+        border-style: solid; border-color: var(--theme-border);
+    }
+    #bannerInput { display: none; }
+
+    .banner-placeholder {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        gap: 5px; pointer-events: none; transition: opacity 0.2s;
+    }
+    .banner-placeholder i { font-size: 1.6rem; color: var(--muted); }
+    .banner-placeholder .ph-title {
+        font-family: 'Outfit', sans-serif; font-size: 0.82rem;
+        font-weight: 600; color: var(--muted2);
+    }
+    .banner-placeholder .ph-hint { font-size: 0.7rem; color: var(--muted); }
+
+    #bannerPreview {
+        width: 100%; height: 100%; object-fit: cover;
+        display: none; position: absolute; inset: 0;
+    }
+    .banner-overlay {
+        position: absolute; inset: 0; background: rgba(0,0,0,0);
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.25s; pointer-events: none;
+    }
+    .banner-overlay span {
+        background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.15);
+        color: #fff; border-radius: 99px; padding: 7px 18px;
+        font-size: 0.78rem; font-family: 'Outfit', sans-serif; font-weight: 500;
+        opacity: 0; transition: opacity 0.25s;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .banner-wrap:hover .banner-overlay { background: rgba(0,0,0,0.25); }
+    .banner-wrap:hover .banner-overlay span { opacity: 1; }
+    .banner-wrap.has-image .banner-placeholder { opacity: 0; }
+
+    .banner-hint {
+        font-size: 0.72rem; color: var(--muted); margin-top: 6px;
+        display: flex; align-items: center; gap: 5px;
+    }
+
+    /* ── ERROR ── */
+    .alert-error {
+        background: rgba(255,0,51,0.07); border: 1px solid rgba(255,0,51,0.18);
+        border-radius: 10px; padding: 11px 15px; font-size: 0.83rem; color: #ff6680;
+        margin-bottom: 20px; display: flex; align-items: flex-start; gap: 8px;
+    }
+    .field-error {
+        font-size: 0.77rem; color: #ff4466; margin-top: 6px;
+        display: flex; align-items: center; gap: 5px;
+    }
+
+    /* ── BUTTONS ── */
+    .btn-row { display: flex; gap: 10px; margin-top: 8px; }
+
+    .btn-submit {
+        flex: 1; background: var(--btn-grad);
+        color: #fff; border: none; border-radius: 11px; padding: 14px;
+        font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 600;
+        cursor: pointer; transition: all 0.25s ease;
+        box-shadow: 0 4px 24px var(--btn-glow);
+        display: flex; align-items: center; justify-content: center; gap: 9px;
+    }
+    .btn-submit:hover {
+        transform: translateY(-1px); box-shadow: 0 8px 32px var(--btn-glow-h);
+    }
+
+    .btn-cancel {
+        background: rgba(255,255,255,0.05); color: var(--muted2);
+        border: 1px solid var(--border); border-radius: 11px;
+        padding: 14px 22px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+        cursor: pointer; text-decoration: none; transition: all 0.2s;
+        display: flex; align-items: center; gap: 7px;
+    }
+    .btn-cancel:hover {
+        background: rgba(255,255,255,0.08);
+        border-color: rgba(255,255,255,0.14); color: var(--text);
+    }
+
+    @media (max-width: 480px) {
+        .form-card { padding: 24px 16px; }
+        .btn-row { flex-direction: column; }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
+<div class="ch-form-page">
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 col-xl-6">
+    <!-- Back -->
+    <a href="{% url 'channel_list' %}" class="back-link">
+        <i class="bi bi-arrow-left"></i> Back to channels
+    </a>
 
-            <h3 class="mb-5 fw-medium text-center">
-                {% if form.instance.pk %}Edit Channel{% else %}Create Your Channel{% endif %}
-            </h3>
-
-            <div class="card bg-dark border-secondary shadow-lg rounded-4">
-                <div class="card-body p-5">
-
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-
-                        {% if form.errors %}
-                            <div class="alert alert-danger alert-dismissible fade show mb-4">
-                                Please correct the errors below.
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        {% endif %}
-
-                        <!-- Channel Name -->
-                        <div class="mb-4">
-                            <label for="{{ form.name.id_for_label }}" class="form-label fw-medium">Channel Name</label>
-                            {{ form.name }}
-                            {% if form.name.errors %}
-                                <div class="text-danger small mt-1">{{ form.name.errors|join:", " }}</div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Description -->
-                        <div class="mb-4">
-                            <label for="{{ form.description.id_for_label }}" class="form-label fw-medium">Description</label>
-                            {{ form.description }}
-                            {% if form.description.errors %}
-                                <div class="text-danger small mt-1">{{ form.description.errors|join:", " }}</div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Banner -->
-                        <div class="mb-5">
-                            <label for="{{ form.banner.id_for_label }}" class="form-label fw-medium">Channel Banner (optional)</label>
-                            {{ form.banner }}
-                            {% if form.banner.errors %}
-                                <div class="text-danger small mt-1">{{ form.banner.errors|join:", " }}</div>
-                            {% endif %}
-                            <small class="text-secondary d-block mt-2">Recommended: 2560×1440 px</small>
-                        </div>
-
-                        <div class="d-flex gap-3">
-                            <button type="submit" class="btn btn-danger btn-lg flex-grow-1 rounded-pill">
-                                {% if form.instance.pk %}
-                                    <i class="bi bi-save me-2"></i> Save Changes
-                                {% else %}
-                                    <i class="bi bi-plus-circle me-2"></i> Create Channel
-                                {% endif %}
-                            </button>
-
-                            {% if form.instance.pk %}
-                                <a href="{{ form.instance.get_absolute_url }}" class="btn btn-outline-secondary btn-lg rounded-pill">
-                                    Cancel
-                                </a>
-                            {% endif %}
-                        </div>
-                    </form>
-
-                </div>
-            </div>
-
-            <div class="text-center mt-4">
-                <a href="{% url 'channel_list' %}" class="text-secondary text-decoration-none">
-                    ← Back to channels
-                </a>
-            </div>
-
+    <!-- Header -->
+    <div class="page-header">
+        <div class="page-header-icon">
+            {% if form.instance.pk %}
+                <i class="bi bi-pencil-square"></i>
+            {% else %}
+                <i class="bi bi-broadcast"></i>
+            {% endif %}
         </div>
+        <h1>
+            {% if form.instance.pk %}
+                Edit Channel
+                <span class="unsaved-badge" id="unsavedBadge">Unsaved changes</span>
+            {% else %}
+                Create Your Channel
+            {% endif %}
+        </h1>
+        <p>
+            {% if form.instance.pk %}
+                Update your channel info and branding
+            {% else %}
+                Set up your channel and start sharing videos with the world
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Card -->
+    <div class="form-card">
+
+        {% if form.errors %}
+            <div class="alert-error">
+                <i class="bi bi-exclamation-circle-fill" style="flex-shrink:0;margin-top:2px;"></i>
+                <span>Please fix the errors below before continuing.</span>
+            </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" id="chForm">
+            {% csrf_token %}
+
+            <!-- ─ Identity ─ -->
+            <div class="section-sep">Channel Identity</div>
+
+            <!-- Name -->
+            <div class="field-group">
+                <label class="field-label" for="{{ form.name.id_for_label }}">
+                    <i class="bi bi-at"></i> Channel Name
+                </label>
+                <div class="field-wrap">
+                    <input type="text"
+                           name="{{ form.name.name }}"
+                           class="field-input"
+                           id="{{ form.name.id_for_label }}"
+                           placeholder="My Awesome Channel"
+                           maxlength="60" required
+                           value="{{ form.name.value|default:'' }}">
+                    <i class="bi bi-broadcast field-icon"></i>
+                </div>
+                <div class="char-count" id="nameCount">0 / 60</div>
+                {% if form.name.errors %}
+                    <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.name.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Description -->
+            <div class="field-group">
+                <label class="field-label" for="{{ form.description.id_for_label }}">
+                    <i class="bi bi-card-text"></i> Description
+                    <span class="optional-tag">optional</span>
+                </label>
+                <textarea name="{{ form.description.name }}"
+                          class="field-textarea"
+                          id="{{ form.description.id_for_label }}"
+                          placeholder="Tell the world what your channel is about..."
+                          maxlength="300">{{ form.description.value|default:'' }}</textarea>
+                <div class="char-count" id="descCount">0 / 300</div>
+                {% if form.description.errors %}
+                    <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.description.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+
+            <!-- ─ Branding ─ -->
+            <div class="section-sep">Branding</div>
+
+            <!-- Banner -->
+            <div class="field-group">
+                <label class="field-label">
+                    <i class="bi bi-image"></i> Channel Banner
+                    <span class="optional-tag">optional</span>
+                </label>
+
+                {% if form.instance.pk and form.instance.banner %}
+                <div class="current-banner">
+                    <img src="{{ form.instance.banner.url }}" alt="Current banner">
+                    <span class="current-banner-label">Current banner</span>
+                </div>
+                {% endif %}
+
+                <div class="banner-wrap" id="bannerWrap">
+                    <input type="file" name="{{ form.banner.name }}"
+                           id="{{ form.banner.id_for_label }}"
+                           accept="image/*">
+                    <img id="bannerPreview" src="" alt="New banner preview">
+                    <div class="banner-placeholder">
+                        <i class="bi bi-panorama"></i>
+                        <div class="ph-title">
+                            {% if form.instance.pk and form.instance.banner %}
+                                Click to replace banner
+                            {% else %}
+                                Click to upload banner
+                            {% endif %}
+                        </div>
+                        <div class="ph-hint">Recommended 2560 × 1440 px</div>
+                    </div>
+                    <div class="banner-overlay">
+                        <span><i class="bi bi-arrow-repeat"></i> Change banner</span>
+                    </div>
+                </div>
+                <div class="banner-hint">
+                    <i class="bi bi-info-circle" style="color:var(--muted2);"></i>
+                    JPG or PNG · Appears at the top of your channel page
+                    {% if form.instance.pk %}· Leave blank to keep current{% endif %}
+                </div>
+                {% if form.banner.errors %}
+                    <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.banner.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Buttons -->
+            <div class="btn-row">
+                <button type="submit" class="btn-submit">
+                    {% if form.instance.pk %}
+                        <i class="bi bi-check2-circle"></i> Save Changes
+                    {% else %}
+                        <i class="bi bi-plus-circle-fill"></i> Create Channel
+                    {% endif %}
+                </button>
+                {% if form.instance.pk %}
+                    <a href="{{ form.instance.get_absolute_url }}" class="btn-cancel">
+                        <i class="bi bi-x"></i> Cancel
+                    </a>
+                {% endif %}
+            </div>
+
+        </form>
     </div>
 </div>
 
+<script>
+    // ── Banner drop zone ──
+    const bannerWrap    = document.getElementById('bannerWrap');
+    const bannerInput   = document.getElementById('{{ form.banner.id_for_label }}');
+    const bannerPreview = document.getElementById('bannerPreview');
+
+    bannerWrap.addEventListener('click', () => bannerInput.click());
+
+    bannerInput.addEventListener('change', () => {
+        const file = bannerInput.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            bannerPreview.src = e.target.result;
+            bannerPreview.style.display = 'block';
+            bannerWrap.classList.add('has-image');
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Drag & drop
+    ['dragenter','dragover'].forEach(ev => bannerWrap.addEventListener(ev, e => {
+        e.preventDefault(); bannerWrap.style.borderColor = 'rgba(var(--theme-border), 0.7)';
+    }));
+    ['dragleave','drop'].forEach(ev => bannerWrap.addEventListener(ev, e => {
+        e.preventDefault(); bannerWrap.style.borderColor = '';
+        if (ev === 'drop' && e.dataTransfer.files[0]) {
+            bannerInput.files = e.dataTransfer.files;
+            bannerInput.dispatchEvent(new Event('change'));
+        }
+    }));
+
+    // ── Char counters ──
+    function setupCounter(fieldId, countId, max) {
+        const el = document.getElementById(fieldId);
+        const ct = document.getElementById(countId);
+        if (!el || !ct) return;
+        function update() {
+            const len = el.value.length;
+            ct.textContent = `${len} / ${max}`;
+            ct.className = 'char-count' + (len > max * 0.9 ? (len >= max ? ' over' : ' warn') : '');
+        }
+        el.addEventListener('input', update);
+        update(); // init with existing value
+    }
+    setupCounter('{{ form.name.id_for_label }}',        'nameCount', 60);
+    setupCounter('{{ form.description.id_for_label }}', 'descCount', 300);
+
+    // ── Unsaved badge (edit mode only) ──
+    {% if form.instance.pk %}
+    const badge    = document.getElementById('unsavedBadge');
+    const origName = document.getElementById('{{ form.name.id_for_label }}').value;
+    const origDesc = document.getElementById('{{ form.description.id_for_label }}').value;
+
+    function checkDirty() {
+        const nameChanged = document.getElementById('{{ form.name.id_for_label }}').value !== origName;
+        const descChanged = document.getElementById('{{ form.description.id_for_label }}').value !== origDesc;
+        const bannerChanged = bannerInput.files.length > 0;
+        badge.classList.toggle('show', nameChanged || descChanged || bannerChanged);
+    }
+    document.getElementById('{{ form.name.id_for_label }}').addEventListener('input', checkDirty);
+    document.getElementById('{{ form.description.id_for_label }}').addEventListener('input', checkDirty);
+    bannerInput.addEventListener('change', checkDirty);
+
+    window.addEventListener('beforeunload', e => {
+        if (badge.classList.contains('show')) { e.preventDefault(); e.returnValue = ''; }
+    });
+    document.getElementById('chForm').addEventListener('submit', () => { window.onbeforeunload = null; });
+    {% endif %}
+</script>
 {% endblock %}

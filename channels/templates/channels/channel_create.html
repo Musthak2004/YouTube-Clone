@@ -1,119 +1,372 @@
 {% extends 'base.html' %}
-{% block title %}Create Channel - YouClone{% endblock %}
+{% block title %}Create Channel — YouClone{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --card:        #111111;
+        --border:      rgba(255,255,255,0.07);
+        --muted:       #555;
+        --muted2:      #888;
+        --text:        #f0f0f0;
+        --accent:      #ff0033;
+        --purple:      #8b5cf6;
+        --purple-dim:  rgba(139,92,246,0.08);
+        --purple-border: rgba(139,92,246,0.2);
+        --input-bg:    #0c0c0c;
+    }
+
+    .create-channel-page {
+        max-width: 580px;
+        margin: 0 auto;
+        padding: 8px 0 60px;
+        animation: fadeUp 0.4s ease both;
+    }
+    @keyframes fadeUp {
+        from { opacity:0; transform:translateY(18px); }
+        to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── BACK ── */
+    .back-link {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 0.82rem; color: var(--muted);
+        text-decoration: none; margin-bottom: 24px; transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--text); }
+
+    /* ── PAGE HEADER ── */
+    .page-header { text-align: center; margin-bottom: 28px; }
+    .page-header-icon {
+        width: 60px; height: 60px; border-radius: 50%;
+        background: var(--purple-dim); border: 1.5px solid var(--purple-border);
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 16px; font-size: 1.5rem; color: #a78bfa;
+    }
+    .page-header h1 {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.6rem; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 6px;
+    }
+    .page-header p { font-size: 0.875rem; color: var(--muted2); }
+
+    /* ── CARD ── */
+    .channel-card {
+        background: var(--card); border: 1px solid var(--border);
+        border-radius: 20px; padding: 32px 28px;
+        box-shadow: 0 28px 70px rgba(0,0,0,0.4);
+        position: relative; overflow: hidden;
+    }
+    .channel-card::before {
+        content: '';
+        position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(139,92,246,0.3), transparent);
+    }
+
+    /* ── SECTION SEP ── */
+    .section-sep {
+        font-size: 0.7rem; font-family: 'Outfit', sans-serif;
+        font-weight: 600; text-transform: uppercase;
+        letter-spacing: 1.2px; color: var(--muted);
+        margin: 24px 0 16px;
+        display: flex; align-items: center; gap: 10px;
+    }
+    .section-sep:first-child { margin-top: 0; }
+    .section-sep::before, .section-sep::after {
+        content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ── FIELDS ── */
+    .field-group { margin-bottom: 18px; }
+    .field-label {
+        display: flex; align-items: center; gap: 6px;
+        font-size: 0.8rem; font-weight: 500; color: var(--muted2); margin-bottom: 8px;
+    }
+    .optional-tag {
+        font-size: 0.68rem; background: rgba(255,255,255,0.06);
+        border-radius: 4px; padding: 1px 6px; color: var(--muted); margin-left: auto;
+    }
+    .field-wrap { position: relative; }
+    .field-icon {
+        position: absolute; left: 13px; top: 50%;
+        transform: translateY(-50%); color: var(--muted);
+        font-size: 0.95rem; pointer-events: none; transition: color 0.2s;
+    }
+    .field-wrap:focus-within .field-icon { color: #a78bfa; }
+
+    .field-input {
+        width: 100%; background: var(--input-bg);
+        border: 1px solid var(--border); border-radius: 10px;
+        color: var(--text); padding: 11px 14px 11px 38px;
+        font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+        outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field-input::placeholder { color: #333; }
+    .field-input:focus {
+        border-color: rgba(139,92,246,0.35);
+        box-shadow: 0 0 0 3px rgba(139,92,246,0.08);
+    }
+
+    .field-textarea {
+        width: 100%; background: var(--input-bg);
+        border: 1px solid var(--border); border-radius: 10px;
+        color: var(--text); padding: 11px 14px;
+        font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+        outline: none; resize: vertical; min-height: 90px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field-textarea::placeholder { color: #333; }
+    .field-textarea:focus {
+        border-color: rgba(139,92,246,0.35);
+        box-shadow: 0 0 0 3px rgba(139,92,246,0.08);
+    }
+
+    .char-count {
+        font-size: 0.72rem; color: var(--muted); text-align: right;
+        margin-top: 5px; transition: color 0.2s;
+    }
+    .char-count.warn { color: #ff8c00; }
+    .char-count.over { color: #ff0033; }
+
+    /* ── BANNER UPLOAD ── */
+    .banner-wrap {
+        position: relative; border-radius: 14px; overflow: hidden;
+        border: 1.5px dashed rgba(255,255,255,0.1);
+        background: #0a0a0a; height: 160px;
+        cursor: pointer; transition: all 0.25s ease;
+    }
+    .banner-wrap:hover { border-color: rgba(139,92,246,0.35); background: rgba(139,92,246,0.04); }
+    .banner-wrap.has-image { border-style: solid; border-color: rgba(139,92,246,0.25); }
+
+    #bannerInput { display: none; }
+
+    .banner-placeholder {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        gap: 6px; pointer-events: none; transition: opacity 0.2s;
+    }
+    .banner-placeholder i { font-size: 2rem; color: var(--muted); }
+    .banner-placeholder .ph-title {
+        font-family: 'Outfit', sans-serif; font-size: 0.85rem;
+        font-weight: 600; color: var(--muted2);
+    }
+    .banner-placeholder .ph-hint { font-size: 0.72rem; color: var(--muted); }
+
+    #bannerPreview {
+        width: 100%; height: 100%; object-fit: cover;
+        display: none; position: absolute; inset: 0;
+    }
+
+    .banner-overlay {
+        position: absolute; inset: 0;
+        background: rgba(0,0,0,0); display: flex;
+        align-items: center; justify-content: center;
+        transition: background 0.25s; pointer-events: none;
+    }
+    .banner-overlay span {
+        background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.15);
+        color: #fff; border-radius: 99px; padding: 8px 20px;
+        font-size: 0.82rem; font-family: 'Outfit', sans-serif; font-weight: 500;
+        opacity: 0; transition: opacity 0.25s;
+        display: flex; align-items: center; gap: 7px;
+    }
+    .banner-wrap:hover .banner-overlay { background: rgba(0,0,0,0.3); }
+    .banner-wrap:hover .banner-overlay span { opacity: 1; }
+    .banner-wrap.has-image .banner-placeholder { opacity: 0; }
+
+    .banner-hint {
+        font-size: 0.72rem; color: var(--muted);
+        margin-top: 6px; display: flex; align-items: center; gap: 5px;
+    }
+
+    /* ── ERROR ── */
+    .alert-error {
+        background: rgba(255,0,51,0.07); border: 1px solid rgba(255,0,51,0.18);
+        border-radius: 10px; padding: 11px 15px; font-size: 0.83rem; color: #ff6680;
+        margin-bottom: 20px; display: flex; align-items: flex-start; gap: 8px;
+    }
+    .field-error {
+        font-size: 0.77rem; color: #ff4466; margin-top: 6px;
+        display: flex; align-items: center; gap: 5px;
+    }
+
+    /* ── SUBMIT ── */
+    .btn-create {
+        width: 100%;
+        background: linear-gradient(135deg, #6d28d9, #8b5cf6);
+        color: #fff; border: none; border-radius: 11px; padding: 14px;
+        font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 600;
+        cursor: pointer; transition: all 0.25s ease;
+        box-shadow: 0 4px 24px rgba(139,92,246,0.22);
+        display: flex; align-items: center; justify-content: center; gap: 9px;
+        margin-top: 8px;
+    }
+    .btn-create:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 32px rgba(139,92,246,0.36);
+    }
+
+    @media (max-width: 480px) {
+        .channel-card { padding: 24px 16px; }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
+<div class="create-channel-page">
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 col-xl-6">
+    <!-- Back -->
+    <a href="{% url 'channel_list' %}" class="back-link">
+        <i class="bi bi-arrow-left"></i> Back to channels
+    </a>
 
-            <!-- Header -->
-            <div class="text-center mb-5">
-                <h2 class="fw-bold mb-2">Create Your Channel</h2>
-                <p class="text-secondary">
-                    Setup your channel and start sharing videos!
-                </p>
+    <!-- Header -->
+    <div class="page-header">
+        <div class="page-header-icon"><i class="bi bi-broadcast"></i></div>
+        <h1>Create Your Channel</h1>
+        <p>Set up your channel and start sharing videos with the world</p>
+    </div>
+
+    <!-- Card -->
+    <div class="channel-card">
+
+        {% if form.errors %}
+            <div class="alert-error">
+                <i class="bi bi-exclamation-circle-fill" style="flex-shrink:0;margin-top:2px;"></i>
+                <span>Please fix the errors below before continuing.</span>
             </div>
+        {% endif %}
 
-            <!-- Form Card -->
-            <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden">
-                <div class="card-body p-5">
+        <form method="post" enctype="multipart/form-data" id="channelForm">
+            {% csrf_token %}
 
-                    <form method="post" enctype="multipart/form-data" class="space-y-5">
-                        {% csrf_token %}
+            <!-- ─ Identity ─ -->
+            <div class="section-sep">Channel Identity</div>
 
-                        {% if form.errors %}
-                            <div class="alert alert-danger alert-dismissible fade show mb-4">
-                                Please fix the errors below.
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        {% endif %}
-
-                        <!-- Channel Name -->
-                        <div class="form-floating mb-4">
-                            {{ form.name }}
-                            <label for="#">Channel Name</label>
-                            {% if form.name.errors %}
-                                <div class="invalid-feedback d-block">{{ form.name.errors|join:", " }}</div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Description -->
-                        <div class="form-floating mb-5">
-                            {{ form.description }}
-                            <label for="#">Channel Description (optional)</label>
-                            {% if form.description.errors %}
-                                <div class="invalid-feedback d-block">{{ form.description.errors|join:", " }}</div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Banner Upload with Preview -->
-                        <div class="mb-5">
-                            <label class="form-label fw-medium mb-2">Channel Banner (optional)</label>
-                            <div class="position-relative border border-secondary rounded-3 overflow-hidden" style="height: 200px; background: #1a1a1a;">
-                                <!-- Preview -->
-                                <img id="banner-preview" class="w-100 h-100 object-fit-cover" style="display: none;" alt="Banner preview">
-                                <!-- Placeholder -->
-                                <div id="banner-placeholder" class="w-100 h-100 d-flex align-items-center justify-content-center text-secondary">
-                                    <div class="text-center">
-                                        <i class="bi bi-image fs-1 mb-2"></i>
-                                        <p class="mb-0">No banner selected</p>
-                                        <small>Recommended: 2560×1440 px</small>
-                                    </div>
-                                </div>
-
-                                <!-- File Input -->
-                                {{ form.banner }}
-                                <label for="{{ form.banner.id_for_label }}" class="position-absolute inset-0 d-flex align-items-center justify-content-center cursor-pointer bg-black bg-opacity-50 opacity-0 hover-opacity-100 transition-opacity">
-                                    <span class="btn btn-outline-light rounded-pill px-4 py-2">
-                                        <i class="bi bi-upload me-2"></i> Choose Banner
-                                    </span>
-                                </label>
-                            </div>
-                            {% if form.banner.errors %}
-                                <div class="text-danger small mt-2">{{ form.banner.errors|join:", " }}</div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Submit -->
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-danger btn-lg rounded-pill py-3 fw-medium shadow-lg">
-                                <i class="bi bi-plus-circle-fill me-2"></i> Create Channel
-                            </button>
-                        </div>
-                    </form>
-
+            <!-- Name -->
+            <div class="field-group">
+                <label class="field-label" for="{{ form.name.id_for_label }}">
+                    <i class="bi bi-at"></i> Channel Name
+                </label>
+                <div class="field-wrap">
+                    <input type="text"
+                           name="{{ form.name.name }}"
+                           class="field-input"
+                           id="{{ form.name.id_for_label }}"
+                           placeholder="My Awesome Channel"
+                           maxlength="60"
+                           required
+                           value="{{ form.name.value|default:'' }}">
+                    <i class="bi bi-broadcast field-icon"></i>
                 </div>
+                <div class="char-count" id="nameCount">0 / 60</div>
+                {% if form.name.errors %}
+                    <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.name.errors|join:", " }}</div>
+                {% endif %}
             </div>
 
-            <div class="text-center mt-4">
-                <a href="{% url 'channel_list' %}" class="text-secondary text-decoration-none">
-                    ← Back to channels
-                </a>
+            <!-- Description -->
+            <div class="field-group">
+                <label class="field-label" for="{{ form.description.id_for_label }}">
+                    <i class="bi bi-card-text"></i> Description
+                    <span class="optional-tag">optional</span>
+                </label>
+                <textarea name="{{ form.description.name }}"
+                          class="field-textarea"
+                          id="{{ form.description.id_for_label }}"
+                          placeholder="Tell the world what your channel is about..."
+                          maxlength="300">{{ form.description.value|default:'' }}</textarea>
+                <div class="char-count" id="descCount">0 / 300</div>
+                {% if form.description.errors %}
+                    <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.description.errors|join:", " }}</div>
+                {% endif %}
             </div>
 
-        </div>
+            <!-- ─ Branding ─ -->
+            <div class="section-sep">Branding</div>
+
+            <!-- Banner -->
+            <div class="field-group">
+                <label class="field-label">
+                    <i class="bi bi-image"></i> Channel Banner
+                    <span class="optional-tag">optional</span>
+                </label>
+                <div class="banner-wrap" id="bannerWrap">
+                    <input type="file" name="{{ form.banner.name }}"
+                           id="{{ form.banner.id_for_label }}"
+                           accept="image/*" id="bannerInput">
+                    <img id="bannerPreview" src="" alt="Banner preview">
+                    <div class="banner-placeholder">
+                        <i class="bi bi-panorama"></i>
+                        <div class="ph-title">Click to upload banner</div>
+                        <div class="ph-hint">Recommended 2560 × 1440 px</div>
+                    </div>
+                    <div class="banner-overlay">
+                        <span><i class="bi bi-arrow-repeat"></i> Change banner</span>
+                    </div>
+                </div>
+                <div class="banner-hint">
+                    <i class="bi bi-info-circle" style="color:var(--muted2);"></i>
+                    JPG or PNG · Appears at the top of your channel page
+                </div>
+                {% if form.banner.errors %}
+                    <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.banner.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn-create">
+                <i class="bi bi-plus-circle-fill"></i> Create Channel
+            </button>
+
+        </form>
     </div>
 </div>
 
-<!-- JS for Banner Preview -->
 <script>
-    const bannerInput = document.getElementById('{{ form.banner.id_for_label }}');
-    const previewImg = document.getElementById('banner-preview');
-    const placeholder = document.getElementById('banner-placeholder');
+    // ── Banner upload ──
+    const bannerWrap    = document.getElementById('bannerWrap');
+    const bannerInput   = document.getElementById('{{ form.banner.id_for_label }}');
+    const bannerPreview = document.getElementById('bannerPreview');
 
-    bannerInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                previewImg.src = event.target.result;
-                previewImg.style.display = 'block';
-                placeholder.style.display = 'none';
-            };
-            reader.readAsDataURL(file);
-        }
+    bannerWrap.addEventListener('click', () => bannerInput.click());
+
+    bannerInput.addEventListener('change', () => {
+        const file = bannerInput.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            bannerPreview.src = e.target.result;
+            bannerPreview.style.display = 'block';
+            bannerWrap.classList.add('has-image');
+        };
+        reader.readAsDataURL(file);
     });
-</script>
 
+    // Drag & drop on banner
+    ['dragenter','dragover'].forEach(ev => bannerWrap.addEventListener(ev, e => {
+        e.preventDefault(); bannerWrap.style.borderColor = 'rgba(139,92,246,0.5)';
+    }));
+    ['dragleave','drop'].forEach(ev => bannerWrap.addEventListener(ev, e => {
+        e.preventDefault(); bannerWrap.style.borderColor = '';
+        if (ev === 'drop' && e.dataTransfer.files[0]) {
+            bannerInput.files = e.dataTransfer.files;
+            bannerInput.dispatchEvent(new Event('change'));
+        }
+    }));
+
+    // ── Char counters ──
+    function setupCounter(id, countId, max) {
+        const el = document.getElementById(id);
+        const ct = document.getElementById(countId);
+        if (!el) return;
+        el.addEventListener('input', () => {
+            const len = el.value.length;
+            ct.textContent = `${len} / ${max}`;
+            ct.className = 'char-count' + (len > max * 0.9 ? (len >= max ? ' over' : ' warn') : '');
+        });
+    }
+    setupCounter('{{ form.name.id_for_label }}',        'nameCount', 60);
+    setupCounter('{{ form.description.id_for_label }}', 'descCount', 300);
+</script>
 {% endblock %}

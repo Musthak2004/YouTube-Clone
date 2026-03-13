@@ -1,78 +1,313 @@
 {% extends 'base.html' %}
-{% block title %}Channels - YouClone{% endblock %}
+{% block title %}Channels — YouClone{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --card:   #111111;
+        --border: rgba(255,255,255,0.07);
+        --muted:  #555;
+        --muted2: #888;
+        --text:   #f0f0f0;
+        --accent: #ff0033;
+    }
+
+    .channels-page {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 8px 0 60px;
+        animation: fadeUp 0.4s ease both;
+    }
+    @keyframes fadeUp {
+        from { opacity:0; transform:translateY(12px); }
+        to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── HEADER ── */
+    .page-header {
+        display: flex; align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+    }
+    .page-header h1 {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.6rem; font-weight: 700;
+        letter-spacing: -0.4px; margin: 0;
+    }
+    .count-chip {
+        background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+        border-radius: 99px; padding: 5px 14px;
+        font-family: 'Outfit', sans-serif; font-size: 0.82rem;
+        font-weight: 600; color: var(--muted2);
+    }
+
+    /* ── GRID ── */
+    .channels-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 18px;
+    }
+
+    /* ── CHANNEL CARD ── */
+    .channel-card {
+        background: var(--card); border: 1px solid var(--border);
+        border-radius: 16px; overflow: hidden;
+        transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+        animation: fadeUp 0.4s ease both;
+        text-decoration: none; display: block;
+        position: relative;
+    }
+    .channel-card:hover {
+        border-color: rgba(255,255,255,0.14);
+        transform: translateY(-4px);
+        box-shadow: 0 16px 48px rgba(0,0,0,0.45);
+    }
+
+    /* stagger */
+    .channel-card:nth-child(1) { animation-delay: 0.04s; }
+    .channel-card:nth-child(2) { animation-delay: 0.08s; }
+    .channel-card:nth-child(3) { animation-delay: 0.12s; }
+    .channel-card:nth-child(4) { animation-delay: 0.16s; }
+    .channel-card:nth-child(5) { animation-delay: 0.20s; }
+    .channel-card:nth-child(6) { animation-delay: 0.24s; }
+    .channel-card:nth-child(n+7) { animation-delay: 0.28s; }
+
+    /* ── BANNER ── */
+    .card-banner {
+        height: 110px; overflow: hidden; position: relative;
+    }
+    .card-banner img {
+        width: 100%; height: 100%; object-fit: cover; display: block;
+        transition: transform 0.4s ease;
+    }
+    .channel-card:hover .card-banner img { transform: scale(1.05); }
+
+    .banner-gradient {
+        width: 100%; height: 100%;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+    }
+
+    /* bottom fade on banner */
+    .card-banner::after {
+        content: '';
+        position: absolute; bottom: 0; left: 0; right: 0; height: 40px;
+        background: linear-gradient(to bottom, transparent, var(--card));
+        pointer-events: none;
+    }
+
+    /* ── CARD BODY ── */
+    .card-body {
+        padding: 0 20px 20px;
+        position: relative;
+    }
+
+    /* Avatar overlaps banner */
+    .avatar-wrap {
+        margin-top: -28px; margin-bottom: 12px;
+        display: flex; justify-content: center;
+        position: relative; z-index: 1;
+    }
+    .ch-avatar {
+        width: 56px; height: 56px; border-radius: 50%;
+        object-fit: cover; border: 3px solid var(--card);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    .ch-avatar-fallback {
+        width: 56px; height: 56px; border-radius: 50%;
+        background: linear-gradient(135deg, #2a2a2a, #111);
+        border: 3px solid var(--card);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 20px;
+        color: var(--text);
+    }
+
+    /* Text */
+    .ch-name {
+        font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 700;
+        color: var(--text); text-align: center; margin-bottom: 3px;
+        display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .ch-owner {
+        font-size: 0.78rem; color: var(--muted2);
+        text-align: center; margin-bottom: 12px;
+        display: flex; align-items: center; justify-content: center; gap: 5px;
+    }
+
+    /* Stats row */
+    .ch-stats {
+        display: flex; justify-content: center; gap: 16px;
+        margin-bottom: 16px;
+    }
+    .ch-stat {
+        text-align: center;
+    }
+    .ch-stat-num {
+        font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 700;
+        color: var(--text); display: block;
+    }
+    .ch-stat-label {
+        font-size: 0.68rem; color: var(--muted2); text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .ch-stat-sep {
+        width: 1px; background: var(--border); align-self: stretch;
+    }
+
+    /* CTA Button */
+    .btn-view {
+        display: block; width: 100%;
+        background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+        color: var(--muted2); border-radius: 8px; padding: 9px;
+        font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500;
+        text-align: center; text-decoration: none;
+        transition: all 0.2s;
+    }
+    .btn-view:hover, .channel-card:hover .btn-view {
+        background: rgba(255,255,255,0.09);
+        border-color: rgba(255,255,255,0.15);
+        color: var(--text);
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+        grid-column: 1/-1; text-align: center; padding: 80px 24px;
+    }
+    .empty-icon-wrap {
+        width: 80px; height: 80px; border-radius: 50%;
+        background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 20px; font-size: 2rem; color: var(--muted2);
+    }
+    .empty-title {
+        font-family: 'Outfit', sans-serif; font-size: 1.15rem;
+        font-weight: 600; margin-bottom: 8px;
+    }
+    .empty-sub { font-size: 0.875rem; color: var(--muted2); line-height: 1.65; margin-bottom: 24px; }
+
+    .btn-create-ch {
+        background: linear-gradient(135deg, #6d28d9, #8b5cf6);
+        color: #fff; border: none; border-radius: 99px;
+        padding: 11px 28px; font-family: 'Outfit', sans-serif;
+        font-size: 0.9rem; font-weight: 600;
+        text-decoration: none; transition: all 0.2s;
+        display: inline-flex; align-items: center; gap: 8px;
+        box-shadow: 0 4px 18px rgba(139,92,246,0.22);
+    }
+    .btn-create-ch:hover {
+        color: #fff; transform: translateY(-1px);
+        box-shadow: 0 8px 28px rgba(139,92,246,0.36);
+    }
+
+    .btn-signin-ch {
+        background: rgba(255,255,255,0.07); border: 1px solid var(--border);
+        color: var(--text); border-radius: 99px; padding: 11px 28px;
+        font-family: 'Outfit', sans-serif; font-size: 0.9rem; font-weight: 600;
+        text-decoration: none; transition: all 0.2s;
+        display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-signin-ch:hover {
+        background: rgba(255,255,255,0.11); color: var(--text); transform: translateY(-1px);
+    }
+
+    @media (max-width: 600px) {
+        .channels-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+        .card-banner { height: 80px; }
+        .ch-avatar, .ch-avatar-fallback { width: 44px; height: 44px; font-size: 16px; }
+        .avatar-wrap { margin-top: -22px; }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
+<div class="channels-page">
 
-<div class="container py-5">
-    <h2 class="mb-5 fw-bold text-center">All Channels</h2>
+    <!-- Header -->
+    <div class="page-header">
+        <h1>All Channels</h1>
+        {% if channels %}
+            <span class="count-chip">{{ channels|length }} channel{{ channels|length|pluralize }}</span>
+        {% endif %}
+    </div>
 
-    {% if channels %}
-        <div class="row g-4">
-            {% for channel in channels %}
-                <div class="col-12 col-md-6 col-lg-4">
-                    <div class="card bg-dark border-secondary shadow-sm h-100 rounded-4 overflow-hidden">
-                        <!-- Banner -->
-                        {% if channel.banner %}
-                            <img src="{{ channel.banner.url }}" class="card-img-top" alt="{{ channel.name }} banner" style="height: 160px; object-fit: cover;">
-                        {% else %}
-                            <div class="bg-gradient-dark" style="height: 160px;"></div>
-                        {% endif %}
+    <div class="channels-grid">
 
-                        <div class="card-body text-center p-4">
-                            <!-- Avatar -->
-                            {% if channel.owner.profile_picture %}
-                                <img src="{{ channel.owner.profile_picture.url }}"
-                                     alt="{{ channel.owner.username }}"
-                                     class="rounded-circle mb-3 shadow"
-                                     width="80" height="80"
-                                     style="object-fit: cover; border: 3px solid #333;">
-                            {% else %}
-                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center fw-bold mb-3 shadow"
-                                     style="width: 80px; height: 80px; font-size: 36px; margin: 0 auto;">
-                                    {{ channel.owner.username|slice:":1"|upper }}
-                                </div>
-                            {% endif %}
+        {% for channel in channels %}
+        <a href="{{ channel.get_absolute_url }}" class="channel-card">
 
-                            <h5 class="card-title mb-2">
-                                <a href="{{ channel.get_absolute_url }}" class="text-white text-decoration-none">
-                                    {{ channel.name }}
-                                </a>
-                            </h5>
+            <!-- Banner -->
+            <div class="card-banner">
+                {% if channel.banner %}
+                    <img src="{{ channel.banner.url }}" alt="{{ channel.name }}">
+                {% else %}
+                    <div class="banner-gradient"></div>
+                {% endif %}
+            </div>
 
-                            <p class="text-secondary small mb-3">
-                                {{ channel.owner.username }}
-                            </p>
+            <!-- Body -->
+            <div class="card-body">
 
-                            <p class="text-muted small mb-4">
-                                {{ channel.subscribers.count }} subscribers • Created {{ channel.created_at|timesince }} ago
-                            </p>
-
-                            <a href="{{ channel.get_absolute_url }}" class="btn btn-outline-light btn-sm px-4">
-                                View Channel
-                            </a>
+                <!-- Avatar overlapping banner -->
+                <div class="avatar-wrap">
+                    {% if channel.owner.profile_picture %}
+                        <img src="{{ channel.owner.profile_picture.url }}"
+                             class="ch-avatar" alt="{{ channel.name }}">
+                    {% else %}
+                        <div class="ch-avatar-fallback">
+                            {{ channel.name|slice:":1"|upper }}
                         </div>
+                    {% endif %}
+                </div>
+
+                <!-- Name + Owner -->
+                <span class="ch-name">{{ channel.name }}</span>
+                <div class="ch-owner">
+                    <i class="bi bi-person" style="font-size:0.72rem;"></i>
+                    {{ channel.owner.username }}
+                </div>
+
+                <!-- Stats -->
+                <div class="ch-stats">
+                    <div class="ch-stat">
+                        <span class="ch-stat-num">{{ channel.subscribers.count }}</span>
+                        <span class="ch-stat-label">Subscribers</span>
+                    </div>
+                    <div class="ch-stat-sep"></div>
+                    <div class="ch-stat">
+                        <span class="ch-stat-num">{{ channel.videos.count }}</span>
+                        <span class="ch-stat-label">Videos</span>
+                    </div>
+                    <div class="ch-stat-sep"></div>
+                    <div class="ch-stat">
+                        <span class="ch-stat-num">{{ channel.created_at|date:"M Y" }}</span>
+                        <span class="ch-stat-label">Joined</span>
                     </div>
                 </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="text-center py-5 my-5">
-            <i class="bi bi-tv fs-1 text-secondary mb-4 d-block"></i>
-            <h4 class="text-secondary mb-3">No channels yet</h4>
-            <p class="text-muted lead mb-4">
-                Be the first to create a channel!
+
+                <span class="btn-view">View Channel →</span>
+
+            </div>
+        </a>
+
+        {% empty %}
+        <div class="empty-state">
+            <div class="empty-icon-wrap"><i class="bi bi-broadcast"></i></div>
+            <div class="empty-title">No channels yet</div>
+            <p class="empty-sub">
+                Be the first to create a channel<br>and start sharing your content!
             </p>
             {% if user.is_authenticated %}
-                <a href="{% url 'channel_create' %}" class="btn btn-outline-light btn-lg px-5 py-3">
-                    Create Your Channel
+                <a href="{% url 'channel_create' %}" class="btn-create-ch">
+                    <i class="bi bi-plus-circle-fill"></i> Create Your Channel
                 </a>
             {% else %}
-                <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg px-5 py-3">
-                    Sign in to create a channel
+                <a href="{% url 'login' %}" class="btn-signin-ch">
+                    <i class="bi bi-box-arrow-in-right"></i> Sign in to create a channel
                 </a>
             {% endif %}
         </div>
-    {% endif %}
-</div>
+        {% endfor %}
 
+    </div>
+</div>
 {% endblock %}

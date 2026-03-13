@@ -7,7 +7,7 @@ class ChannelForm(forms.ModelForm):
         fields = ['name', 'description', 'banner']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Channel Name'}),
-            'description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Channel Description', 'rows': 4}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Channel Description', 'rows': 4}),
             'banner': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
 

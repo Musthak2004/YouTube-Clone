@@ -1,39 +1,248 @@
 {% extends 'base.html' %}
-{% block title %}Delete Channel - YouClone{% endblock %}
+{% block title %}Delete Channel — YouClone{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --card:          #111111;
+        --border:        rgba(255,255,255,0.07);
+        --muted:         #555;
+        --muted2:        #888;
+        --text:          #f0f0f0;
+        --danger:        #ff3b3b;
+        --danger-dim:    rgba(255,59,59,0.08);
+        --danger-border: rgba(255,59,59,0.2);
+    }
+
+    .delete-page {
+        min-height: calc(100vh - 160px);
+        display: flex; align-items: center; justify-content: center;
+        padding: 40px 20px;
+        animation: fadeUp 0.4s ease both;
+    }
+    @keyframes fadeUp {
+        from { opacity:0; transform:translateY(18px); }
+        to   { opacity:1; transform:translateY(0); }
+    }
+
+    .delete-wrap { width: 100%; max-width: 460px; }
+
+    /* ── CARD ── */
+    .delete-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 22px; padding: 40px 32px;
+        box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+        text-align: center; position: relative; overflow: hidden;
+    }
+    .delete-card::before {
+        content: '';
+        position: absolute; top: 0; left: 8%; right: 8%; height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255,59,59,0.45), transparent);
+    }
+    .delete-card::after {
+        content: '';
+        position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
+        width: 300px; height: 200px;
+        background: radial-gradient(circle, rgba(255,59,59,0.055) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    /* ── ICON ── */
+    .danger-icon-wrap {
+        width: 70px; height: 70px; border-radius: 50%;
+        background: var(--danger-dim); border: 1.5px solid var(--danger-border);
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 22px;
+        animation: pulse-ring 2.5s ease infinite;
+    }
+    @keyframes pulse-ring {
+        0%,100% { box-shadow: 0 0 0 0 rgba(255,59,59,0.15); }
+        50%      { box-shadow: 0 0 0 10px rgba(255,59,59,0); }
+    }
+    .danger-icon-wrap i { font-size: 2rem; color: var(--danger); }
+
+    /* ── TEXT ── */
+    .delete-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.3px;
+    }
+    .delete-sub {
+        font-size: 0.85rem; color: var(--muted2); line-height: 1.65; margin-bottom: 20px;
+    }
+
+    /* ── CHANNEL CHIP ── */
+    .channel-chip {
+        display: inline-flex; align-items: center; gap: 10px;
+        background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+        border-radius: 12px; padding: 12px 18px; margin-bottom: 20px;
+        text-align: left; width: 100%;
+    }
+    .channel-chip-icon {
+        width: 42px; height: 42px; border-radius: 50%;
+        background: linear-gradient(135deg, #2a2a2a, #111);
+        border: 1.5px solid var(--border);
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 16px;
+        color: var(--text); flex-shrink: 0;
+    }
+    .channel-chip-info { flex: 1; min-width: 0; }
+    .channel-chip-name {
+        font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 600;
+        color: var(--text); display: block; margin-bottom: 2px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .channel-chip-meta { font-size: 0.75rem; color: var(--muted2); }
+
+    /* ── WHAT GETS DELETED ── */
+    .delete-list {
+        background: var(--danger-dim); border: 1px solid var(--danger-border);
+        border-radius: 10px; padding: 14px 16px;
+        margin-bottom: 20px; text-align: left;
+    }
+    .delete-list-title {
+        font-size: 0.75rem; font-family: 'Outfit', sans-serif; font-weight: 600;
+        text-transform: uppercase; letter-spacing: 0.8px;
+        color: #ff8080; margin-bottom: 10px;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .delete-list ul {
+        list-style: none; margin: 0; padding: 0;
+        display: flex; flex-direction: column; gap: 6px;
+    }
+    .delete-list ul li {
+        font-size: 0.82rem; color: #ff9999;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .delete-list ul li i { font-size: 0.8rem; opacity: 0.7; flex-shrink: 0; }
+
+    /* ── CONFIRM INPUT ── */
+    .confirm-section { margin-bottom: 22px; text-align: left; }
+    .confirm-label {
+        font-size: 0.78rem; color: var(--muted2); margin-bottom: 8px; display: block;
+    }
+    .confirm-label code {
+        background: rgba(255,255,255,0.07); padding: 1px 6px;
+        border-radius: 4px; font-size: 0.8rem; color: #ff8080;
+    }
+    .confirm-input {
+        width: 100%; background: #0c0c0c; border: 1px solid var(--border);
+        border-radius: 10px; color: var(--text); padding: 11px 14px;
+        font-family: 'DM Sans', sans-serif; font-size: 0.875rem;
+        outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .confirm-input::placeholder { color: #333; }
+    .confirm-input.valid {
+        border-color: rgba(255,59,59,0.4);
+        box-shadow: 0 0 0 3px rgba(255,59,59,0.08);
+    }
+
+    /* ── BUTTONS ── */
+    .btn-delete {
+        width: 100%;
+        background: linear-gradient(135deg, #cc0000, #ff3b3b);
+        color: #fff; border: none; border-radius: 11px; padding: 13px;
+        font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 600;
+        cursor: pointer; transition: all 0.25s ease;
+        box-shadow: 0 4px 20px rgba(255,59,59,0.2);
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        margin-bottom: 10px;
+    }
+    .btn-delete:hover:not(:disabled) {
+        transform: translateY(-1px); box-shadow: 0 8px 28px rgba(255,59,59,0.35);
+    }
+    .btn-delete:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+    .btn-cancel {
+        width: 100%; background: transparent; color: var(--muted2);
+        border: 1px solid var(--border); border-radius: 11px; padding: 12px;
+        font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+        cursor: pointer; text-decoration: none; transition: all 0.2s;
+        display: flex; align-items: center; justify-content: center; gap: 7px;
+    }
+    .btn-cancel:hover {
+        background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.13); color: var(--text);
+    }
+
+    @media (max-width: 480px) { .delete-card { padding: 28px 18px; } }
+</style>
+{% endblock %}
 
 {% block content %}
+<div class="delete-page">
+    <div class="delete-wrap">
+        <div class="delete-card">
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-6">
-
-            <div class="card bg-dark border-danger text-center p-5 shadow-lg rounded-4">
-                <i class="bi bi-exclamation-triangle-fill text-danger fs-1 mb-4"></i>
-
-                <h3 class="text-danger mb-4">Delete Channel?</h3>
-
-                <p class="lead mb-4">
-                    Are you sure you want to delete <strong>"{{ channel.name }}"</strong>?<br>
-                    All videos and data will be permanently removed.
-                </p>
-
-                <p class="text-muted mb-5">
-                    This action cannot be undone.
-                </p>
-
-                <form method="post" class="d-grid gap-3">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger btn-lg rounded-pill">
-                        <i class="bi bi-trash me-2"></i> Yes, Delete Channel
-                    </button>
-                    <a href="{{ channel.get_absolute_url }}" class="btn btn-outline-secondary btn-lg rounded-pill">
-                        Cancel
-                    </a>
-                </form>
+            <!-- Icon -->
+            <div class="danger-icon-wrap">
+                <i class="bi bi-broadcast"></i>
             </div>
+
+            <!-- Title -->
+            <div class="delete-title">Delete this channel?</div>
+            <p class="delete-sub">
+                You're about to permanently delete your channel.<br>
+                Everything associated with it will be gone forever.
+            </p>
+
+            <!-- Channel chip -->
+            <div class="channel-chip">
+                <div class="channel-chip-icon">{{ channel.name|slice:":1"|upper }}</div>
+                <div class="channel-chip-info">
+                    <span class="channel-chip-name">{{ channel.name }}</span>
+                    <span class="channel-chip-meta">
+                        <i class="bi bi-person-fill" style="font-size:0.7rem;"></i>
+                        Owned by {{ channel.owner.username }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- What gets deleted -->
+            <div class="delete-list">
+                <div class="delete-list-title">
+                    <i class="bi bi-exclamation-triangle-fill"></i> This will permanently delete
+                </div>
+                <ul>
+                    <li><i class="bi bi-camera-video"></i> All uploaded videos</li>
+                    <li><i class="bi bi-chat-square-text"></i> All comments on your videos</li>
+                    <li><i class="bi bi-people"></i> All subscriber data</li>
+                    <li><i class="bi bi-image"></i> Channel banner & branding</li>
+                </ul>
+            </div>
+
+            <!-- Confirm input -->
+            <div class="confirm-section">
+                <label class="confirm-label">
+                    Type <code>DELETE</code> to confirm
+                </label>
+                <input type="text" class="confirm-input" id="confirmInput"
+                       placeholder="Type DELETE here" autocomplete="off">
+            </div>
+
+            <!-- Form -->
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn-delete" id="deleteBtn" disabled>
+                    <i class="bi bi-trash3"></i> Yes, Delete Channel
+                </button>
+            </form>
+
+            <a href="{{ channel.get_absolute_url }}" class="btn-cancel">
+                <i class="bi bi-arrow-left"></i> Cancel, keep channel
+            </a>
 
         </div>
     </div>
 </div>
 
+<script>
+    const input     = document.getElementById('confirmInput');
+    const deleteBtn = document.getElementById('deleteBtn');
+
+    input.addEventListener('input', () => {
+        const valid = input.value.trim().toUpperCase() === 'DELETE';
+        deleteBtn.disabled = !valid;
+        input.classList.toggle('valid', valid);
+    });
+</script>
 {% endblock %}
