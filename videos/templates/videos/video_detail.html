@@ -630,7 +630,7 @@
         <div class="sticky-top" style="top:76px;">
             <div class="sidebar-title">Up next</div>
 
-            {% with videos=related_videos|default:recent_videos %}
+            {% with videos=related_videos %}
                 {% for v in videos|slice:":10" %}
                     <a href="{{ v.get_absolute_url }}" class="related-item">
                         <div class="related-thumb">

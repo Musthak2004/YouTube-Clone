@@ -19,220 +19,145 @@
         to   { opacity:1; transform:translateY(0); }
     }
 
-    /* ── BANNER ── */
     .banner-wrap {
         position: relative; width: 100%; height: 220px;
         overflow: hidden; background: #111;
         border-radius: 0 0 16px 16px;
-        margin-bottom: 0;
     }
-    .banner-wrap img {
-        width: 100%; height: 100%; object-fit: cover;
-        display: block;
-    }
+    .banner-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .banner-gradient {
         width: 100%; height: 220px;
         background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460, #1a1a2e);
         border-radius: 0 0 16px 16px;
     }
-    /* Overlay fade at bottom */
     .banner-wrap::after {
-        content: '';
-        position: absolute; bottom: 0; left: 0; right: 0; height: 80px;
+        content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 80px;
         background: linear-gradient(to bottom, transparent, #0a0a0a);
         pointer-events: none;
     }
 
-    /* ── CHANNEL HEADER ── */
     .channel-header {
         display: flex; align-items: flex-end; gap: 20px;
-        padding: 0 0 20px;
-        flex-wrap: wrap;
-        margin-top: -40px;
-        position: relative; z-index: 1;
+        padding: 0 0 20px; flex-wrap: wrap;
+        margin-top: -40px; position: relative; z-index: 1;
     }
-
     .ch-avatar-wrap { flex-shrink: 0; }
     .ch-avatar {
-        width: 100px; height: 100px; border-radius: 50%;
-        object-fit: cover;
-        border: 3px solid #0a0a0a;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        width: 100px; height: 100px; border-radius: 50%; object-fit: cover;
+        border: 3px solid #0a0a0a; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     }
     .ch-avatar-fallback {
         width: 100px; height: 100px; border-radius: 50%;
         background: linear-gradient(135deg, #2a2a2a, #111);
-        border: 3px solid #0a0a0a;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        border: 3px solid #0a0a0a; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         display: flex; align-items: center; justify-content: center;
-        font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 38px;
-        color: var(--text);
+        font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 38px; color: var(--text);
     }
 
     .ch-meta { flex: 1; min-width: 0; padding-bottom: 4px; }
     .ch-name {
-        font-family: 'Outfit', sans-serif;
-        font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px;
-        margin-bottom: 4px; line-height: 1.2;
+        font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 700;
+        letter-spacing: -0.5px; margin-bottom: 4px; line-height: 1.2;
     }
-    .ch-info-row {
-        display: flex; align-items: center; gap: 14px;
-        flex-wrap: wrap; margin-bottom: 14px;
-    }
-    .ch-info-item {
-        font-size: 0.82rem; color: var(--muted2);
-        display: flex; align-items: center; gap: 5px;
-    }
+    .ch-info-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+    .ch-info-item { font-size: 0.82rem; color: var(--muted2); display: flex; align-items: center; gap: 5px; }
     .ch-info-item i { font-size: 0.78rem; }
     .ch-info-dot { color: var(--muted); }
 
-    /* Subscribe */
     .btn-subscribe {
-        background: var(--accent); color: #fff; border: none;
-        border-radius: 99px; padding: 10px 24px;
-        font-family: 'Outfit', sans-serif; font-size: 0.88rem; font-weight: 600;
-        cursor: pointer; transition: all 0.2s ease;
-        box-shadow: 0 2px 14px rgba(255,0,51,0.22);
+        background: var(--accent); color: #fff; border: none; border-radius: 99px;
+        padding: 10px 24px; font-family: 'Outfit', sans-serif; font-size: 0.88rem; font-weight: 600;
+        cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 14px rgba(255,0,51,0.22);
         display: inline-flex; align-items: center; gap: 7px;
     }
     .btn-subscribe:hover { background: #e0002d; transform: translateY(-1px); }
-
     .btn-unsubscribe {
-        background: rgba(255,255,255,0.06); color: var(--muted2);
-        border: 1px solid var(--border); border-radius: 99px;
-        padding: 10px 24px; font-family: 'Outfit', sans-serif;
-        font-size: 0.88rem; font-weight: 500; cursor: pointer;
-        transition: all 0.2s; display: inline-flex; align-items: center; gap: 7px;
+        background: rgba(255,255,255,0.06); color: var(--muted2); border: 1px solid var(--border);
+        border-radius: 99px; padding: 10px 24px; font-family: 'Outfit', sans-serif;
+        font-size: 0.88rem; font-weight: 500; cursor: pointer; transition: all 0.2s;
+        display: inline-flex; align-items: center; gap: 7px;
     }
     .btn-unsubscribe:hover { background: rgba(255,255,255,0.1); color: var(--text); }
 
-    /* Owner actions */
     .owner-actions { display: flex; gap: 8px; padding-bottom: 4px; }
     .btn-ch-edit {
-        background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-        color: var(--muted2); border-radius: 8px; padding: 8px 16px;
-        font-size: 0.82rem; text-decoration: none; transition: all 0.2s;
-        display: inline-flex; align-items: center; gap: 6px;
+        background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--muted2);
+        border-radius: 8px; padding: 8px 16px; font-size: 0.82rem; text-decoration: none;
+        transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
     }
     .btn-ch-edit:hover { background: rgba(255,255,255,0.09); color: var(--text); }
     .btn-ch-del {
-        background: rgba(255,0,51,0.07); border: 1px solid rgba(255,0,51,0.15);
-        color: #ff6680; border-radius: 8px; padding: 8px 16px;
-        font-size: 0.82rem; text-decoration: none; transition: all 0.2s;
-        display: inline-flex; align-items: center; gap: 6px;
+        background: rgba(255,0,51,0.07); border: 1px solid rgba(255,0,51,0.15); color: #ff6680;
+        border-radius: 8px; padding: 8px 16px; font-size: 0.82rem; text-decoration: none;
+        transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
     }
     .btn-ch-del:hover { background: rgba(255,0,51,0.12); color: #ff4455; }
 
-    /* ── DIVIDER ── */
     .ch-divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
 
-    /* ── TABS ── */
-    .tab-row {
-        display: flex; gap: 4px;
-        border-bottom: 1px solid var(--border);
-        margin-bottom: 24px;
-    }
+    .tab-row { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
     .tab-btn {
         background: transparent; border: none; border-bottom: 2px solid transparent;
         color: var(--muted2); padding: 10px 18px; margin-bottom: -1px;
         font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 500;
-        cursor: pointer; transition: all 0.2s;
-        display: inline-flex; align-items: center; gap: 7px;
+        cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 7px;
     }
     .tab-btn:hover { color: var(--text); }
     .tab-btn.active { color: var(--text); border-bottom-color: var(--text); font-weight: 600; }
 
-    /* ── ABOUT BOX ── */
     .about-box {
         background: var(--card); border: 1px solid var(--border);
         border-radius: 14px; padding: 20px 22px; margin-bottom: 24px;
     }
     .about-title {
         font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600;
-        color: var(--muted2); margin-bottom: 10px;
-        display: flex; align-items: center; gap: 7px;
+        color: var(--muted2); margin-bottom: 10px; display: flex; align-items: center; gap: 7px;
     }
     .about-text { font-size: 0.875rem; color: #ccc; line-height: 1.7; }
 
-    /* ── VIDEO GRID ── */
-    .videos-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 16px;
-    }
-
+    .videos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
     .video-card { cursor: pointer; }
-
     .thumb-wrap {
         position: relative; border-radius: 10px; overflow: hidden;
         background: #1a1a1a; aspect-ratio: 16/9; margin-bottom: 10px;
     }
-    .thumb-wrap img {
-        width: 100%; height: 100%; object-fit: cover; display: block;
-        transition: transform 0.35s ease;
-    }
+    .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.35s ease; }
     .video-card:hover .thumb-wrap img { transform: scale(1.04); }
-
-    .thumb-placeholder {
-        width: 100%; height: 100%; display: flex;
-        align-items: center; justify-content: center;
-    }
+    .thumb-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
     .thumb-placeholder i { font-size: 1.8rem; color: #333; }
-
     .thumb-overlay {
-        position: absolute; inset: 0;
-        background: rgba(0,0,0,0); display: flex;
-        align-items: center; justify-content: center; transition: background 0.3s;
+        position: absolute; inset: 0; background: rgba(0,0,0,0);
+        display: flex; align-items: center; justify-content: center; transition: background 0.3s;
     }
-    .thumb-overlay i {
-        font-size: 2.2rem; color: rgba(255,255,255,0);
-        transition: all 0.3s; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
-    }
+    .thumb-overlay i { font-size: 2.2rem; color: rgba(255,255,255,0); transition: all 0.3s; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5)); }
     .video-card:hover .thumb-overlay { background: rgba(0,0,0,0.22); }
     .video-card:hover .thumb-overlay i { color: rgba(255,255,255,0.9); }
-
     .video-title-text {
         font-family: 'Outfit', sans-serif; font-size: 0.875rem; font-weight: 600;
         color: var(--text); text-decoration: none; display: block;
         display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-        overflow: hidden; margin-bottom: 4px; line-height: 1.4;
-        transition: color 0.2s;
+        overflow: hidden; margin-bottom: 4px; line-height: 1.4; transition: color 0.2s;
     }
     .video-title-text:hover { color: #ddd; }
     .video-meta { font-size: 0.75rem; color: var(--muted2); }
-
-    .empty-videos {
-        grid-column: 1/-1; text-align: center; padding: 60px 20px;
-    }
+    .empty-videos { grid-column: 1/-1; text-align: center; padding: 60px 20px; }
     .empty-videos i { font-size: 2rem; color: var(--muted); display: block; margin-bottom: 12px; }
     .empty-videos p { font-size: 0.875rem; color: var(--muted2); }
 
-    /* ── SIDEBAR ── */
-    .stats-card {
-        background: var(--card); border: 1px solid var(--border);
-        border-radius: 14px; padding: 20px 22px; margin-bottom: 14px;
-    }
+    .stats-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; margin-bottom: 14px; }
     .stats-title {
         font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600;
-        color: var(--muted2); margin-bottom: 16px;
-        display: flex; align-items: center; gap: 7px;
+        color: var(--muted2); margin-bottom: 16px; display: flex; align-items: center; gap: 7px;
     }
     .stat-row {
         display: flex; align-items: center; justify-content: space-between;
         padding: 8px 0; border-bottom: 1px solid var(--border);
     }
     .stat-row:last-child { border-bottom: none; padding-bottom: 0; }
-    .stat-label {
-        font-size: 0.8rem; color: var(--muted2);
-        display: flex; align-items: center; gap: 7px;
-    }
+    .stat-label { font-size: 0.8rem; color: var(--muted2); display: flex; align-items: center; gap: 7px; }
     .stat-label i { font-size: 0.8rem; }
-    .stat-value {
-        font-family: 'Outfit', sans-serif; font-size: 0.9rem; font-weight: 600;
-        color: var(--text);
-    }
+    .stat-value { font-family: 'Outfit', sans-serif; font-size: 0.9rem; font-weight: 600; color: var(--text); }
 
-    /* ── MOBILE ── */
     @media (max-width: 767px) {
         .banner-wrap, .banner-gradient { height: 140px; }
         .ch-avatar, .ch-avatar-fallback { width: 72px; height: 72px; font-size: 26px; }
@@ -247,7 +172,6 @@
 {% block content %}
 <div class="channel-page">
 
-    <!-- Banner -->
     {% if channel.banner %}
         <div class="banner-wrap">
             <img src="{{ channel.banner.url }}" alt="{{ channel.name }} banner">
@@ -258,7 +182,6 @@
 
     <div class="container-fluid px-3 px-md-4">
 
-        <!-- Channel Header -->
         <div class="channel-header">
             <div class="ch-avatar-wrap">
                 {% if channel.owner.profile_picture %}
@@ -271,17 +194,11 @@
             <div class="ch-meta">
                 <div class="ch-name">{{ channel.name }}</div>
                 <div class="ch-info-row">
-                    <span class="ch-info-item">
-                        <i class="bi bi-person"></i> {{ channel.owner.username }}
-                    </span>
+                    <span class="ch-info-item"><i class="bi bi-person"></i> {{ channel.owner.username }}</span>
                     <span class="ch-info-dot">·</span>
-                    <span class="ch-info-item">
-                        <i class="bi bi-people"></i> {{ subscriber_count }} subscriber{{ subscriber_count|pluralize }}
-                    </span>
+                    <span class="ch-info-item"><i class="bi bi-people"></i> {{ subscriber_count }} subscriber{{ subscriber_count|pluralize }}</span>
                     <span class="ch-info-dot">·</span>
-                    <span class="ch-info-item">
-                        <i class="bi bi-camera-video"></i> {{ video_count }} video{{ video_count|pluralize }}
-                    </span>
+                    <span class="ch-info-item"><i class="bi bi-camera-video"></i> {{ video_count }} video{{ video_count|pluralize }}</span>
                 </div>
 
                 {% if user.is_authenticated and user != channel.owner %}
@@ -314,11 +231,9 @@
 
         <hr class="ch-divider">
 
-        <!-- Main + Sidebar -->
         <div class="row g-4">
             <div class="col-lg-8">
 
-                <!-- About -->
                 {% if channel.description %}
                 <div class="about-box">
                     <div class="about-title"><i class="bi bi-info-circle"></i> About</div>
@@ -326,7 +241,6 @@
                 </div>
                 {% endif %}
 
-                <!-- Tabs -->
                 <div class="tab-row">
                     <button class="tab-btn active" onclick="showTab('videos', this)">
                         <i class="bi bi-play-circle"></i> Videos
@@ -337,7 +251,6 @@
                     </button>
                 </div>
 
-                <!-- Videos tab -->
                 <div id="tab-videos">
                     <div class="videos-grid">
                         {% for video in channel.videos.all|dictsortreversed:"uploaded_at" %}
@@ -346,20 +259,12 @@
                                 {% if video.thumbnail %}
                                     <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" loading="lazy">
                                 {% else %}
-                                    <div class="thumb-placeholder">
-                                        <i class="bi bi-play-circle"></i>
-                                    </div>
+                                    <div class="thumb-placeholder"><i class="bi bi-play-circle"></i></div>
                                 {% endif %}
-                                <div class="thumb-overlay">
-                                    <i class="bi bi-play-circle-fill"></i>
-                                </div>
+                                <div class="thumb-overlay"><i class="bi bi-play-circle-fill"></i></div>
                             </a>
-                            <a href="{{ video.get_absolute_url }}" class="video-title-text">
-                                {{ video.title|truncatechars:60 }}
-                            </a>
-                            <div class="video-meta">
-                                {{ video.views }} views · {{ video.uploaded_at|timesince }} ago
-                            </div>
+                            <a href="{{ video.get_absolute_url }}" class="video-title-text">{{ video.title|truncatechars:60 }}</a>
+                            <div class="video-meta">{{ video.views }} views · {{ video.uploaded_at|timesince }} ago</div>
                         </div>
                         {% empty %}
                         <div class="empty-videos">
@@ -375,13 +280,10 @@
                     </div>
                 </div>
 
-                <!-- About tab (hidden by default) -->
                 <div id="tab-about" style="display:none;">
                     <div class="about-box">
                         <div class="about-title"><i class="bi bi-info-circle"></i> About this channel</div>
-                        <div class="about-text">
-                            {{ channel.description|default:"No description provided."|linebreaks }}
-                        </div>
+                        <div class="about-text">{{ channel.description|default:"No description provided."|linebreaks }}</div>
                     </div>
                 </div>
 
@@ -393,7 +295,6 @@
 
                     <div class="stats-card">
                         <div class="stats-title"><i class="bi bi-bar-chart-line"></i> Channel Stats</div>
-
                         <div class="stat-row">
                             <span class="stat-label"><i class="bi bi-camera-video"></i> Videos</span>
                             <span class="stat-value">{{ video_count }}</span>
@@ -404,11 +305,7 @@
                         </div>
                         <div class="stat-row">
                             <span class="stat-label"><i class="bi bi-eye"></i> Total Views</span>
-                            <span class="stat-value">
-                                {% with total=channel.videos.all %}
-                                    {% for v in total %}{% if forloop.first %}{{ v.views }}{% endif %}{% endfor %}
-                                {% endwith %}
-                            </span>
+                            <span class="stat-value">{{ total_views }}</span>
                         </div>
                         <div class="stat-row">
                             <span class="stat-label"><i class="bi bi-calendar3"></i> Joined</span>
@@ -434,7 +331,6 @@
 
                 </div>
             </div>
-
         </div>
     </div>
 </div>
