@@ -63,10 +63,20 @@ class VideoCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.uploader = self.request.user
-        # Channel auto-assign — user-ஓட channel இருந்தா set பண்ணு
         if hasattr(self.request.user, 'channel'):
             form.instance.channel = self.request.user.channel
-        return super().form_valid(form)
+        response = super().form_valid(form)
+
+        # Tags save
+        tag_ids = self.request.POST.getlist('tags')
+        for tag_id in tag_ids:
+            try:
+                from recommendations.models import VideoTag, VideoTagMap
+                tag = VideoTag.objects.get(pk=tag_id)
+                VideoTagMap.objects.get_or_create(video=self.object, tag=tag)
+            except VideoTag.DoesNotExist:
+                pass
+        return response
 
 
 class VideoUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):

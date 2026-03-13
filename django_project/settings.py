@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'subscriptions.apps.SubscriptionsConfig',
     'channels.apps.ChannelsConfig',
     'search.apps.SearchConfig',
+    'recommendations.apps.RecommendationsConfig',
 
     'crispy_forms',
     'crispy_bootstrap5',

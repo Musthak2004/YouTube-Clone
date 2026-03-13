@@ -29,6 +29,7 @@ urlpatterns = [
     path("subscriptions/", include("subscriptions.urls")),
     path("channels/", include("channels.urls")),
     path("search/", include("search.urls")),
+    path("recommendations/", include("recommendations.urls")),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
