@@ -17,53 +17,36 @@ class VideoListView(ListView):
 
 class VideoDetailView(DetailView):
     model = Video
-    template_name = "videos/video_detail.html"
-    context_object_name = "video"
-
-    def get_object(self):
-        video = super().get_object()
-
-        # Uploader views count பண்ண வேண்டாம்
-        if self.request.user != video.uploader:
-            video.views += 1
-            video.save(update_fields=['views'])
-
-            # Anonymous user handle பண்றோம் safely
-            VideoView.objects.create(
-                user=self.request.user if self.request.user.is_authenticated else None,
-                video=video,
-            )
-
-        return video
+    template_name = 'videos/video_detail.html'
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        ctx = super().get_context_data(**kwargs)
+        video = self.object
+        user  = self.request.user
 
-        # Related videos - same uploader
-        context['related_videos'] = (
-            Video.objects
-            .filter(uploader=self.object.uploader)
-            .exclude(id=self.object.id)
-            .order_by('-views')[:8]
+        # Subscriber count
+        ctx['subscriber_count'] = video.uploader.subscribers_list.count()
+
+        # Is subscribed?
+        ctx['is_subscribed'] = (
+            user.is_authenticated and
+            Subscription.objects.filter(user=user, channel=video.uploader).exists()
         )
 
-        # Recent videos fallback
-        context['recent_videos'] = (
-            Video.objects
-            .exclude(id=self.object.id)
-            .order_by('-uploaded_at')[:8]
+        # User reaction
+        ctx['user_reaction'] = None
+        if user.is_authenticated:
+            reaction = video.reactions.filter(user=user).first()
+            ctx['user_reaction'] = reaction.reaction if reaction else None
+
+        # Related / recent videos
+        ctx['related_videos'] = (
+            Video.objects.filter(channel=video.channel)
+            .exclude(pk=video.pk)
+            .order_by('-uploaded_at')[:10]
         )
 
-        # Subscription check - uploader's Channel object வேணும்
-        if self.request.user.is_authenticated:
-            context["is_subscribed"] = Subscription.objects.filter(
-                user=self.request.user,
-                channel=self.object.uploader  # ✅ Fixed: User → Channel via owner
-            ).exists()
-        else:
-            context["is_subscribed"] = False
-
-        return context
+        return ctx
 
 
 class VideoCreateView(LoginRequiredMixin, CreateView):

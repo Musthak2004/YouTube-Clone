@@ -497,9 +497,9 @@
             </div>
 
             <div class="ch-info">
-                <a href="#" class="ch-name">{{ video.uploader.username }}</a>
+                <a href="{{ video.uploader.channel.get_absolute_url }}" class="ch-name">{{ video.uploader.channel.username }}</a>
                 <span class="ch-subs">
-                    {{ video.uploader.subscribers_list.count }} subscriber{{ video.uploader.subscribers_list.count|pluralize }}
+                    {{ subscriber_count }} subscriber{{ subscriber_count|pluralize }}
                 </span>
             </div>
 

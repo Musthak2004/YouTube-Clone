@@ -1,5 +1,5 @@
 from django import forms
-from .models import Channel, Subscription
+from .models import Channel
 
 class ChannelForm(forms.ModelForm):
     class Meta:
@@ -10,8 +10,3 @@ class ChannelForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Channel Description', 'rows': 4}),
             'banner': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
-
-class SubscriptionForm(forms.ModelForm):
-    class Meta:
-        model = Subscription
-        fields = []

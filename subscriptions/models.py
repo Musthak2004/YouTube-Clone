@@ -4,26 +4,23 @@ from django.core.exceptions import ValidationError
 
 
 class Subscription(models.Model):
-
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="user_subscriptions",
+        related_name='user_subscriptions'
     )
-
     channel = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="subscribers_list"
+        related_name='subscribers_list'
     )
-
     subscribed_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["user", "channel"],
-                name="unique_subscription"
+                fields=['user', 'channel'],
+                name='unique_subscription'
             )
         ]
 
