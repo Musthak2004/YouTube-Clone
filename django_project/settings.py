@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'channels.apps.ChannelsConfig',
     'search.apps.SearchConfig',
     'recommendations.apps.RecommendationsConfig',
+    'watch_history.apps.HistoryConfig',
 
     'crispy_forms',
     'crispy_bootstrap5',

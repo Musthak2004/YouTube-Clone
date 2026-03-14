@@ -8,8 +8,7 @@ from .models import Subscription
 User = get_user_model()
 
 
-class SubscribeListView(LoginRequiredMixin, ListView):
-
+class SubscriptionListView(LoginRequiredMixin, ListView):
     model = Subscription
     template_name = "subscriptions/subscription_list.html"
     context_object_name = "subscriptions"
@@ -17,14 +16,15 @@ class SubscribeListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return Subscription.objects.filter(
             user=self.request.user
-        ).order_by("-subscribed_at")
+        ).select_related('channel').order_by("-subscribed_at")
 
 
 class ToggleSubscriptionView(LoginRequiredMixin, View):
-
     def post(self, request, channel_pk):
-
         channel = get_object_or_404(User, pk=channel_pk)
+
+        if request.user == channel:
+            return redirect(request.META.get("HTTP_REFERER", "/"))
 
         subscription = Subscription.objects.filter(
             user=request.user,
@@ -32,10 +32,8 @@ class ToggleSubscriptionView(LoginRequiredMixin, View):
         )
 
         if subscription.exists():
-            # Unsubscribe
             subscription.delete()
         else:
-            # Subscribe
             Subscription.objects.create(
                 user=request.user,
                 channel=channel

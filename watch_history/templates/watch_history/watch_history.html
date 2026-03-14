@@ -1,0 +1,352 @@
+{% extends 'base.html' %}
+{% block title %}Watch History — YouClone{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --accent:   #ff0033;
+        --card:     #111111;
+        --border:   rgba(255,255,255,0.07);
+        --muted:    #555;
+        --muted2:   #888;
+        --text:     #f0f0f0;
+        --hist:     #a78bfa;
+        --hist-bg:  rgba(167,139,250,0.08);
+    }
+
+    .history-page {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding-bottom: 60px;
+        animation: fadeUp 0.4s ease both;
+    }
+    @keyframes fadeUp {
+        from { opacity:0; transform:translateY(14px); }
+        to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── HERO ── */
+    .history-hero {
+        background: linear-gradient(135deg, rgba(167,139,250,0.08), rgba(167,139,250,0.02));
+        border: 1px solid rgba(167,139,250,0.15);
+        border-radius: 20px;
+        padding: 30px 36px;
+        margin-bottom: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    .hero-left { display: flex; align-items: center; gap: 20px; }
+    .history-icon-wrap {
+        width: 64px; height: 64px; border-radius: 16px;
+        background: rgba(167,139,250,0.12);
+        border: 1px solid rgba(167,139,250,0.2);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.8rem; flex-shrink: 0;
+    }
+    .history-hero h1 {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.6rem; font-weight: 700;
+        letter-spacing: -0.4px; margin: 0 0 5px;
+    }
+    .history-hero h1 span { color: var(--hist); }
+    .history-hero-meta {
+        font-size: 0.82rem; color: var(--muted2);
+        display: flex; gap: 14px; flex-wrap: wrap;
+    }
+    .history-hero-meta i { margin-right: 4px; color: var(--hist); }
+
+    .btn-clear-all {
+        display: inline-flex; align-items: center; gap: 7px;
+        background: rgba(255,71,87,0.08);
+        border: 1px solid rgba(255,71,87,0.18);
+        color: #ff6680; border-radius: 10px;
+        padding: 9px 18px; font-size: 0.82rem;
+        font-family: 'Outfit', sans-serif; font-weight: 600;
+        cursor: pointer; transition: all 0.2s;
+    }
+    .btn-clear-all:hover {
+        background: rgba(255,71,87,0.14);
+        border-color: rgba(255,71,87,0.3);
+        transform: translateY(-1px);
+    }
+
+    /* ── DATE GROUP ── */
+    .date-group { margin-bottom: 28px; }
+    .date-label {
+        font-size: 0.72rem; font-family: 'Outfit', sans-serif;
+        font-weight: 600; text-transform: uppercase;
+        letter-spacing: 1.2px; color: var(--muted);
+        margin-bottom: 12px;
+        display: flex; align-items: center; gap: 10px;
+    }
+    .date-label::after {
+        content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ── HISTORY ITEM ── */
+    .history-item {
+        display: flex; gap: 14px; align-items: flex-start;
+        padding: 12px;
+        border-radius: 14px;
+        transition: background 0.2s;
+        margin-bottom: 6px;
+        position: relative;
+    }
+    .history-item:hover { background: rgba(255,255,255,0.03); }
+
+    .thumb-link {
+        flex-shrink: 0; display: block;
+        width: 168px; border-radius: 10px; overflow: hidden;
+        aspect-ratio: 16/9; background: #1a1a1a;
+        position: relative;
+    }
+    .thumb-link img {
+        width: 100%; height: 100%; object-fit: cover; display: block;
+        transition: transform 0.3s ease;
+    }
+    .history-item:hover .thumb-link img { transform: scale(1.04); }
+    .thumb-placeholder {
+        width: 100%; height: 100%;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .thumb-placeholder i { font-size: 1.6rem; color: #333; }
+    .play-overlay {
+        position: absolute; inset: 0;
+        background: rgba(0,0,0,0);
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.3s;
+    }
+    .play-overlay i { font-size: 2rem; color: rgba(255,255,255,0); transition: all 0.3s; }
+    .history-item:hover .play-overlay { background: rgba(0,0,0,0.25); }
+    .history-item:hover .play-overlay i { color: rgba(255,255,255,0.9); }
+
+    .item-info { flex: 1; min-width: 0; padding-top: 2px; }
+    .item-title {
+        font-family: 'Outfit', sans-serif; font-size: 0.9rem; font-weight: 600;
+        color: var(--text); text-decoration: none; display: block;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+        overflow: hidden; line-height: 1.4; margin-bottom: 6px;
+        transition: color 0.2s;
+    }
+    .item-title:hover { color: #ddd; }
+    .item-uploader {
+        font-size: 0.78rem; color: var(--muted2); margin-bottom: 5px;
+        display: flex; align-items: center; gap: 5px;
+    }
+    .item-uploader i { font-size: 0.7rem; }
+    .item-meta {
+        font-size: 0.75rem; color: var(--muted);
+        display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    }
+    .meta-dot { color: #333; }
+    .watched-time {
+        font-size: 0.72rem; color: var(--hist);
+        display: flex; align-items: center; gap: 4px; margin-top: 8px;
+    }
+
+    .btn-remove {
+        flex-shrink: 0; background: none; border: none;
+        color: var(--muted); cursor: pointer; padding: 6px 8px;
+        border-radius: 8px; transition: all 0.2s;
+        font-size: 0.85rem; display: flex; align-items: center;
+        align-self: center;
+    }
+    .btn-remove:hover { background: rgba(255,0,51,0.08); color: #ff6680; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+        text-align: center; padding: 80px 24px;
+    }
+    .empty-icon-wrap {
+        width: 80px; height: 80px; border-radius: 50%;
+        background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 20px; font-size: 2rem; color: var(--muted2);
+    }
+    .empty-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.2rem; font-weight: 600; margin-bottom: 10px;
+    }
+    .empty-sub {
+        font-size: 0.875rem; color: var(--muted2);
+        line-height: 1.7; max-width: 300px; margin: 0 auto 24px;
+    }
+    .btn-browse {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: var(--hist-bg); color: var(--hist);
+        border: 1px solid rgba(167,139,250,0.25);
+        border-radius: 99px; padding: 11px 26px;
+        font-family: 'Outfit', sans-serif; font-size: 0.875rem; font-weight: 600;
+        text-decoration: none; transition: all 0.2s;
+    }
+    .btn-browse:hover {
+        background: rgba(167,139,250,0.14); color: var(--hist);
+        transform: translateY(-1px);
+    }
+
+    /* ── PAGINATION ── */
+    .pagination-wrap {
+        display: flex; justify-content: center; gap: 8px;
+        margin-top: 36px; flex-wrap: wrap;
+    }
+    .page-btn {
+        padding: 8px 16px; border-radius: 8px; font-size: 0.85rem;
+        background: var(--card); border: 1px solid var(--border);
+        color: var(--muted2); text-decoration: none; transition: all 0.2s;
+        font-family: 'Outfit', sans-serif;
+        display: inline-flex; align-items: center; gap: 5px;
+    }
+    .page-btn:hover { border-color: rgba(255,255,255,0.14); color: var(--text); }
+    .page-btn.active {
+        background: var(--hist-bg);
+        border-color: rgba(167,139,250,0.25);
+        color: var(--hist);
+    }
+    .page-btn.disabled { opacity: 0.35; pointer-events: none; }
+
+    @media (max-width: 767px) {
+        .history-hero { padding: 20px; flex-direction: column; }
+        .thumb-link { width: 120px; }
+        .history-item { padding: 8px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="history-page">
+
+    <!-- Hero -->
+    <div class="history-hero">
+        <div class="hero-left">
+            <div class="history-icon-wrap">🕐</div>
+            <div>
+                <h1>Watch <span>History</span></h1>
+                <div class="history-hero-meta">
+                    <span><i class="bi bi-camera-video"></i>{{ total_count }} video{{ total_count|pluralize }} watched</span>
+                    <span><i class="bi bi-person"></i>{{ user.username }}</span>
+                </div>
+            </div>
+        </div>
+        {% if history %}
+        <form method="post" action="{% url 'watch_history_clear' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-clear-all"
+                    onclick="return confirm('Clear all watch history?')">
+                <i class="bi bi-trash3"></i> Clear All
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    {% if history %}
+
+        {% regroup history by watched_at|date:"Y-m-d" as history_by_date %}
+
+        {% for date_group in history_by_date %}
+
+        <div class="date-group">
+            <div class="date-label">
+                {% with date_group.grouper as d %}
+                    {% now "Y-m-d" as today %}
+                    {% if d == today %}
+                        Today
+                    {% else %}
+                        {{ date_group.list.0.watched_at|date:"F j, Y" }}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            {% for item in date_group.list %}
+            <div class="history-item">
+
+                <!-- Thumbnail -->
+                <a href="{{ item.video.get_absolute_url }}" class="thumb-link">
+                    {% if item.video.thumbnail %}
+                        <img src="{{ item.video.thumbnail.url }}" alt="{{ item.video.title }}" loading="lazy">
+                    {% else %}
+                        <div class="thumb-placeholder">
+                            <i class="bi bi-play-circle"></i>
+                        </div>
+                    {% endif %}
+                    <div class="play-overlay">
+                        <i class="bi bi-play-circle-fill"></i>
+                    </div>
+                </a>
+
+                <!-- Info -->
+                <div class="item-info">
+                    <a href="{{ item.video.get_absolute_url }}" class="item-title">
+                        {{ item.video.title|truncatechars:80 }}
+                    </a>
+                    <div class="item-uploader">
+                        <i class="bi bi-person-circle"></i>
+                        {{ item.video.uploader.username }}
+                    </div>
+                    <div class="item-meta">
+                        <span>{{ item.video.views }} views</span>
+                        <span class="meta-dot">·</span>
+                        <span>{{ item.video.uploaded_at|timesince }} ago</span>
+                    </div>
+                    <div class="watched-time">
+                        <i class="bi bi-clock-history"></i>
+                        Watched {{ item.watched_at|timesince }} ago
+                    </div>
+                </div>
+
+                <!-- Remove button -->
+                <form method="post" action="{% url 'watch_history_remove' item.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-remove" title="Remove from history">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </form>
+
+            </div>
+            {% endfor %}
+        </div>
+
+        {% endfor %}
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="pagination-wrap">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="page-btn">
+                    <i class="bi bi-chevron-left"></i> Prev
+                </a>
+            {% endif %}
+            {% for num in paginator.page_range %}
+                <a href="?page={{ num }}"
+                   class="page-btn {% if page_obj.number == num %}active{% endif %}">
+                    {{ num }}
+                </a>
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="page-btn">
+                    Next <i class="bi bi-chevron-right"></i>
+                </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon-wrap">
+            <i class="bi bi-clock-history"></i>
+        </div>
+        <div class="empty-title">No watch history</div>
+        <p class="empty-sub">
+            Videos you watch will appear here.<br>
+            Start exploring!
+        </p>
+        <a href="{% url 'video_list' %}" class="btn-browse">
+            <i class="bi bi-compass"></i> Browse Videos
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -22,6 +22,7 @@ class Video(models.Model):
     thumbnail = models.ImageField(upload_to='thumbnails/', blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     views = models.PositiveIntegerField(default=0)
+    duration = models.IntegerField(default=0, help_text="Duration in seconds")
 
     def __str__(self):
         return self.title
@@ -66,7 +67,7 @@ class VideoView(models.Model):
     video = models.ForeignKey(
         Video,
         on_delete=models.CASCADE,
-        related_name='view_history'
+        related_name='view_view_counts'
     )
     viewed_at = models.DateTimeField(auto_now_add=True)
 

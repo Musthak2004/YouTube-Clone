@@ -387,7 +387,7 @@
             <div class="ch-actions">
                 {% if user.is_authenticated %}
                     {% if user != video.uploader %}
-                        <form method="post" action="{% url 'subscribe' video.uploader.pk %}">
+                        <form method="post" action="{% url 'toggle_subscription' channel_pk=video.uploader.pk %}">
                             {% csrf_token %}
                             {% if is_subscribed %}
                                 <button type="submit" class="btn-unsubscribe">

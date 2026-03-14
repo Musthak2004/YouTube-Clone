@@ -91,6 +91,17 @@ class VideoDetailView(DetailView):
 
         return ctx
 
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        Video.objects.filter(pk=self.object.pk).update(views=self.object.views + 1)
+        if request.user.is_authenticated:
+            from watch_history.models import WatchHistory
+            WatchHistory.objects.create(
+                user=request.user,
+                video=self.object
+            )
+        return response
+
 
 class VideoCreateView(LoginRequiredMixin, CreateView):
     model = Video
