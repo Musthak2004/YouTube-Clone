@@ -6,4 +6,4 @@ __pycache__/
 *.pyc
 .venv/
 db.sqlite3
-*.sqlite3
+*.sqlite3staticfiles_build/
