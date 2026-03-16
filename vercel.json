@@ -2,18 +2,18 @@
   "version": 2,
   "builds": [
     {
-      "src": "youtube_clone/wsgi.py",
+      "src": "django_project/wsgi.py",
       "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "15mb",
-        "runtime": "python3.13"
+        "runtime": "python3.12"
       }
     },
     {
       "src": "build_files.sh",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "staticfiles"
+        "distDir": "staticfiles_build/static"
       }
     }
   ],
@@ -24,7 +24,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "youtube_clone/wsgi.py"
+      "dest": "django_project/wsgi.py"
     }
   ]
 }
