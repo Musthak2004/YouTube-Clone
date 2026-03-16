@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "outputDirectory": "staticfiles_build/static",
   "builds": [
     {
       "src": "django_project/wsgi.py",
