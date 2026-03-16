@@ -1,9 +1,0 @@
-.env
-media/
-staticfiles/
-staticfiles_build/
-__pycache__/
-*.pyc
-.venv/
-db.sqlite3
-*.sqlite3staticfiles_build/
