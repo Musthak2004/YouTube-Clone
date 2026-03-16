@@ -21,8 +21,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # Third party
-    'cloudinary_storage',
-    'cloudinary',
     'crispy_forms',
     'crispy_bootstrap5',
 
@@ -104,12 +102,6 @@ if os.path.exists(static_dir):
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ── Media files → Cloudinary ──
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY':    os.environ.get('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
-}
 MEDIA_URL  = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
