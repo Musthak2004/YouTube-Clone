@@ -4,8 +4,8 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'q)*u3dl43hgf!ebn+e-0+%b^qg8@4dpoy-o17z)8#9npl#=s1a'
-DEBUG = False
-ALLOWED_HOSTS = ['youtube_clone.pythonanywhere.com']
+DEBUG = True
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -24,8 +24,6 @@ INSTALLED_APPS = [
     'search.apps.SearchConfig',
     'recommendations.apps.RecommendationsConfig',
     'watch_history.apps.HistoryConfig',
-    'cloudinary',
-    'cloudinary_storage',
 ]
 
 MIDDLEWARE = [
@@ -36,7 +34,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'django_project.urls'
@@ -72,13 +69,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dsprgehmt',
-    'API_KEY': '745734925631431',
-    'API_SECRET': 'C5OxvF1T98DRDHvBgtquGlZeud0',
-}
-
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Asia/Kolkata'
 USE_I18N = True
@@ -96,5 +86,3 @@ LOGOUT_REDIRECT_URL = 'home'
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
