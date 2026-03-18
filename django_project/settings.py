@@ -1,13 +1,11 @@
 from pathlib import Path
 import os
-import dj_database_url
-from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = 'q)*u3dl43hgf!ebn+e-0+%b^qg8@4dpoy-o17z)8#9npl#=s1a'
 DEBUG = False
-ALLOWED_HOSTS = ['.railway.app', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['youtube_clone.pythonanywhere.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -26,6 +24,8 @@ INSTALLED_APPS = [
     'search.apps.SearchConfig',
     'recommendations.apps.RecommendationsConfig',
     'watch_history.apps.HistoryConfig',
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 MIDDLEWARE = [
@@ -59,7 +59,10 @@ TEMPLATES = [
 WSGI_APPLICATION = 'django_project.wsgi.application'
 
 DATABASES = {
-    'default': dj_database_url.config(default=config('DATABASE_URL'))
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -71,9 +74,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': config('CLOUDINARY_API_KEY'),
-    'API_SECRET': config('CLOUDINARY_API_SECRET'),
+    'CLOUD_NAME': 'dsprgehmt',
+    'API_KEY': '745734925631431',
+    'API_SECRET': 'C5OxvF1T98DRDHvBgtquGlZeud0',
 }
 
 LANGUAGE_CODE = 'en-us'
@@ -83,7 +86,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [BASE_DIR / 'static'] if (BASE_DIR / 'static').exists() else []
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
