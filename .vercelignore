@@ -1,6 +1,0 @@
-.git/
-.idea/
-.venv/
-media/
-staticfiles_build/
-db.sqlite3
