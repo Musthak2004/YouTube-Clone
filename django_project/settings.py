@@ -25,7 +25,7 @@ SECRET_KEY = os.getenv(
 DEBUG = env_bool("DEBUG", default=True)
 ALLOWED_HOSTS = env_list(
     "ALLOWED_HOSTS",
-    "127.0.0.1,localhost",
+    "127.0.0.1,localhost,.vercel.app",
 )
 CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS")
 
@@ -86,7 +86,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "django_project.wsgi.application"
+WSGI_APPLICATION = "django_project.wsgi.app"
 
 
 database_url = os.getenv("DATABASE_URL")
