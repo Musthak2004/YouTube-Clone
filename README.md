@@ -1,54 +1,126 @@
-# YouClone - Django YouTube Clone
+﻿# YouClone - Django YouTube Clone
 
-YouClone is a YouTube-inspired web app built with Django. It supports video upload, watch pages, comments, subscriptions, watch history, and search.
+YouClone is a YouTube-inspired video sharing platform built with Django.  
+It allows users to upload videos, watch content, interact through comments, and subscribe to channels.
 
-## Tech Stack
-- Python
-- Django
-- SQLite (local)
-- PostgreSQL (production recommended)
-- Bootstrap 5
+This project demonstrates a real-world backend architecture using Django models, class-based views, authentication, and relational database design.
+
+---
 
 ## Features
-- Authentication (signup/login/logout)
-- Video upload and playback
-- Comments
-- Subscribe/Unsubscribe
-- Watch history
-- Search and recommendations
 
-## Local Setup
-```bash
-git clone <your-repo-url>
-cd YouTube-Clone
-python -m venv .venv
-.venv\\Scripts\\activate
+- User authentication system
+- Upload and watch videos
+- Video thumbnails
+- Video views counter
+- Comment system
+- Like / Dislike reactions
+- Subscribe / Unsubscribe channels
+- View history tracking
+- Pagination for video feed
+- Responsive YouTube-style UI
+
+---
+
+## Tech Stack
+
+Backend:
+- Django
+- Python
+- MySQL
+
+Frontend:
+- HTML
+- CSS
+- Bootstrap / Tailwind CSS
+
+Other Tools:
+- Git
+- GitHub
+
+---
+
+## Project Structure
+YouClone/
+│
+├── users/ # Custom user system
+├── videos/ # Video upload & playback
+├── comments/ # Comment system
+├── subscriptions/ # Channel subscriptions
+│
+├── templates/
+├── static/
+├── media/
+│
+└── manage.py
+
+
+---
+
+## Installation
+
+Clone the repository:
+git clone https://github.com/yourusername/youclone.git
+
+cd youclone
+
+
+Create virtual environment:
+python -m venv venv
+
+
+Activate environment:
+
+Windows
+venv\Scripts\activate
+
+
+Install dependencies:
 pip install -r requirements.txt
+
+Run migrations:
 python manage.py migrate
+
+
+Create superuser:
+python manage.py createsuperuser
+
+
+Run development server:
 python manage.py runserver
-```
 
-## Deploy to Vercel
-1. Push this project to GitHub.
-2. Import the repo in Vercel.
-3. Add these Environment Variables in Vercel Project Settings:
-   - `DEBUG=False`
-   - `SECRET_KEY=<strong-random-key>`
-   - `ALLOWED_HOSTS=.vercel.app,your-domain.com`
-   - `CSRF_TRUSTED_ORIGINS=https://*.vercel.app,https://your-domain.com`
-   - `DATABASE_URL=<postgres-connection-string>`
-   - `SECURE_SSL_REDIRECT=True`
-4. Redeploy.
 
-## Security Baseline Added
-- Removed hardcoded secret key.
-- Debug mode controlled by environment variable.
-- Allowed hosts restricted via env variable.
-- CSRF trusted origins controlled via env variable.
-- HTTPS security headers enabled in production.
-- Secure session and CSRF cookies in production.
-- HSTS enabled in production.
-- WhiteNoise static file serving configured.
+Open browser:
+http://127.0.0.1:8000/
 
-## Resume Bullet (Use This)
-Built and deployed a YouTube clone using Django with authentication, video workflows, comments, subscriptions, and production security hardening on Vercel.
+
+---
+
+## Key Learning Concepts
+
+This project demonstrates:
+
+- Django class-based views
+- Database relationships
+- User authentication
+- File uploads
+- Model design for scalable applications
+- Real-world backend architecture
+
+---
+
+## Future Improvements
+
+- Video streaming optimization
+- Channel pages
+- Notifications
+- Search functionality
+- Recommendation system
+- REST API with Django REST Framework
+
+---
+
+## License
+
+This project is built for learning and portfolio purposes.
+
