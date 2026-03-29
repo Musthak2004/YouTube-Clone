@@ -7,6 +7,7 @@ __pycache__/
 # Virtual env
 .venv/
 venv/
+.vercel-venv/
 
 # Environment files
 .env
