@@ -93,6 +93,30 @@ python manage.py runserver
 Open browser:
 http://127.0.0.1:8000/
 
+---
+
+## Vercel Deployment
+
+This project is configured for Vercel using Django WSGI, WhiteNoise static files, and Postgres through `DATABASE_URL`.
+
+1. Push the latest code to GitHub.
+2. Import the repository in Vercel.
+3. Add a Postgres database from Vercel Storage or connect another Postgres provider.
+4. Add these Environment Variables in Vercel:
+
+DEBUG=False
+SECRET_KEY=<your-django-secret-key>
+ALLOWED_HOSTS=.vercel.app,your-custom-domain.com
+CSRF_TRUSTED_ORIGINS=https://*.vercel.app,https://your-custom-domain.com
+DATABASE_URL=<your-postgres-connection-string>
+SECURE_SSL_REDIRECT=True
+
+5. Deploy.
+
+Build steps run from `pyproject.toml`:
+- `python manage.py collectstatic --noinput`
+- `python manage.py migrate --noinput`
+
 
 ---
 
