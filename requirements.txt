@@ -1,9 +1,11 @@
 Django==6.0.3
+gunicorn>=25.0
+whitenoise>=6.7
+dj-database-url>=2.2
+psycopg[binary]>=3.2
+python-decouple>=3.8
+Pillow>=10.0
 django-crispy-forms>=2.1
 crispy-bootstrap5>=2024.2
-dj-database-url>=2.2
-whitenoise>=6.7
-Pillow>=10.0
-psycopg[binary]>=3.2
 cloudinary>=2.0.0
 django-cloudinary-storage>=0.20.0
