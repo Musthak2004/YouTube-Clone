@@ -24,6 +24,11 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
     template_name = "comments/comment_create.html"
     fields = ["text"]
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['video'] = get_object_or_404(Video, pk=self.kwargs["video_pk"])
+        return ctx
+
     def form_valid(self, form):
         form.instance.user = self.request.user
         form.instance.video = get_object_or_404(

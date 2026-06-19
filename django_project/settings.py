@@ -3,9 +3,17 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'q)*u3dl43hgf!ebn+e-0+%b^qg8@4dpoy-o17z)8#9npl#=s1a'
-DEBUG = True
-ALLOWED_HOSTS = ['*']
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '77i-jk3e=z12(8*#@sidlc)(4@kzsx)*1&77qr9-w5y(k2kq=#')
+DEBUG = False
+ALLOWED_HOSTS = ['yourusername.pythonanywhere.com', 'localhost', '127.0.0.1']
+
+SECURE_SSL_REDIRECT = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -24,7 +32,10 @@ INSTALLED_APPS = [
     'search.apps.SearchConfig',
     'recommendations.apps.RecommendationsConfig',
     'watch_history.apps.HistoryConfig',
+    'pages.apps.PagesConfig',
 ]
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

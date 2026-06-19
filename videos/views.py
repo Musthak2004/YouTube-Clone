@@ -97,6 +97,8 @@ class VideoDetailView(DetailView):
             .order_by('-uploaded_at')[:10]
         )
 
+        ctx['video_tags'] = video.tags.select_related('tag').all()
+
         return ctx
 
 

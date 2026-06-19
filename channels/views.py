@@ -2,6 +2,7 @@ from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
+from django.db.models import Count
 
 from subscriptions.models import Subscription
 from .forms import ChannelForm
@@ -12,8 +13,12 @@ class ChannelListView(ListView):
     model = Channel
     template_name = 'channels/channel_list.html'
     context_object_name = 'channels'
-    ordering = ['-created_at']
     paginate_by = 10
+
+    def get_queryset(self):
+        return Channel.objects.annotate(
+            subscriber_count=Count('owner__subscribers_list')
+        ).order_by('-created_at')
 
 
 class ChannelDetailView(DetailView):
@@ -58,7 +63,7 @@ class ChannelCreateView(LoginRequiredMixin, CreateView):
 class ChannelUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Channel
     form_class = ChannelForm
-    template_name = 'channels/channel_form.html'
+    template_name = 'channels/channel_update.html'
 
     def test_func(self):
         return self.request.user == self.get_object().owner

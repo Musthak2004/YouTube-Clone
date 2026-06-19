@@ -29,4 +29,5 @@ class TagVideoListView(ListView):
         ctx = super().get_context_data(**kwargs)
         ctx['tag'] = self.tag
         ctx['all_tags'] = VideoTag.objects.all().order_by('name')
+        ctx['tag_video_count'] = ctx['paginator'].count
         return ctx
