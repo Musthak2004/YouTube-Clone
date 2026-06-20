@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '77i-jk3e=z12(8*#@sidlc)(4@kzsx)*1&77qr9-w5y(k2kq=#')
 DEBUG = False
-ALLOWED_HOSTS = ['yourusername.pythonanywhere.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['streamhub.pythonanywhere.com', 'localhost', '127.0.0.1']
 
 SECURE_SSL_REDIRECT = True
 CSRF_COOKIE_SECURE = True
