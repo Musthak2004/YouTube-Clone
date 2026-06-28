@@ -307,7 +307,7 @@
         <!-- Player -->
         <div class="player-wrap">
             <video controls poster="{% if video.thumbnail %}{{ video.thumbnail.url }}{% endif %}" preload="metadata">
-                <source src="{{ video.video_file.url }}" type="video/mp4">
+                <source src="{{ video.video_url }}" type="video/mp4">
                 Your browser does not support video playback.
             </video>
         </div>
