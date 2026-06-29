@@ -378,6 +378,7 @@ Currently no REST API is available. Planned for a future iteration using Django 
 ### Short Term
 
 - [ ] Server-side upload validation (file size, format)
+- [x] Fix double-nested URL patterns
 - [ ] Paginated search results
 - [ ] Email notifications for new subscribers/comments
 - [ ] Fix double-nested URL patterns (`/comments/comments/`)
@@ -403,6 +404,7 @@ Currently no REST API is available. Planned for a future iteration using Django 
 
 - **Video upload**: No server-side file size validation (client-side "500MB" claim only)
 - **Comments**: Not paginated on video detail pages
+- **Double-nested URLs**: Fixed (`/comments/comments/` → `/comments/`, etc.)
 - **Search**: Uses basic `icontains` matching (not full-text search)
 - **Notifications**: Bell icon is decorative only
 - **Settings page**: Placeholder link only
