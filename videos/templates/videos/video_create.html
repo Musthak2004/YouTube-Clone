@@ -18,15 +18,12 @@
         max-width: 720px;
         margin: 0 auto;
         padding: 8px 0 60px;
+    }
+
+    .page-header {
+        margin-bottom: 32px;
         animation: fadeUp 0.4s ease both;
     }
-
-    @keyframes fadeUp {
-        from { opacity:0; transform:translateY(18px); }
-        to   { opacity:1; transform:translateY(0); }
-    }
-
-    .page-header { margin-bottom: 32px; }
     .page-header h1 {
         font-family: 'Outfit', sans-serif;
         font-size: 1.8rem;
@@ -45,8 +42,39 @@
         text-decoration: none;
         margin-bottom: 20px;
         transition: color 0.2s;
+        animation: fadeUp 0.4s ease both;
     }
     .back-link:hover { color: var(--text); }
+
+    .stagger-1 { animation: fadeUp 0.4s ease both; }
+    .stagger-2 { animation: fadeUp 0.4s ease 0.08s both; }
+    .stagger-3 { animation: fadeUp 0.4s ease 0.16s both; }
+    .stagger-4 { animation: fadeUp 0.4s ease 0.24s both; }
+    .stagger-5 { animation: fadeUp 0.4s ease 0.32s both; }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(18px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50%      { opacity: 0.5; }
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    @keyframes shimmer {
+        0%   { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-8px); max-height: 0; }
+        to   { opacity: 1; transform: translateY(0); max-height: 60px; }
+    }
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(8px); max-height: 0; }
+        to   { opacity: 1; transform: translateY(0); max-height: 200px; }
+    }
 
     .upload-card {
         background: var(--card);
@@ -77,7 +105,7 @@
         align-items: center;
         gap: 10px;
     }
-    .section-sep:first-child { margin-top: 0; }
+    .section-sep:first-of-type { margin-top: 0; }
     .section-sep::before, .section-sep::after {
         content: '';
         flex: 1;
@@ -85,7 +113,7 @@
         background: var(--border);
     }
 
-    .field-group { margin-bottom: 18px; }
+    .field-group { margin-bottom: 22px; }
 
     .field-label {
         display: flex;
@@ -103,6 +131,10 @@
         padding: 1px 6px;
         color: var(--muted);
         margin-left: auto;
+    }
+    .required-star {
+        color: var(--accent);
+        margin-left: 2px;
     }
 
     .field-wrap { position: relative; }
@@ -123,7 +155,7 @@
         border: 1px solid var(--border);
         border-radius: 10px;
         color: var(--text);
-        padding: 11px 14px 11px 38px;
+        padding: 12px 14px 12px 38px;
         font-family: 'DM Sans', sans-serif;
         font-size: 0.9rem;
         outline: none;
@@ -134,6 +166,14 @@
         border-color: rgba(255,0,51,0.3);
         box-shadow: 0 0 0 3px rgba(255,0,51,0.07);
     }
+    .field-input.error {
+        border-color: #ff4466;
+        box-shadow: 0 0 0 3px rgba(255,68,102,0.1);
+    }
+    .field-input.valid {
+        border-color: rgba(34,197,94,0.4);
+        box-shadow: 0 0 0 3px rgba(34,197,94,0.07);
+    }
 
     .field-textarea {
         width: 100%;
@@ -141,7 +181,7 @@
         border: 1px solid var(--border);
         border-radius: 10px;
         color: var(--text);
-        padding: 11px 14px;
+        padding: 12px 14px;
         font-family: 'DM Sans', sans-serif;
         font-size: 0.9rem;
         outline: none;
@@ -165,6 +205,38 @@
     .char-count.warn { color: #ff8c00; }
     .char-count.over { color: var(--accent); }
 
+    .field-helper {
+        font-size: 0.72rem;
+        color: var(--muted);
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .field-error {
+        font-size: 0.77rem;
+        color: #ff4466;
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        animation: slideDown 0.25s ease both;
+    }
+
+    .alert-error {
+        background: rgba(255,0,51,0.08);
+        border: 1px solid rgba(255,0,51,0.18);
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 0.84rem;
+        color: #ff6680;
+        margin-bottom: 22px;
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+    }
+
     .drop-zone {
         position: relative;
         border: 1.5px dashed rgba(255,255,255,0.1);
@@ -174,9 +246,18 @@
         cursor: pointer;
         overflow: hidden;
     }
-    .drop-zone:hover, .drop-zone.dragging {
+    .drop-zone:hover, .drop-zone.dragover {
         border-color: rgba(255,0,51,0.35);
         background: rgba(255,0,51,0.04);
+    }
+    .drop-zone.dragover {
+        border-color: var(--accent);
+        background: rgba(255,0,51,0.08);
+        transform: scale(1.005);
+    }
+    .drop-zone.has-file {
+        border-style: solid;
+        border-color: rgba(255,0,51,0.2);
     }
     .drop-zone input[type="file"] {
         position: absolute;
@@ -185,17 +266,15 @@
         cursor: pointer;
         z-index: 10;
     }
-    .file-input-hidden {
-        position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 10;
-    }
     .drop-inner {
         padding: 36px 24px;
         text-align: center;
         pointer-events: none;
         transition: all 0.25s;
     }
+    .drop-zone.has-file .drop-inner { padding: 24px 24px 16px; }
     .drop-zone:hover .drop-inner,
-    .drop-zone.dragging .drop-inner { transform: scale(1.01); }
+    .drop-zone.dragover .drop-inner { transform: scale(1.01); }
 
     .drop-icon {
         font-size: 2.4rem;
@@ -205,7 +284,7 @@
         display: block;
     }
     .drop-zone:hover .drop-icon,
-    .drop-zone.dragging .drop-icon { color: #ff4466; }
+    .drop-zone.dragover .drop-icon { color: #ff4466; }
 
     .drop-title {
         font-family: 'Outfit', sans-serif;
@@ -215,29 +294,81 @@
         margin-bottom: 4px;
     }
     .drop-hint { font-size: 0.78rem; color: var(--muted); }
+    .drop-formats {
+        font-size: 0.7rem;
+        color: var(--muted);
+        margin-top: 8px;
+        opacity: 0.7;
+    }
 
-    .video-selected-info {
+    .file-selected-info {
         display: none;
         align-items: center;
         gap: 14px;
         padding: 14px 18px;
         background: rgba(255,0,51,0.06);
         border-top: 1px solid rgba(255,0,51,0.1);
+        animation: slideUp 0.3s ease both;
     }
-    .video-selected-info.show { display: flex; }
-    .video-file-icon { font-size: 1.6rem; color: #ff6680; }
-    .video-file-name { font-size: 0.85rem; color: var(--text); font-weight: 500; }
-    .video-file-size { font-size: 0.75rem; color: var(--muted2); }
+    .file-selected-info.show { display: flex; }
+    .file-icon { font-size: 1.6rem; color: #ff6680; flex-shrink: 0; }
+    .file-details { min-width: 0; flex: 1; }
+    .file-name {
+        font-size: 0.85rem;
+        color: var(--text);
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .file-size {
+        font-size: 0.75rem;
+        color: var(--muted2);
+    }
+    .file-remove {
+        font-size: 0.75rem;
+        color: var(--muted);
+        background: none;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 6px;
+        padding: 4px 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+        flex-shrink: 0;
+    }
+    .file-remove:hover {
+        color: #ff4466;
+        border-color: rgba(255,68,102,0.3);
+        background: rgba(255,68,102,0.08);
+    }
 
-    .thumb-preview { display: none; padding: 0 18px 16px; }
-    .thumb-preview.show { display: block; }
+    .thumb-preview { display: none; }
+    .thumb-preview.show { display: block; animation: slideUp 0.3s ease both; }
     .thumb-preview img {
-        width: 100%; max-height: 180px; object-fit: cover;
+        width: 100%; max-height: 200px; object-fit: cover;
         border-radius: 10px; border: 1px solid var(--border);
     }
-    .thumb-change { font-size: 0.75rem; color: var(--muted2); margin-top: 6px; text-align: center; }
+    .thumb-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 8px;
+    }
+    .thumb-change {
+        font-size: 0.75rem;
+        color: var(--muted2);
+        background: none;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 6px;
+        padding: 4px 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .thumb-change:hover {
+        color: var(--text);
+        border-color: rgba(255,255,255,0.15);
+    }
 
-    /* ── TAGS ── */
     .tags-grid {
         display: flex;
         flex-wrap: wrap;
@@ -256,13 +387,17 @@
         color: var(--muted2);
         font-family: 'Outfit', sans-serif;
         user-select: none;
+        display: inline-block;
     }
     .tag-option:checked + .tag-label {
         background: rgba(255,0,51,0.1);
         border-color: rgba(255,0,51,0.3);
         color: #ff6680;
     }
-    .tag-label:hover { background: rgba(255,255,255,0.07); color: var(--text); }
+    .tag-label:hover {
+        background: rgba(255,255,255,0.07);
+        color: var(--text);
+    }
 
     .tags-preview-row {
         margin-top: 10px;
@@ -281,8 +416,12 @@
         font-size: 0.75rem;
     }
 
-    .upload-progress { display: none; margin-top: 16px; }
-    .upload-progress.show { display: block; }
+    .upload-progress {
+        display: none;
+        margin-top: 20px;
+        padding: 20px 0;
+    }
+    .upload-progress.show { display: block; animation: fadeUp 0.3s ease both; }
     .progress-track {
         height: 4px;
         background: rgba(255,255,255,0.06);
@@ -294,30 +433,29 @@
         width: 0%;
         background: linear-gradient(90deg, var(--accent), #ff6b35);
         border-radius: 99px;
-        transition: width 0.3s ease;
+        transition: width 0.4s ease;
+        position: relative;
     }
-    .progress-label { font-size: 0.75rem; color: var(--muted2); margin-top: 6px; text-align: center; }
-
-    .field-error {
-        font-size: 0.77rem;
-        color: #ff4466;
-        margin-top: 6px;
+    .progress-fill.indeterminate {
+        width: 40%;
+        animation: shimmer 1.5s ease-in-out infinite;
+        background: linear-gradient(90deg, var(--accent), #ff6b35, var(--accent));
+        background-size: 200% 100%;
+    }
+    .progress-label {
+        font-size: 0.8rem;
+        color: var(--muted2);
+        margin-top: 8px;
+        text-align: center;
+    }
+    .progress-status {
         display: flex;
         align-items: center;
-        gap: 5px;
-    }
-
-    .alert-error {
-        background: rgba(255,0,51,0.08);
-        border: 1px solid rgba(255,0,51,0.18);
-        border-radius: 10px;
-        padding: 12px 16px;
-        font-size: 0.84rem;
-        color: #ff6680;
-        margin-bottom: 22px;
-        display: flex;
-        align-items: flex-start;
-        gap: 9px;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 4px;
+        font-size: 0.75rem;
+        color: var(--muted);
     }
 
     .btn-submit {
@@ -338,11 +476,67 @@
         justify-content: center;
         gap: 8px;
         margin-top: 24px;
+        position: relative;
+        overflow: hidden;
     }
-    .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(255,0,51,0.36); }
-    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(255,0,51,0.36); }
+    .btn-submit:active:not(:disabled) { transform: translateY(0); }
+    .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+    .btn-submit .spinner {
+        display: none;
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+    }
+    .btn-submit.loading .spinner { display: inline-block; }
+    .btn-submit.loading .btn-text { opacity: 0.7; }
+    .btn-submit.loading .btn-icon { display: none; }
 
-    @media (max-width: 600px) { .upload-card { padding: 24px 16px; } }
+    .btn-submit .success-check {
+        display: none;
+        font-size: 1.2rem;
+    }
+    .btn-submit.success .success-check { display: inline-block; }
+    .btn-submit.success .spinner,
+    .btn-submit.success .btn-text,
+    .btn-submit.success .btn-icon { display: none; }
+
+    .unsaved-notice {
+        display: none;
+        align-items: center;
+        gap: 6px;
+        margin-top: 12px;
+        font-size: 0.72rem;
+        color: var(--muted);
+        text-align: center;
+        justify-content: center;
+    }
+    .unsaved-notice.show { display: flex; }
+
+    @media (max-width: 600px) {
+        .upload-card { padding: 24px 16px; }
+        .drop-inner { padding: 28px 16px; }
+        .file-selected-info { flex-wrap: wrap; }
+        .file-remove { margin-left: auto; }
+        .page-header h1 { font-size: 1.4rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .stagger-1, .stagger-2, .stagger-3, .stagger-4, .stagger-5,
+        .page-header, .back-link { animation: none; }
+        .upload-progress.show { animation: none; }
+        .file-selected-info.show { animation: none; }
+        .thumb-preview.show { animation: none; }
+        .field-error { animation: none; }
+        .progress-fill.indeterminate { animation: none; }
+    }
 </style>
 {% endblock %}
 
@@ -358,7 +552,7 @@
         <p>Share your content with the world</p>
     </div>
 
-    <div class="upload-card">
+    <div class="upload-card stagger-1">
 
         {% if form.non_field_errors %}
             <div class="alert-error">
@@ -367,24 +561,24 @@
             </div>
         {% endif %}
 
-        <form method="post" enctype="multipart/form-data" id="uploadForm">
+        <form method="post" enctype="multipart/form-data" id="uploadForm" novalidate>
             {% csrf_token %}
 
-            <!-- ─ Info ─ -->
-            <div class="section-sep">Video Info</div>
+            <div class="section-sep stagger-2">Video Info</div>
 
-            <div class="field-group">
+            <div class="field-group stagger-2">
                 <label class="field-label" for="{{ form.title.id_for_label }}">
-                    <i class="bi bi-type"></i> Title
+                    <i class="bi bi-type"></i> Title <span class="required-star">*</span>
                 </label>
                 <div class="field-wrap">
                     <input type="text"
                            name="{{ form.title.name }}"
                            class="field-input"
                            id="{{ form.title.id_for_label }}"
-                           placeholder="Give your video a great title"
+                           placeholder="Give your video a clear, compelling title"
                            maxlength="100"
                            required
+                           autocomplete="off"
                            value="{{ form.title.value|default:'' }}">
                     <i class="bi bi-pencil field-icon"></i>
                 </div>
@@ -394,7 +588,7 @@
                 {% endif %}
             </div>
 
-            <div class="field-group">
+            <div class="field-group stagger-2">
                 <label class="field-label" for="{{ form.description.id_for_label }}">
                     <i class="bi bi-card-text"></i> Description
                     <span class="optional-tag">optional</span>
@@ -402,7 +596,7 @@
                 <textarea name="{{ form.description.name }}"
                           class="field-textarea"
                           id="{{ form.description.id_for_label }}"
-                          placeholder="Tell viewers what your video is about..."
+                          placeholder="Tell viewers what your video is about — include keywords to help people find it"
                           maxlength="500">{{ form.description.value|default:'' }}</textarea>
                 <div class="char-count" id="descCount">0 / 500</div>
                 {% if form.description.errors %}
@@ -410,48 +604,74 @@
                 {% endif %}
             </div>
 
-            <!-- ─ Files ─ -->
-            <div class="section-sep">Files</div>
+            <div class="section-sep stagger-3">Files</div>
 
-            <div class="field-group">
+            <div class="field-group stagger-3">
                 <label class="field-label" for="{{ form.video_file.id_for_label }}">
-                    <i class="bi bi-camera-video"></i> Video File
+                    <i class="bi bi-camera-video"></i> Video File <span class="required-star">*</span>
                 </label>
-                <div class="field-wrap">
+                <div class="drop-zone" id="videoDropZone">
                     <input type="file"
                            name="{{ form.video_file.name }}"
-                           class="field-input"
                            id="{{ form.video_file.id_for_label }}"
                            accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov"
                            required>
+                    <div class="drop-inner" id="videoDropInner">
+                        <i class="bi bi-cloud-upload drop-icon"></i>
+                        <div class="drop-title">Choose a video file or drag it here</div>
+                        <div class="drop-hint">MP4, WebM, or MOV</div>
+                        <div class="drop-formats">Maximum 500 MB</div>
+                    </div>
+                    <div class="file-selected-info" id="videoFileInfo">
+                        <i class="bi bi-file-play file-icon"></i>
+                        <div class="file-details">
+                            <div class="file-name" id="videoFileName"></div>
+                            <div class="file-size" id="videoFileSize"></div>
+                        </div>
+                        <button type="button" class="file-remove" id="videoFileRemove">Remove</button>
+                    </div>
                 </div>
                 {% if form.video_file.errors %}
                     <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.video_file.errors|join:", " }}</div>
                 {% endif %}
             </div>
 
-            <div class="field-group">
+            <div class="field-group stagger-3">
                 <label class="field-label" for="{{ form.thumbnail.id_for_label }}">
                     <i class="bi bi-image"></i> Thumbnail
                     <span class="optional-tag">optional</span>
                 </label>
-                <div class="field-wrap">
+                <div class="drop-zone" id="thumbDropZone">
                     <input type="file"
                            name="{{ form.thumbnail.name }}"
-                           class="field-input"
                            id="{{ form.thumbnail.id_for_label }}"
                            accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp">
+                    <div class="drop-inner" id="thumbDropInner">
+                        <i class="bi bi-image drop-icon"></i>
+                        <div class="drop-title">Choose a thumbnail image</div>
+                        <div class="drop-hint">JPEG, PNG, or WebP &middot; 16:9 recommended</div>
+                        <div class="drop-formats">Max 2 MB</div>
+                    </div>
+                    <div class="thumb-preview" id="thumbPreview">
+                        <img id="thumbPreviewImg" alt="Thumbnail preview">
+                        <div class="thumb-meta">
+                            <div>
+                                <div class="file-name" id="thumbFileName"></div>
+                                <div class="file-size" id="thumbFileSize"></div>
+                            </div>
+                            <button type="button" class="thumb-change" id="thumbChange">Change</button>
+                        </div>
+                    </div>
                 </div>
                 {% if form.thumbnail.errors %}
                     <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.thumbnail.errors|join:", " }}</div>
                 {% endif %}
             </div>
 
-            <!-- ─ Tags ─ -->
             {% if all_tags %}
-            <div class="section-sep">Tags</div>
+            <div class="section-sep stagger-4">Tags</div>
 
-            <div class="field-group" style="margin-bottom:0;">
+            <div class="field-group stagger-4" style="margin-bottom:0;">
                 <label class="field-label">
                     <i class="bi bi-tags"></i> Select Tags
                     <span class="optional-tag">optional</span>
@@ -471,9 +691,27 @@
             </div>
             {% endif %}
 
-            <button type="submit" class="btn-submit" id="submitBtn">
-                <i class="bi bi-cloud-arrow-up"></i> Upload Video
+            <button type="submit" class="btn-submit stagger-5" id="submitBtn">
+                <i class="bi bi-cloud-arrow-up btn-icon"></i>
+                <span class="spinner"></span>
+                <span class="btn-text">Upload Video</span>
+                <span class="success-check"><i class="bi bi-check-lg"></i></span>
             </button>
+
+            <div class="unsaved-notice" id="unsavedNotice">
+                <i class="bi bi-exclamation-circle"></i>
+                You have unsaved changes
+            </div>
+
+            <div class="upload-progress" id="uploadProgress">
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-label" id="progressLabel">Uploading your video...</div>
+                <div class="progress-status" id="progressStatus">
+                    <i class="bi bi-arrow-repeat"></i> Please don't close this page
+                </div>
+            </div>
 
         </form>
     </div>
@@ -481,21 +719,159 @@
 
 <script>
     function getEl(id) { return document.getElementById(id); }
+    function formatSize(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), sizes.length - 1);
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
+        let formDirty = false;
+
         // ── Char counters ──
         function setupCounter(inputId, countId, max) {
             const el = getEl(inputId);
             const ct = getEl(countId);
             if (!el) return;
-            el.addEventListener('input', () => {
+            const update = () => {
                 const len = el.value.length;
                 ct.textContent = `${len} / ${max}`;
                 ct.className = 'char-count' + (len > max * 0.9 ? (len >= max ? ' over' : ' warn') : '');
-            });
+            };
+            el.addEventListener('input', update);
+            update();
         }
         setupCounter('{{ form.title.id_for_label }}',       'titleCount', 100);
         setupCounter('{{ form.description.id_for_label }}', 'descCount',  500);
+
+        // ── Title inline validation ──
+        const titleInput = getEl('{{ form.title.id_for_label }}');
+        if (titleInput) {
+            titleInput.addEventListener('blur', () => {
+                const val = titleInput.value.trim();
+                titleInput.classList.remove('error', 'valid');
+                if (val.length > 0 && val.length < 3) {
+                    titleInput.classList.add('error');
+                } else if (val.length >= 3) {
+                    titleInput.classList.add('valid');
+                }
+            });
+            titleInput.addEventListener('input', () => {
+                titleInput.classList.remove('error', 'valid');
+            });
+        }
+
+        // ── Video file drop zone ──
+        const videoInput = getEl('{{ form.video_file.id_for_label }}');
+        const videoDropZone = getEl('videoDropZone');
+        const videoDropInner = getEl('videoDropInner');
+        const videoFileInfo = getEl('videoFileInfo');
+        const videoFileName = getEl('videoFileName');
+        const videoFileSize = getEl('videoFileSize');
+        const videoFileRemove = getEl('videoFileRemove');
+
+        if (videoInput) {
+            videoInput.addEventListener('change', () => {
+                const file = videoInput.files[0];
+                if (file) {
+                    videoFileName.textContent = file.name;
+                    videoFileSize.textContent = formatSize(file.size);
+                    videoDropInner.style.display = 'none';
+                    videoFileInfo.classList.add('show');
+                    videoDropZone.classList.add('has-file');
+                    formDirty = true;
+                    updateUnsavedNotice();
+                }
+            });
+
+            videoDropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                videoDropZone.classList.add('dragover');
+            });
+            videoDropZone.addEventListener('dragleave', () => {
+                videoDropZone.classList.remove('dragover');
+            });
+            videoDropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                videoDropZone.classList.remove('dragover');
+                if (e.dataTransfer.files.length > 0) {
+                    videoInput.files = e.dataTransfer.files;
+                    videoInput.dispatchEvent(new Event('change'));
+                }
+            });
+
+            if (videoFileRemove) {
+                videoFileRemove.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    videoInput.value = '';
+                    videoFileInfo.classList.remove('show');
+                    videoDropInner.style.display = '';
+                    videoDropZone.classList.remove('has-file');
+                    formDirty = true;
+                    updateUnsavedNotice();
+                });
+            }
+        }
+
+        // ── Thumbnail drop zone ──
+        const thumbInput = getEl('{{ form.thumbnail.id_for_label }}');
+        const thumbDropZone = getEl('thumbDropZone');
+        const thumbDropInner = getEl('thumbDropInner');
+        const thumbPreview = getEl('thumbPreview');
+        const thumbPreviewImg = getEl('thumbPreviewImg');
+        const thumbFileName = getEl('thumbFileName');
+        const thumbFileSize = getEl('thumbFileSize');
+        const thumbChange = getEl('thumbChange');
+
+        if (thumbInput) {
+            thumbInput.addEventListener('change', () => {
+                const file = thumbInput.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        thumbPreviewImg.src = e.target.result;
+                        thumbDropInner.style.display = 'none';
+                        thumbPreview.classList.add('show');
+                        thumbDropZone.classList.add('has-file');
+                    };
+                    reader.readAsDataURL(file);
+                    thumbFileName.textContent = file.name;
+                    thumbFileSize.textContent = formatSize(file.size);
+                    formDirty = true;
+                    updateUnsavedNotice();
+                }
+            });
+
+            thumbDropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                thumbDropZone.classList.add('dragover');
+            });
+            thumbDropZone.addEventListener('dragleave', () => {
+                thumbDropZone.classList.remove('dragover');
+            });
+            thumbDropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                thumbDropZone.classList.remove('dragover');
+                if (e.dataTransfer.files.length > 0) {
+                    thumbInput.files = e.dataTransfer.files;
+                    thumbInput.dispatchEvent(new Event('change'));
+                }
+            });
+
+            if (thumbChange) {
+                thumbChange.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    thumbInput.value = '';
+                    thumbPreview.classList.remove('show');
+                    thumbDropInner.style.display = '';
+                    thumbDropZone.classList.remove('has-file');
+                    formDirty = true;
+                    updateUnsavedNotice();
+                });
+            }
+        }
 
         // ── Tags preview ──
         document.querySelectorAll('.tag-option').forEach(cb => {
@@ -509,7 +885,106 @@
                         const lbl = document.querySelector(`label[for="${c.id}"]`).textContent;
                         return `<span class="tag-badge">${lbl}</span>`;
                       }).join('');
+                formDirty = true;
+                updateUnsavedNotice();
             });
+        });
+
+        // ── Form dirty tracking ──
+        function updateUnsavedNotice() {
+            const notice = getEl('unsavedNotice');
+            if (!notice) return;
+            notice.classList.toggle('show', formDirty);
+        }
+
+        document.querySelectorAll('#uploadForm input, #uploadForm textarea').forEach(el => {
+            el.addEventListener('input', () => {
+                formDirty = true;
+                updateUnsavedNotice();
+            });
+        });
+
+        window.addEventListener('beforeunload', (e) => {
+            if (formDirty) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // ── Submit handling ──
+        const form = getEl('uploadForm');
+        const submitBtn = getEl('submitBtn');
+        const uploadProgress = getEl('uploadProgress');
+        const progressFill = getEl('progressFill');
+        const progressLabel = getEl('progressLabel');
+        const progressStatus = getEl('progressStatus');
+
+        form.addEventListener('submit', (e) => {
+            const videoFile = videoInput ? videoInput.files[0] : null;
+            const title = titleInput ? titleInput.value.trim() : '';
+
+            if (!videoFile) {
+                e.preventDefault();
+                if (videoDropZone) {
+                    videoDropZone.style.borderColor = '#ff4466';
+                    videoDropZone.style.boxShadow = '0 0 0 3px rgba(255,68,102,0.1)';
+                    setTimeout(() => {
+                        videoDropZone.style.borderColor = '';
+                        videoDropZone.style.boxShadow = '';
+                    }, 3000);
+                }
+                return;
+            }
+
+            if (title.length < 3) {
+                e.preventDefault();
+                if (titleInput) {
+                    titleInput.classList.add('error');
+                    titleInput.focus();
+                }
+                return;
+            }
+
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.classList.add('loading');
+            uploadProgress.classList.add('show');
+            progressFill.className = 'progress-fill indeterminate';
+
+            // Simulate upload stages
+            let progress = 0;
+            const stages = [
+                { at: 20, label: 'Validating file...', icon: 'bi-arrow-repeat' },
+                { at: 50, label: 'Uploading video...', icon: 'bi-cloud-upload' },
+                { at: 80, label: 'Processing video...', icon: 'bi-gear' },
+                { at: 100, label: 'Finalizing...', icon: 'bi-check-circle' },
+            ];
+
+            const interval = setInterval(() => {
+                progress += Math.random() * 8 + 2;
+                if (progress >= 95) {
+                    clearInterval(interval);
+                    return;
+                }
+                progressFill.style.width = Math.min(progress, 90) + '%';
+                progressFill.className = 'progress-fill';
+                const stage = stages.filter(s => progress >= s.at).pop();
+                if (stage) {
+                    progressLabel.textContent = stage.label;
+                    progressStatus.innerHTML = `<i class="bi ${stage.icon}"></i> Please don't close this page`;
+                }
+            }, 400);
+
+            // Allow the form to submit naturally
+            formDirty = false;
+        });
+
+        // Re-enable submit on page navigation (if form fails)
+        window.addEventListener('pageshow', () => {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('loading', 'success');
+            uploadProgress.classList.remove('show');
+            progressFill.style.width = '0%';
         });
     });
 </script>
