@@ -25,7 +25,12 @@ class VideoTagMap(models.Model):
     )
 
     class Meta:
-        unique_together = ('video', 'tag')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['video', 'tag'],
+                name='unique_video_tag'
+            )
+        ]
 
     def __str__(self):
         return f"{self.video.title} → {self.tag.name}"
@@ -45,8 +50,13 @@ class UserInterest(models.Model):
     score = models.IntegerField(default=0)
 
     class Meta:
-        unique_together = ('user', 'tag')
         ordering = ['-score']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'tag'],
+                name='unique_user_tag_interest'
+            )
+        ]
 
     def __str__(self):
         return f"{self.user.username} → {self.tag.name} ({self.score})"

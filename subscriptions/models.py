@@ -28,5 +28,9 @@ class Subscription(models.Model):
         if self.user == self.channel:
             raise ValidationError("You cannot subscribe to yourself.")
 
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.user} subscribed to {self.channel}"

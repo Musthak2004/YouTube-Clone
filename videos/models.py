@@ -8,7 +8,8 @@ class Video(models.Model):
     uploader = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='videos'
+        related_name='videos',
+        db_index=True
     )
     channel = models.ForeignKey(
         'channels.Channel',
@@ -21,9 +22,12 @@ class Video(models.Model):
     description = models.TextField(blank=True)
     video_file = models.FileField(upload_to='videos/')
     thumbnail = models.ImageField(upload_to='thumbnails/', blank=True, null=True)
-    uploaded_at = models.DateTimeField(auto_now_add=True)
-    views = models.PositiveIntegerField(default=0)
+    uploaded_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    views = models.PositiveIntegerField(default=0, db_index=True)
     duration = models.IntegerField(default=0, help_text="Duration in seconds")
+
+    class Meta:
+        ordering = ['-uploaded_at']
 
     def __str__(self):
         return self.title
@@ -62,7 +66,12 @@ class VideoReaction(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'video')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'video'],
+                name='unique_user_video_reaction'
+            )
+        ]
 
     def __str__(self):
         return f"{self.user} {self.reaction}d {self.video}"
@@ -79,9 +88,12 @@ class VideoView(models.Model):
     video = models.ForeignKey(
         Video,
         on_delete=models.CASCADE,
-        related_name='view_view_counts'
+        related_name='view_records'
     )
     viewed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-viewed_at']
 
     def __str__(self):
         return f"{self.video.title} viewed"
