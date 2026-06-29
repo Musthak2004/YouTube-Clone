@@ -410,27 +410,24 @@
             <!-- ─ Files ─ -->
             <div class="section-sep">Files</div>
 
+            {{ form.cloudinary_video_id }}
+            {{ form.cloudinary_thumbnail_id }}
+
             <div class="field-group">
-                <label class="field-label" for="{{ form.video_file.id_for_label }}">
+                <label class="field-label">
                     <i class="bi bi-camera-video"></i> Video File
                 </label>
-                <div class="drop-zone" id="videoDrop">
-                    <input type="file"
-                           name="{{ form.video_file.name }}"
-                           id="{{ form.video_file.id_for_label }}"
-                           accept="video/*" required>
+                <div class="drop-zone" id="videoDrop" onclick="openCloudinaryUpload('video')">
                     <div class="drop-inner" id="videoDropInner">
                         <i class="bi bi-cloud-arrow-up drop-icon"></i>
-                        <div class="drop-title">Drag & drop your video here</div>
-                        <div class="drop-hint">or click to browse — MP4, WebM, MOV · Max 500MB</div>
+                        <div class="drop-title">Click to upload video to Cloudinary</div>
+                        <div class="drop-hint">MP4, WebM, MOV — uploaded directly to CDN</div>
                     </div>
                     <div class="video-selected-info" id="videoInfo">
-                        <i class="bi bi-file-play video-file-icon"></i>
+                        <i class="bi bi-check-circle-fill" style="color:#00c853;font-size:1.2rem;"></i>
                         <div>
                             <div class="video-file-name" id="videoName">—</div>
-                            <div class="video-file-size" id="videoSize">—</div>
                         </div>
-                        <i class="bi bi-check-circle-fill ms-auto" style="color:#00c853;font-size:1.2rem;"></i>
                     </div>
                 </div>
                 {% if form.video_file.errors %}
@@ -439,24 +436,20 @@
             </div>
 
             <div class="field-group">
-                <label class="field-label" for="{{ form.thumbnail.id_for_label }}">
+                <label class="field-label">
                     <i class="bi bi-image"></i> Thumbnail
                     <span class="optional-tag">optional</span>
                 </label>
-                <div class="drop-zone" id="thumbDrop">
-                    <input type="file"
-                           name="{{ form.thumbnail.name }}"
-                           id="{{ form.thumbnail.id_for_label }}"
-                           accept="image/*">
+                <div class="drop-zone" id="thumbDrop" onclick="openCloudinaryUpload('image')">
                     <div class="drop-inner" id="thumbDropInner">
                         <i class="bi bi-image drop-icon"></i>
-                        <div class="drop-title">Upload a thumbnail</div>
-                        <div class="drop-hint">Recommended 1280×720 · JPG, PNG · Leave blank for auto</div>
+                        <div class="drop-title">Upload a thumbnail to Cloudinary</div>
+                        <div class="drop-hint">Recommended 1280×720 · JPG, PNG</div>
                     </div>
                 </div>
                 <div class="thumb-preview" id="thumbPreview">
                     <img id="thumbImg" src="" alt="Thumbnail preview">
-                    <div class="thumb-change">Click the area above to change</div>
+                    <div class="thumb-change">Click above to change</div>
                 </div>
                 {% if form.thumbnail.errors %}
                     <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.thumbnail.errors|join:", " }}</div>
@@ -503,42 +496,46 @@
     </div>
 </div>
 
+{% block extra_js %}
+<script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
 <script>
-    // ── Drag & Drop ──
-    function setupDrop(zoneId) {
-        const zone = document.getElementById(zoneId);
-        zone.addEventListener('dragenter', e => { e.preventDefault(); zone.classList.add('dragging'); });
-        zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('dragging'); });
-        zone.addEventListener('dragleave', () => zone.classList.remove('dragging'));
-        zone.addEventListener('drop',      e => { e.preventDefault(); zone.classList.remove('dragging'); });
+    // ── Cloudinary Upload ──
+    let cloudinaryWidget = null;
+
+    function openCloudinaryUpload(type) {
+        const resourceType = type === 'video' ? 'video' : 'image';
+        if (!cloudinaryWidget) {
+            cloudinaryWidget = cloudinary.createUploadWidget({
+                cloudName: 'dj56sanf3',
+                uploadPreset: 'youtube_clone_unsigned',
+                resourceType: resourceType,
+                sources: ['local', 'url', 'camera', 'dropbox'],
+                maxFileSize: 500000000,
+                clientAllowedFormats: type === 'video' ? ['mp4', 'webm', 'mov'] : ['jpg', 'jpeg', 'png', 'webp'],
+                multiple: false,
+                styles: {
+                    palette: { window: '#111', windowBorder: '#333', tabIcon: '#ff0033', action: '#ff0033' }
+                }
+            }, (error, result) => {
+                if (!error && result.event === 'success') {
+                    const info = result.info;
+                    if (type === 'video') {
+                        document.getElementById('{{ form.cloudinary_video_id.id_for_label }}').value = info.public_id;
+                        document.getElementById('videoName').textContent = info.original_filename + '.' + info.format;
+                        document.getElementById('videoDropInner').style.display = 'none';
+                        document.getElementById('videoInfo').classList.add('show');
+                    } else {
+                        document.getElementById('{{ form.cloudinary_thumbnail_id.id_for_label }}').value = info.public_id;
+                        document.getElementById('thumbImg').src = info.secure_url;
+                        document.getElementById('thumbDropInner').style.padding = '12px 24px';
+                        document.getElementById('thumbPreview').classList.add('show');
+                    }
+                }
+            });
+        }
+        cloudinaryWidget.update({ resourceType: resourceType });
+        cloudinaryWidget.open();
     }
-    setupDrop('videoDrop');
-    setupDrop('thumbDrop');
-
-    // ── Video file selected ──
-    const videoInput = document.getElementById('{{ form.video_file.id_for_label }}');
-    videoInput.addEventListener('change', () => {
-        const file = videoInput.files[0];
-        if (!file) return;
-        document.getElementById('videoName').textContent = file.name;
-        document.getElementById('videoSize').textContent = (file.size / (1024*1024)).toFixed(1) + ' MB';
-        document.getElementById('videoDropInner').style.display = 'none';
-        document.getElementById('videoInfo').classList.add('show');
-    });
-
-    // ── Thumbnail preview ──
-    const thumbInput = document.getElementById('{{ form.thumbnail.id_for_label }}');
-    thumbInput.addEventListener('change', () => {
-        const file = thumbInput.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = e => {
-            document.getElementById('thumbImg').src = e.target.result;
-            document.getElementById('thumbDropInner').style.padding = '12px 24px';
-            document.getElementById('thumbPreview').classList.add('show');
-        };
-        reader.readAsDataURL(file);
-    });
 
     // ── Char counters ──
     function setupCounter(inputId, countId, max) {

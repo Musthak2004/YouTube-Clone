@@ -264,8 +264,8 @@
 
                 <!-- Thumbnail -->
                 <a href="{{ item.video.get_absolute_url }}" class="thumb-link">
-                    {% if item.video.thumbnail %}
-                        <img src="{{ item.video.thumbnail.url }}" alt="{{ item.video.title }}" loading="lazy">
+                    {% if item.video.thumbnail_url %}
+                        <img src="{{ item.video.thumbnail_url }}" alt="{{ item.video.title }}" loading="lazy">
                     {% else %}
                         <div class="thumb-placeholder">
                             <i class="bi bi-play-circle"></i>

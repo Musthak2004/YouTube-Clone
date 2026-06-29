@@ -339,8 +339,8 @@
             {% for video in recommended_videos|slice:":6" %}
             <div class="video-card">
                 <a href="{{ video.get_absolute_url }}" class="thumb-wrap" style="display:block;">
-                    {% if video.thumbnail %}
-                        <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" loading="lazy">
+                    {% if video.thumbnail_url %}
+                        <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}" loading="lazy">
                     {% else %}
                         <div class="thumb-placeholder">
                             <i class="bi bi-play-circle"></i>
@@ -388,8 +388,8 @@
         <div class="video-card">
             <!-- Thumbnail -->
             <a href="{{ video.get_absolute_url }}" class="thumb-wrap" style="display:block;">
-                {% if video.thumbnail %}
-                    <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" loading="lazy">
+                {% if video.thumbnail_url %}
+                    <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}" loading="lazy">
                 {% else %}
                     <div class="thumb-placeholder">
                         <i class="bi bi-play-circle"></i>

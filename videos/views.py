@@ -7,6 +7,7 @@ from django.views import View
 
 from subscriptions.models import Subscription
 from .models import Video, VideoView, VideoReaction
+from .forms import VideoUploadForm
 
 class LikedVideosView(LoginRequiredMixin, ListView):
     template_name = 'videos/liked_videos.html'
@@ -123,7 +124,7 @@ class VideoDetailView(DetailView):
 class VideoCreateView(LoginRequiredMixin, CreateView):
     model = Video
     template_name = "videos/video_create.html"
-    fields = ['title', 'description', 'video_file', 'thumbnail']
+    form_class = VideoUploadForm
 
     def form_valid(self, form):
         form.instance.uploader = self.request.user
@@ -146,7 +147,7 @@ class VideoCreateView(LoginRequiredMixin, CreateView):
 class VideoUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Video
     template_name = "videos/video_update.html"
-    fields = ['title', 'description', 'video_file', 'thumbnail']
+    form_class = VideoUploadForm
 
     def form_valid(self, form):
         form.instance.uploader = self.request.user
