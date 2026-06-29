@@ -13,7 +13,9 @@ class CommentListView(LoginRequiredMixin, ListView):
     context_object_name = "comments"
 
     def get_queryset(self):
-        return Comment.objects.filter(
+        return Comment.objects.select_related(
+            'video', 'video__uploader'
+        ).filter(
             user=self.request.user
         ).order_by("-created_at")
 

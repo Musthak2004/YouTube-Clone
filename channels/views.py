@@ -2,7 +2,7 @@ from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
-from django.db.models import Count
+from django.db.models import Count, Sum
 
 from subscriptions.models import Subscription
 from .forms import ChannelForm
@@ -37,7 +37,7 @@ class ChannelDetailView(DetailView):
 
         ctx['video_count'] = channel.videos.count()
 
-        ctx['total_views'] = sum(v.views for v in channel.videos.all())
+        ctx['total_views'] = channel.videos.aggregate(total=Sum('views'))['total'] or 0
 
         ctx['is_subscribed'] = (
             user.is_authenticated and

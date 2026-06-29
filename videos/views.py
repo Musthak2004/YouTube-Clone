@@ -14,10 +14,10 @@ class LikedVideosView(LoginRequiredMixin, ListView):
     paginate_by = 12
 
     def get_queryset(self):
-        return Video.objects.filter(
-            reactions__user=self.request.user,      # reaction → reactions
+        return Video.objects.select_related('uploader').filter(
+            reactions__user=self.request.user,
             reactions__reaction='like'
-        ).order_by('-reactions__id')                # reactions_id → reactions__id (double underscore)
+        ).order_by('-reactions__id')
 
 class VideoReactionView(LoginRequiredMixin, View):
     def post(self, request, pk):
@@ -48,8 +48,10 @@ class VideoListView(ListView):
     model = Video
     template_name = "videos/video_list.html"
     context_object_name = "videos"
-    ordering = ['-uploaded_at']
     paginate_by = 10
+
+    def get_queryset(self):
+        return Video.objects.select_related('uploader', 'channel').order_by('-uploaded_at')
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -62,6 +64,9 @@ class VideoListView(ListView):
 class VideoDetailView(DetailView):
     model = Video
     template_name = 'videos/video_detail.html'
+
+    def get_queryset(self):
+        return Video.objects.select_related('uploader', 'channel')
 
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
