@@ -185,6 +185,9 @@
         cursor: pointer;
         z-index: 10;
     }
+    .file-input-hidden {
+        position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 10;
+    }
     .drop-inner {
         padding: 36px 24px;
         text-align: center;
@@ -417,7 +420,8 @@
                 <label class="field-label">
                     <i class="bi bi-camera-video"></i> Video File
                 </label>
-                <div class="drop-zone" id="videoDrop" onclick="openCloudinaryUpload('video')">
+                <div class="drop-zone" id="videoDrop">
+                    <input type="file" id="videoFileInput" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov" class="file-input-hidden">
                     <div class="drop-inner" id="videoDropInner">
                         <i class="bi bi-cloud-arrow-up drop-icon"></i>
                         <div class="drop-title">Click to upload video to Cloudinary</div>
@@ -440,7 +444,8 @@
                     <i class="bi bi-image"></i> Thumbnail
                     <span class="optional-tag">optional</span>
                 </label>
-                <div class="drop-zone" id="thumbDrop" onclick="openCloudinaryUpload('image')">
+                <div class="drop-zone" id="thumbDrop">
+                    <input type="file" id="thumbFileInput" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" class="file-input-hidden">
                     <div class="drop-inner" id="thumbDropInner">
                         <i class="bi bi-image drop-icon"></i>
                         <div class="drop-title">Upload a thumbnail to Cloudinary</div>
@@ -496,94 +501,132 @@
     </div>
 </div>
 
-<script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
 <script>
-    // ── Cloudinary Upload ──
-    let cloudinaryWidget = null;
+    const CLOUD_NAME = '{{ cloudinary_cloud_name }}';
+    const UPLOAD_PRESET = 'youtube_clone_unsigned';
 
-    function openCloudinaryUpload(type) {
-        const resourceType = type === 'video' ? 'video' : 'image';
-        if (!cloudinaryWidget) {
-            cloudinaryWidget = cloudinary.createUploadWidget({
-                cloudName: 'dj56sanf3',
-                uploadPreset: 'youtube_clone_unsigned',
-                resourceType: resourceType,
-                sources: ['local', 'url', 'camera', 'dropbox'],
-                maxFileSize: 500000000,
-                clientAllowedFormats: type === 'video' ? ['mp4', 'webm', 'mov'] : ['jpg', 'jpeg', 'png', 'webp'],
-                multiple: false,
-                styles: {
-                    palette: { window: '#111', windowBorder: '#333', tabIcon: '#ff0033', action: '#ff0033' }
-                }
-            }, (error, result) => {
-                if (!error && result.event === 'success') {
-                    const info = result.info;
-                    if (type === 'video') {
-                        document.getElementById('{{ form.cloudinary_video_id.id_for_label }}').value = info.public_id;
-                        document.getElementById('videoName').textContent = info.original_filename + '.' + info.format;
-                        document.getElementById('videoDropInner').style.display = 'none';
-                        document.getElementById('videoInfo').classList.add('show');
-                    } else {
-                        document.getElementById('{{ form.cloudinary_thumbnail_id.id_for_label }}').value = info.public_id;
-                        document.getElementById('thumbImg').src = info.secure_url;
-                        document.getElementById('thumbDropInner').style.padding = '12px 24px';
-                        document.getElementById('thumbPreview').classList.add('show');
+    function getEl(id) { return document.getElementById(id); }
+
+    // ── Upload file directly to Cloudinary via XHR ──
+    function uploadToCloudinary(file, resourceType, callbacks) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${resourceType}/upload`, true);
+
+        xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable && callbacks.onProgress)
+                callbacks.onProgress(Math.round((e.loaded / e.total) * 100));
+        };
+        xhr.onload = () => {
+            if (xhr.status === 200) {
+                callbacks.onComplete(JSON.parse(xhr.responseText));
+            } else {
+                let msg = `Upload failed (${xhr.status})`;
+                try { msg = JSON.parse(xhr.responseText).error?.message || msg; } catch (_) {}
+                callbacks.onError(msg);
+            }
+        };
+        xhr.onerror = () => callbacks.onError('Network error — could not reach Cloudinary');
+
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('upload_preset', UPLOAD_PRESET);
+        xhr.send(fd);
+    }
+
+    // ── Wire file input → Cloudinary upload ──
+    function wireUpload(inputId, resourceType, opts) {
+        const input = getEl(inputId);
+        if (!input) return;
+        input.addEventListener('change', () => {
+            const file = input.files?.[0];
+            if (!file) return;
+
+            const submitBtn = getEl('submitBtn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Uploading to Cloudinary...';
+            }
+
+            uploadToCloudinary(file, resourceType, {
+                onProgress: (pct) => {
+                    const fill = getEl('progressFill');
+                    const label = getEl('progressLabel');
+                    const prog = getEl('uploadProgress');
+                    if (fill && label && prog) {
+                        prog.classList.add('show');
+                        fill.style.width = pct + '%';
+                        label.textContent = opts.progressLabel ? opts.progressLabel(pct) : `Uploading... ${pct}%`;
+                    }
+                },
+                onComplete: (data) => {
+                    opts.onComplete(data);
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> Upload Video';
+                    }
+                },
+                onError: (msg) => {
+                    alert('Upload error: ' + msg);
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> Upload Video';
                     }
                 }
             });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Video upload
+        wireUpload('videoFileInput', 'video', {
+            progressLabel: (pct) => `Uploading video... ${pct}%`,
+            onComplete: (data) => {
+                getEl('{{ form.cloudinary_video_id.id_for_label }}').value = data.public_id;
+                getEl('videoName').textContent = data.original_filename + '.' + data.format;
+                getEl('videoDropInner').style.display = 'none';
+                getEl('videoInfo').classList.add('show');
+            }
+        });
+
+        // Thumbnail upload
+        wireUpload('thumbFileInput', 'image', {
+            progressLabel: (pct) => `Uploading thumbnail... ${pct}%`,
+            onComplete: (data) => {
+                getEl('{{ form.cloudinary_thumbnail_id.id_for_label }}').value = data.public_id;
+                getEl('thumbImg').src = data.secure_url;
+                getEl('thumbDropInner').style.display = 'none';
+                getEl('thumbPreview').classList.add('show');
+            }
+        });
+
+        // ── Char counters ──
+        function setupCounter(inputId, countId, max) {
+            const el = getEl(inputId);
+            const ct = getEl(countId);
+            if (!el) return;
+            el.addEventListener('input', () => {
+                const len = el.value.length;
+                ct.textContent = `${len} / ${max}`;
+                ct.className = 'char-count' + (len > max * 0.9 ? (len >= max ? ' over' : ' warn') : '');
+            });
         }
-        cloudinaryWidget.update({ resourceType: resourceType });
-        cloudinaryWidget.open();
-    }
+        setupCounter('{{ form.title.id_for_label }}',       'titleCount', 100);
+        setupCounter('{{ form.description.id_for_label }}', 'descCount',  500);
 
-    // ── Char counters ──
-    function setupCounter(inputId, countId, max) {
-        const el    = document.getElementById(inputId);
-        const count = document.getElementById(countId);
-        if (!el) return;
-        el.addEventListener('input', () => {
-            const len = el.value.length;
-            count.textContent = `${len} / ${max}`;
-            count.className = 'char-count' + (len > max * 0.9 ? (len >= max ? ' over' : ' warn') : '');
+        // ── Tags preview ──
+        document.querySelectorAll('.tag-option').forEach(cb => {
+            cb.addEventListener('change', () => {
+                const checked = [...document.querySelectorAll('.tag-option:checked')];
+                const preview = getEl('tagsPreview');
+                if (!preview) return;
+                preview.innerHTML = checked.length === 0
+                    ? '<span style="color:var(--muted);">No tags selected</span>'
+                    : checked.map(c => {
+                        const lbl = document.querySelector(`label[for="${c.id}"]`).textContent;
+                        return `<span class="tag-badge">${lbl}</span>`;
+                      }).join('');
+            });
         });
-    }
-    setupCounter('{{ form.title.id_for_label }}',       'titleCount', 100);
-    setupCounter('{{ form.description.id_for_label }}', 'descCount',  500);
-
-    // ── Tags preview ──
-    document.querySelectorAll('.tag-option').forEach(cb => {
-        cb.addEventListener('change', () => {
-            const checked = [...document.querySelectorAll('.tag-option:checked')];
-            const preview = document.getElementById('tagsPreview');
-            if (!preview) return;
-            preview.innerHTML = checked.length === 0
-                ? '<span style="color:var(--muted);">No tags selected</span>'
-                : checked.map(c => {
-                    const lbl = document.querySelector(`label[for="${c.id}"]`).textContent;
-                    return `<span class="tag-badge">${lbl}</span>`;
-                  }).join('');
-        });
-    });
-
-    // ── Submit animation ──
-    document.getElementById('uploadForm').addEventListener('submit', () => {
-        const btn  = document.getElementById('submitBtn');
-        const prog = document.getElementById('uploadProgress');
-        const fill = document.getElementById('progressFill');
-        const lbl  = document.getElementById('progressLabel');
-
-        btn.disabled = true;
-        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Uploading...';
-        prog.classList.add('show');
-
-        let w = 0;
-        const labels = ['Preparing upload...', 'Uploading file...', 'Processing...', 'Almost done...'];
-        const iv = setInterval(() => {
-            w = Math.min(w + Math.random() * 12, 90);
-            fill.style.width = w + '%';
-            lbl.textContent  = labels[Math.floor(w / 25)] || 'Almost done...';
-            if (w >= 90) clearInterval(iv);
-        }, 300);
     });
 </script>
 {% endblock %}

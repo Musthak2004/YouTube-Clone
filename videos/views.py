@@ -126,6 +126,12 @@ class VideoCreateView(LoginRequiredMixin, CreateView):
     template_name = "videos/video_create.html"
     form_class = VideoUploadForm
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        from django.conf import settings
+        ctx['cloudinary_cloud_name'] = settings.CLOUDINARY_STORAGE.get('CLOUD_NAME', '')
+        return ctx
+
     def form_valid(self, form):
         form.instance.uploader = self.request.user
         if hasattr(self.request.user, 'channel'):
@@ -148,6 +154,12 @@ class VideoUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Video
     template_name = "videos/video_update.html"
     form_class = VideoUploadForm
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        from django.conf import settings
+        ctx['cloudinary_cloud_name'] = settings.CLOUDINARY_STORAGE.get('CLOUD_NAME', '')
+        return ctx
 
     def form_valid(self, form):
         form.instance.uploader = self.request.user

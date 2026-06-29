@@ -235,6 +235,25 @@
     }
     .unsaved-badge.show { display: inline-block; }
 
+    /* ── PROGRESS ── */
+    .upload-progress {
+        display: none; margin: 20px 0;
+    }
+    .upload-progress.show { display: block; }
+    .progress-track {
+        height: 5px; background: rgba(255,255,255,0.06);
+        border-radius: 99px; overflow: hidden;
+    }
+    .progress-fill {
+        height: 100%; width: 0; border-radius: 99px;
+        background: linear-gradient(90deg, #ff5500, #ff9955);
+        transition: width 0.3s ease;
+    }
+    .progress-label {
+        font-size: 0.78rem; color: var(--muted2); margin-top: 7px;
+        text-align: center;
+    }
+
     /* ── BUTTONS ── */
     .btn-row {
         display: flex; gap: 10px; margin-top: 28px;
@@ -373,7 +392,8 @@
                     <i class="bi bi-camera-video"></i> Replace Video File
                     <span class="optional-tag">optional</span>
                 </label>
-                <div class="drop-zone" id="videoDrop" onclick="openCloudinaryUpload('video')">
+                <div class="drop-zone" id="videoDrop">
+                    <input type="file" id="videoFileInput" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov">
                     <div class="drop-inner" id="videoDropInner">
                         <i class="bi bi-cloud-arrow-up drop-icon"></i>
                         <div class="drop-title">Click to upload a new video to Cloudinary</div>
@@ -398,7 +418,8 @@
                     <i class="bi bi-image"></i> Replace Thumbnail
                     <span class="optional-tag">optional</span>
                 </label>
-                <div class="drop-zone" id="thumbDrop" onclick="openCloudinaryUpload('image')">
+                <div class="drop-zone" id="thumbDrop">
+                    <input type="file" id="thumbFileInput" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp">
                     <div class="drop-inner" id="thumbDropInner">
                         <i class="bi bi-image drop-icon"></i>
                         <div class="drop-title">Upload a new thumbnail to Cloudinary</div>
@@ -415,9 +436,17 @@
                 {% endif %}
             </div>
 
+            <!-- Progress -->
+            <div class="upload-progress" id="uploadProgress">
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-label" id="progressLabel">Preparing upload...</div>
+            </div>
+
             <!-- Buttons -->
             <div class="btn-row">
-                <button type="submit" class="btn-save">
+                <button type="submit" class="btn-save" id="saveBtn">
                     <i class="bi bi-check2-circle"></i> Save Changes
                 </button>
                 <a href="{{ object.get_absolute_url }}" class="btn-cancel">
@@ -429,85 +458,133 @@
     </div>
 </div>
 
-<script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
 <script>
+    const CLOUD_NAME = '{{ cloudinary_cloud_name }}';
+    const UPLOAD_PRESET = 'youtube_clone_unsigned';
+
+    function getEl(id) { return document.getElementById(id); }
+
+    // ── Upload file directly to Cloudinary via XHR ──
+    function uploadToCloudinary(file, resourceType, callbacks) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${resourceType}/upload`, true);
+
+        xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable && callbacks.onProgress)
+                callbacks.onProgress(Math.round((e.loaded / e.total) * 100));
+        };
+        xhr.onload = () => {
+            if (xhr.status === 200) {
+                callbacks.onComplete(JSON.parse(xhr.responseText));
+            } else {
+                let msg = `Upload failed (${xhr.status})`;
+                try { msg = JSON.parse(xhr.responseText).error?.message || msg; } catch (_) {}
+                callbacks.onError(msg);
+            }
+        };
+        xhr.onerror = () => callbacks.onError('Network error — could not reach Cloudinary');
+
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('upload_preset', UPLOAD_PRESET);
+        xhr.send(fd);
+    }
+
     // ── Unsaved changes indicator ──
-    const unsavedBadge = document.getElementById('unsavedBadge');
-    const originalTitle = document.getElementById('{{ form.title.id_for_label }}').value;
-    const originalDesc  = document.getElementById('{{ form.description.id_for_label }}').value;
+    const unsavedBadge = getEl('unsavedBadge');
+    const originalTitle = getEl('{{ form.title.id_for_label }}').value;
+    const originalDesc  = getEl('{{ form.description.id_for_label }}').value;
 
     function checkChanges() {
-        const titleChanged = document.getElementById('{{ form.title.id_for_label }}').value !== originalTitle;
-        const descChanged  = document.getElementById('{{ form.description.id_for_label }}').value !== originalDesc;
+        const titleChanged = getEl('{{ form.title.id_for_label }}').value !== originalTitle;
+        const descChanged  = getEl('{{ form.description.id_for_label }}').value !== originalDesc;
         unsavedBadge.classList.toggle('show', titleChanged || descChanged);
     }
 
-    document.getElementById('{{ form.title.id_for_label }}').addEventListener('input', checkChanges);
-    document.getElementById('{{ form.description.id_for_label }}').addEventListener('input', checkChanges);
+    getEl('{{ form.title.id_for_label }}').addEventListener('input', checkChanges);
+    getEl('{{ form.description.id_for_label }}').addEventListener('input', checkChanges);
 
     // ── Char counters ──
     function setupCounter(inputId, countId, max) {
-        const el    = document.getElementById(inputId);
-        const count = document.getElementById(countId);
+        const el = getEl(inputId);
+        const ct = getEl(countId);
         if (!el) return;
         el.addEventListener('input', () => {
             const len = el.value.length;
-            count.textContent = `${len} / ${max}`;
-            count.className = 'char-count' + (len > max * 0.9 ? (len >= max ? ' over' : ' warn') : '');
+            ct.textContent = `${len} / ${max}`;
+            ct.className = 'char-count' + (len > max * 0.9 ? (len >= max ? ' over' : ' warn') : '');
         });
     }
     setupCounter('{{ form.title.id_for_label }}',       'titleCount', 100);
     setupCounter('{{ form.description.id_for_label }}', 'descCount',  500);
 
-    // ── Drag & Drop ──
-    function setupDrop(zoneId) {
-        const zone = document.getElementById(zoneId);
-        zone.addEventListener('dragenter', e => { e.preventDefault(); zone.classList.add('dragging'); });
-        zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('dragging'); });
-        zone.addEventListener('dragleave', () => zone.classList.remove('dragging'));
-        zone.addEventListener('drop',      e => { e.preventDefault(); zone.classList.remove('dragging'); });
-    }
-    setupDrop('videoDrop');
-    setupDrop('thumbDrop');
+    // ── Wire file input → Cloudinary upload ──
+    function wireUpload(inputId, resourceType, opts) {
+        const input = getEl(inputId);
+        if (!input) return;
+        input.addEventListener('change', () => {
+            const file = input.files?.[0];
+            if (!file) return;
 
-    // ── Cloudinary Upload ──
-    let cloudinaryWidget = null;
+            const saveBtn = getEl('saveBtn');
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Uploading to Cloudinary...';
+            }
 
-    function openCloudinaryUpload(type) {
-        const resourceType = type === 'video' ? 'video' : 'image';
-        if (!cloudinaryWidget) {
-            cloudinaryWidget = cloudinary.createUploadWidget({
-                cloudName: 'dj56sanf3',
-                uploadPreset: 'youtube_clone_unsigned',
-                resourceType: resourceType,
-                sources: ['local', 'url', 'camera', 'dropbox'],
-                maxFileSize: 500000000,
-                clientAllowedFormats: type === 'video' ? ['mp4', 'webm', 'mov'] : ['jpg', 'jpeg', 'png', 'webp'],
-                multiple: false,
-                styles: {
-                    palette: { window: '#111', windowBorder: '#333', tabIcon: '#ff0033', action: '#ff0033' }
-                }
-            }, (error, result) => {
-                if (!error && result.event === 'success') {
-                    const info = result.info;
-                    if (type === 'video') {
-                        document.getElementById('{{ form.cloudinary_video_id.id_for_label }}').value = info.public_id;
-                        document.getElementById('videoName').textContent = info.original_filename + '.' + info.format;
-                        document.getElementById('videoDropInner').style.display = 'none';
-                        document.getElementById('videoInfo').classList.add('show');
-                    } else {
-                        document.getElementById('{{ form.cloudinary_thumbnail_id.id_for_label }}').value = info.public_id;
-                        document.getElementById('thumbNewImg').src = info.secure_url;
-                        document.getElementById('thumbDropInner').style.padding = '10px 20px';
-                        document.getElementById('thumbNewPreview').classList.add('show');
+            uploadToCloudinary(file, resourceType, {
+                onProgress: (pct) => {
+                    const fill = getEl('progressFill');
+                    const label = getEl('progressLabel');
+                    const prog = getEl('uploadProgress');
+                    if (fill && label && prog) {
+                        prog.classList.add('show');
+                        fill.style.width = pct + '%';
+                        label.textContent = opts.progressLabel ? opts.progressLabel(pct) : `Uploading... ${pct}%`;
+                    }
+                },
+                onComplete: (data) => {
+                    opts.onComplete(data);
+                    if (saveBtn) {
+                        saveBtn.disabled = false;
+                        saveBtn.innerHTML = '<i class="bi bi-check2-circle"></i> Save Changes';
                     }
                     unsavedBadge.classList.add('show');
+                },
+                onError: (msg) => {
+                    alert('Upload error: ' + msg);
+                    if (saveBtn) {
+                        saveBtn.disabled = false;
+                        saveBtn.innerHTML = '<i class="bi bi-check2-circle"></i> Save Changes';
+                    }
                 }
             });
-        }
-        cloudinaryWidget.update({ resourceType: resourceType });
-        cloudinaryWidget.open();
+        });
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Video upload
+        wireUpload('videoFileInput', 'video', {
+            progressLabel: (pct) => `Uploading video... ${pct}%`,
+            onComplete: (data) => {
+                getEl('{{ form.cloudinary_video_id.id_for_label }}').value = data.public_id;
+                getEl('videoName').textContent = data.original_filename + '.' + data.format;
+                getEl('videoDropInner').style.display = 'none';
+                getEl('videoInfo').classList.add('show');
+            }
+        });
+
+        // Thumbnail upload
+        wireUpload('thumbFileInput', 'image', {
+            progressLabel: (pct) => `Uploading thumbnail... ${pct}%`,
+            onComplete: (data) => {
+                getEl('{{ form.cloudinary_thumbnail_id.id_for_label }}').value = data.public_id;
+                getEl('thumbNewImg').src = data.secure_url;
+                getEl('thumbDropInner').style.display = 'none';
+                getEl('thumbNewPreview').classList.add('show');
+            }
+        });
+    });
 
     // ── Warn on leave with unsaved changes ──
     window.addEventListener('beforeunload', e => {
@@ -518,7 +595,7 @@
     });
 
     // ── Don't warn when submitting ──
-    document.getElementById('editForm').addEventListener('submit', () => {
+    getEl('editForm').addEventListener('submit', () => {
         window.onbeforeunload = null;
     });
 </script>
