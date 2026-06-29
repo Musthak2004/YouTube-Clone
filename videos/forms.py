@@ -8,8 +8,8 @@ class VideoUploadForm(forms.ModelForm):
         fields = [
             'title',
             'description',
-            'cloudinary_video_id',
-            'cloudinary_thumbnail_id',
+            'video_file',
+            'thumbnail',
         ]
 
         widgets = {
@@ -23,13 +23,4 @@ class VideoUploadForm(forms.ModelForm):
                 'rows': 4,
                 'placeholder': 'Enter video description',
             }),
-
-            'cloudinary_video_id': forms.HiddenInput(),
-            'cloudinary_thumbnail_id': forms.HiddenInput(),
         }
-
-    def clean(self):
-        cleaned = super().clean()
-        if not cleaned.get('cloudinary_video_id'):
-            raise forms.ValidationError("Please upload a video using the Cloudinary uploader.")
-        return cleaned

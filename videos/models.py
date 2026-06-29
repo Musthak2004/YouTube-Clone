@@ -1,7 +1,6 @@
 from django.db import models
 from django.conf import settings
 from django.urls import reverse
-from cloudinary.utils import cloudinary_url
 
 
 class Video(models.Model):
@@ -22,8 +21,6 @@ class Video(models.Model):
     description = models.TextField(blank=True)
     video_file = models.FileField(upload_to='videos/', blank=True, null=True)
     thumbnail = models.ImageField(upload_to='thumbnails/', blank=True, null=True)
-    cloudinary_video_id = models.CharField(max_length=255, blank=True, null=True, db_index=True)
-    cloudinary_thumbnail_id = models.CharField(max_length=255, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True, db_index=True)
     views = models.PositiveIntegerField(default=0, db_index=True)
     duration = models.IntegerField(default=0, help_text="Duration in seconds")
@@ -39,27 +36,12 @@ class Video(models.Model):
 
     @property
     def video_url(self):
-        if self.cloudinary_video_id:
-            url, _ = cloudinary_url(
-                self.cloudinary_video_id,
-                resource_type='video',
-                secure=True
-            )
-            return url
         if self.video_file:
             return self.video_file.url
         return None
 
     @property
     def thumbnail_url(self):
-        if self.cloudinary_thumbnail_id:
-            url, _ = cloudinary_url(
-                self.cloudinary_thumbnail_id,
-                resource_type='image',
-                secure=True,
-                transformation=[{'width': 320, 'height': 180, 'crop': 'fill'}]
-            )
-            return url
         if self.thumbnail:
             return self.thumbnail.url
         return None

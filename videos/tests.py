@@ -22,7 +22,6 @@ def make_user(username, password='pass', **kwargs):
         'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
         'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
     },
-    CLOUDINARY_STORAGE=None,
 )
 class VideoListTests(TestCase):
     def test_video_list_status_code(self):
@@ -53,7 +52,6 @@ class VideoListTests(TestCase):
         'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
         'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
     },
-    CLOUDINARY_STORAGE=None,
 )
 class VideoCreateTests(TestCase):
     def setUp(self):
@@ -112,7 +110,6 @@ class VideoCreateTests(TestCase):
         'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
         'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
     },
-    CLOUDINARY_STORAGE=None,
 )
 class VideoDetailTests(TestCase):
     def setUp(self):
@@ -145,7 +142,6 @@ class VideoDetailTests(TestCase):
         'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
         'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
     },
-    CLOUDINARY_STORAGE=None,
 )
 class VideoReactionTests(TestCase):
     def setUp(self):
@@ -216,7 +212,6 @@ class VideoReactionTests(TestCase):
         'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
         'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
     },
-    CLOUDINARY_STORAGE=None,
 )
 class VideoUpdateDeleteTests(TestCase):
     def setUp(self):
@@ -270,7 +265,6 @@ class VideoUpdateDeleteTests(TestCase):
         'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
         'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
     },
-    CLOUDINARY_STORAGE=None,
 )
 class LikedVideosTests(TestCase):
     def setUp(self):

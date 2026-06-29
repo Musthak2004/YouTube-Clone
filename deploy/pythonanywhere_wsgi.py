@@ -22,9 +22,6 @@ from pathlib import Path
 # os.environ['DJANGO_DEBUG']            = 'False'
 # os.environ['DJANGO_ALLOWED_HOSTS']    = 'yourdomain.pythonanywhere.com,localhost,127.0.0.1'
 # os.environ['DATABASE_URL']            = 'mysql://user:pass@host/dbname'
-# os.environ['CLOUDINARY_CLOUD_NAME']   = 'your-cloud-name'
-# os.environ['CLOUDINARY_API_KEY']      = 'your-api-key'
-# os.environ['CLOUDINARY_API_SECRET']   = 'your-api-secret'
 
 
 # ── Option B: Load from .env File ────────────────────────────────────────────

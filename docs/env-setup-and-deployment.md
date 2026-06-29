@@ -59,9 +59,7 @@ cp .env.example .env
 | `DJANGO_SECRET_KEY` | Generate with `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"` |
 | `DJANGO_DEBUG` | `True` for local dev, `False` for production |
 | `DJANGO_ALLOWED_HOSTS` | Comma-separated hostnames (e.g. `localhost,127.0.0.1`) |
-| `CLOUDINARY_CLOUD_NAME` | From Cloudinary Dashboard |
-| `CLOUDINARY_API_KEY` | From Cloudinary Dashboard |
-| `CLOUDINARY_API_SECRET` | From Cloudinary Dashboard |
+| *(no additional vars needed for local file storage)* | |
 
 ### 1c. Optional Variables
 
@@ -174,7 +172,7 @@ Navigate there via the **Web** tab → **Code** section → click the WSGI file 
 ### 3d. Also configure:
 
 1. **Virtualenv**: Web tab → Virtualenv → enter `/home/yourusername/.virtualenvs/venv-name`
-2. **Static files** (if not using Cloudinary):
+2. **Static files**:
    - URL: `/static/`
    - Directory: `/home/yourusername/YouTube-Clone/staticfiles`
 3. **Source code**: `/home/yourusername/YouTube-Clone`

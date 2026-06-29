@@ -383,65 +383,38 @@
             <!-- ─ Files ─ -->
             <div class="section-sep">Replace Files</div>
 
-            {{ form.cloudinary_video_id }}
-            {{ form.cloudinary_thumbnail_id }}
-
-            <!-- Video File -->
             <div class="field-group">
-                <label class="field-label">
+                <label class="field-label" for="{{ form.video_file.id_for_label }}">
                     <i class="bi bi-camera-video"></i> Replace Video File
                     <span class="optional-tag">optional</span>
                 </label>
-                <div class="drop-zone" id="videoDrop">
-                    <input type="file" id="videoFileInput" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov">
-                    <div class="drop-inner" id="videoDropInner">
-                        <i class="bi bi-cloud-arrow-up drop-icon"></i>
-                        <div class="drop-title">Click to upload a new video to Cloudinary</div>
-                        <div class="drop-hint">MP4, WebM, MOV</div>
-                        <div class="drop-keep"><i class="bi bi-check-circle-fill"></i> Current video kept if left blank</div>
-                    </div>
-                    <div class="file-selected-bar" id="videoInfo">
-                        <i class="bi bi-check-circle-fill" style="color:#00c853;font-size:1.1rem;"></i>
-                        <div>
-                            <div class="file-name" id="videoName">—</div>
-                        </div>
-                    </div>
+                <div class="field-wrap">
+                    <input type="file"
+                           name="{{ form.video_file.name }}"
+                           class="field-input"
+                           id="{{ form.video_file.id_for_label }}"
+                           accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov">
                 </div>
                 {% if form.video_file.errors %}
                     <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.video_file.errors|join:", " }}</div>
                 {% endif %}
             </div>
 
-            <!-- Thumbnail -->
             <div class="field-group">
-                <label class="field-label">
+                <label class="field-label" for="{{ form.thumbnail.id_for_label }}">
                     <i class="bi bi-image"></i> Replace Thumbnail
                     <span class="optional-tag">optional</span>
                 </label>
-                <div class="drop-zone" id="thumbDrop">
-                    <input type="file" id="thumbFileInput" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp">
-                    <div class="drop-inner" id="thumbDropInner">
-                        <i class="bi bi-image drop-icon"></i>
-                        <div class="drop-title">Upload a new thumbnail to Cloudinary</div>
-                        <div class="drop-hint">Recommended 1280×720 · JPG, PNG</div>
-                        <div class="drop-keep"><i class="bi bi-check-circle-fill"></i> Current thumbnail kept if left blank</div>
-                    </div>
-                </div>
-                <div class="thumb-new-preview" id="thumbNewPreview">
-                    <img id="thumbNewImg" src="" alt="New thumbnail preview">
-                    <div class="thumb-change-hint">New thumbnail selected — click above to change</div>
+                <div class="field-wrap">
+                    <input type="file"
+                           name="{{ form.thumbnail.name }}"
+                           class="field-input"
+                           id="{{ form.thumbnail.id_for_label }}"
+                           accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp">
                 </div>
                 {% if form.thumbnail.errors %}
                     <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.thumbnail.errors|join:", " }}</div>
                 {% endif %}
-            </div>
-
-            <!-- Progress -->
-            <div class="upload-progress" id="uploadProgress">
-                <div class="progress-track">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-                <div class="progress-label" id="progressLabel">Preparing upload...</div>
             </div>
 
             <!-- Buttons -->
@@ -459,36 +432,7 @@
 </div>
 
 <script>
-    const CLOUD_NAME = '{{ cloudinary_cloud_name }}';
-    const UPLOAD_PRESET = 'youtube_clone_unsigned';
-
     function getEl(id) { return document.getElementById(id); }
-
-    // ── Upload file directly to Cloudinary via XHR ──
-    function uploadToCloudinary(file, resourceType, callbacks) {
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${resourceType}/upload`, true);
-
-        xhr.upload.onprogress = (e) => {
-            if (e.lengthComputable && callbacks.onProgress)
-                callbacks.onProgress(Math.round((e.loaded / e.total) * 100));
-        };
-        xhr.onload = () => {
-            if (xhr.status === 200) {
-                callbacks.onComplete(JSON.parse(xhr.responseText));
-            } else {
-                let msg = `Upload failed (${xhr.status})`;
-                try { msg = JSON.parse(xhr.responseText).error?.message || msg; } catch (_) {}
-                callbacks.onError(msg);
-            }
-        };
-        xhr.onerror = () => callbacks.onError('Network error — could not reach Cloudinary');
-
-        const fd = new FormData();
-        fd.append('file', file);
-        fd.append('upload_preset', UPLOAD_PRESET);
-        xhr.send(fd);
-    }
 
     // ── Unsaved changes indicator ──
     const unsavedBadge = getEl('unsavedBadge');
@@ -517,74 +461,6 @@
     }
     setupCounter('{{ form.title.id_for_label }}',       'titleCount', 100);
     setupCounter('{{ form.description.id_for_label }}', 'descCount',  500);
-
-    // ── Wire file input → Cloudinary upload ──
-    function wireUpload(inputId, resourceType, opts) {
-        const input = getEl(inputId);
-        if (!input) return;
-        input.addEventListener('change', () => {
-            const file = input.files?.[0];
-            if (!file) return;
-
-            const saveBtn = getEl('saveBtn');
-            if (saveBtn) {
-                saveBtn.disabled = true;
-                saveBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Uploading to Cloudinary...';
-            }
-
-            uploadToCloudinary(file, resourceType, {
-                onProgress: (pct) => {
-                    const fill = getEl('progressFill');
-                    const label = getEl('progressLabel');
-                    const prog = getEl('uploadProgress');
-                    if (fill && label && prog) {
-                        prog.classList.add('show');
-                        fill.style.width = pct + '%';
-                        label.textContent = opts.progressLabel ? opts.progressLabel(pct) : `Uploading... ${pct}%`;
-                    }
-                },
-                onComplete: (data) => {
-                    opts.onComplete(data);
-                    if (saveBtn) {
-                        saveBtn.disabled = false;
-                        saveBtn.innerHTML = '<i class="bi bi-check2-circle"></i> Save Changes';
-                    }
-                    unsavedBadge.classList.add('show');
-                },
-                onError: (msg) => {
-                    alert('Upload error: ' + msg);
-                    if (saveBtn) {
-                        saveBtn.disabled = false;
-                        saveBtn.innerHTML = '<i class="bi bi-check2-circle"></i> Save Changes';
-                    }
-                }
-            });
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        // Video upload
-        wireUpload('videoFileInput', 'video', {
-            progressLabel: (pct) => `Uploading video... ${pct}%`,
-            onComplete: (data) => {
-                getEl('{{ form.cloudinary_video_id.id_for_label }}').value = data.public_id;
-                getEl('videoName').textContent = data.original_filename + '.' + data.format;
-                getEl('videoDropInner').style.display = 'none';
-                getEl('videoInfo').classList.add('show');
-            }
-        });
-
-        // Thumbnail upload
-        wireUpload('thumbFileInput', 'image', {
-            progressLabel: (pct) => `Uploading thumbnail... ${pct}%`,
-            onComplete: (data) => {
-                getEl('{{ form.cloudinary_thumbnail_id.id_for_label }}').value = data.public_id;
-                getEl('thumbNewImg').src = data.secure_url;
-                getEl('thumbDropInner').style.display = 'none';
-                getEl('thumbNewPreview').classList.add('show');
-            }
-        });
-    });
 
     // ── Warn on leave with unsaved changes ──
     window.addEventListener('beforeunload', e => {
