@@ -2,6 +2,7 @@ from django.views.generic import ListView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth import get_user_model
+from channels.models import Channel
 
 from .models import Subscription
 
@@ -21,14 +22,14 @@ class SubscriptionListView(LoginRequiredMixin, ListView):
 
 class ToggleSubscriptionView(LoginRequiredMixin, View):
     def post(self, request, channel_pk):
-        channel = get_object_or_404(User, pk=channel_pk)
+        channel_user = get_object_or_404(User, pk=channel_pk)
 
-        if request.user == channel:
-            return redirect(request.META.get("HTTP_REFERER", "/"))
+        if request.user == channel_user:
+            return redirect("video_list")
 
         subscription = Subscription.objects.filter(
             user=request.user,
-            channel=channel
+            channel=channel_user
         )
 
         if subscription.exists():
@@ -36,7 +37,10 @@ class ToggleSubscriptionView(LoginRequiredMixin, View):
         else:
             Subscription.objects.create(
                 user=request.user,
-                channel=channel
+                channel=channel_user
             )
 
-        return redirect(request.META.get("HTTP_REFERER", "/"))
+        channel = Channel.objects.filter(owner=channel_user).first()
+        if channel:
+            return redirect("channel_detail", pk=channel.pk)
+        return redirect("video_list")

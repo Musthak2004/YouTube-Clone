@@ -62,4 +62,4 @@ class ClearSearchHistoryView(View):
 class DeleteSearchHistoryView(View):
     def post(self, request, pk):
         SearchHistory.objects.filter(pk=pk, user=request.user).delete()
-        return redirect(request.META.get('HTTP_REFERER', 'search'))
+        return redirect('search')
