@@ -15,6 +15,28 @@
 
     .list-page { padding: 4px 0 60px; }
 
+    .recommended-section {
+        margin-bottom: 32px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--text);
+        margin: 0 0 16px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .section-title i {
+        color: var(--accent);
+        font-size: 0.95rem;
+    }
+
     /* ── FILTER CHIPS ── */
     .filter-row {
         display: flex;
@@ -310,7 +332,56 @@
         <button class="chip">New</button>
     </div>
 
-    <!-- Grid -->
+    {% if recommended_videos %}
+    <section class="recommended-section">
+        <h2 class="section-title"><i class="bi bi-star-fill"></i> Recommended for you</h2>
+        <div class="videos-grid">
+            {% for video in recommended_videos|slice:":6" %}
+            <div class="video-card">
+                <a href="{{ video.get_absolute_url }}" class="thumb-wrap" style="display:block;">
+                    {% if video.thumbnail %}
+                        <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" loading="lazy">
+                    {% else %}
+                        <div class="thumb-placeholder">
+                            <i class="bi bi-play-circle"></i>
+                        </div>
+                    {% endif %}
+                    <div class="thumb-overlay">
+                        <i class="bi bi-play-circle-fill"></i>
+                    </div>
+                </a>
+                <div class="card-body-row">
+                    <a href="#">
+                        {% if video.uploader.profile_picture %}
+                            <img src="{{ video.uploader.profile_picture.url }}"
+                                 class="uploader-avatar"
+                                 alt="{{ video.uploader.username }}">
+                        {% else %}
+                            <div class="avatar-fallback">
+                                {{ video.uploader.username|slice:":1"|upper }}
+                            </div>
+                        {% endif %}
+                    </a>
+                    <div class="card-meta">
+                        <a href="{{ video.get_absolute_url }}" class="video-title-text">
+                            {{ video.title|truncatechars:65 }}
+                        </a>
+                        <a href="#" class="uploader-name">{{ video.uploader.username }}</a>
+                        <div class="video-stats">
+                            <span>{{ video.views }} views</span>
+                            <span class="stat-dot">·</span>
+                            <span>{{ video.uploaded_at|timesince }} ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- All videos -->
+    <h2 class="section-title">All videos</h2>
     <div class="videos-grid">
 
         {% for video in videos %}

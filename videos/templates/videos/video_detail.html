@@ -506,8 +506,32 @@
     <!-- ═══ SIDEBAR ═══ -->
     <div class="col-lg-4">
         <div class="sticky-top" style="top:76px;">
-            <div class="sidebar-title">Up next</div>
+            {% if recommended_videos %}
+            <div class="sidebar-title"><i class="bi bi-star-fill" style="color:var(--accent);font-size:0.75rem;"></i> Recommended</div>
+            {% for v in recommended_videos %}
+                <a href="{{ v.get_absolute_url }}" class="related-item">
+                    <div class="related-thumb">
+                        {% if v.thumbnail %}
+                            <img src="{{ v.thumbnail.url }}" alt="{{ v.title }}">
+                        {% else %}
+                            <div style="width:100%;height:100%;background:#1a1a1a;display:flex;align-items:center;justify-content:center;">
+                                <i class="bi bi-play-circle" style="color:#444;font-size:1.5rem;"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="related-info">
+                        <div class="related-title">{{ v.title|truncatechars:65 }}</div>
+                        <div class="related-meta">
+                            {{ v.uploader.username }}<br>
+                            {{ v.views }} views · {{ v.uploaded_at|timesince }} ago
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+            <hr style="border-color:var(--border);margin:16px 0;">
+            {% endif %}
 
+            <div class="sidebar-title">From this channel</div>
             {% with videos=related_videos %}
                 {% for v in videos|slice:":10" %}
                     <a href="{{ v.get_absolute_url }}" class="related-item">

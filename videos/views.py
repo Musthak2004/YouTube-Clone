@@ -51,6 +51,13 @@ class VideoListView(ListView):
     ordering = ['-uploaded_at']
     paginate_by = 10
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        if self.request.user.is_authenticated:
+            from recommendations.utils import get_recommendations
+            ctx['recommended_videos'] = get_recommendations(self.request.user)
+        return ctx
+
 
 class VideoDetailView(DetailView):
     model = Video
@@ -98,6 +105,12 @@ class VideoDetailView(DetailView):
         )
 
         ctx['video_tags'] = video.tags.select_related('tag').all()
+
+        if user.is_authenticated:
+            from recommendations.utils import get_recommendations
+            ctx['recommended_videos'] = get_recommendations(user).exclude(pk=video.pk)[:6]
+        else:
+            ctx['recommended_videos'] = Video.objects.none()
 
         return ctx
 
