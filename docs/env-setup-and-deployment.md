@@ -4,184 +4,208 @@
 
 ```
 YouTube-Clone/
-├── .env                  # Local secrets (gitignored)
-├── .env.example          # Template with dummy values (committed)
-├── .gitignore
-├── requirements.txt
-├── manage.py
+├── .env                      # Local secrets (gitignored)
+├── .env.example              # Template with dummy values (committed to git)
+├── .gitignore                # .env listed here
+├── deploy/
+│   └── pythonanywhere_wsgi.py   # Ready-to-use WSGI file template
 ├── django_project/
-│   ├── settings.py       # Reads from .env via python-dotenv
-│   ├── wsgi.py           # Django's WSGI entry point
-│   └── ...
+│   ├── settings.py           # Reads all secrets from os.environ
+│   └── wsgi.py               # Default Django WSGI (no changes needed)
 └── ...
 ```
 
----
-
-## 1. `.env` File (Local Development)
-
-Never commit this file. Keep it in `.gitignore`.
+## How Secrets Flow
 
 ```
-DJANGO_SECRET_KEY=django-insecure-abc123...
-DJANGO_DEBUG=True
-DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
-
-CLOUDINARY_CLOUD_NAME=your_cloud
-CLOUDINARY_API_KEY=123456789
-CLOUDINARY_API_SECRET=your_secret
-```
-
-## 2. `.env.example` (Committed to Git)
-
-Template with placeholder values so other devs know what to define:
-
-```
-DJANGO_SECRET_KEY=changeme
-DJANGO_DEBUG=True
-DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
-
-CLOUDINARY_CLOUD_NAME=changeme
-CLOUDINARY_API_KEY=changeme
-CLOUDINARY_API_SECRET=changeme
-```
-
-## 3. `.gitignore`
-
-```
-.env
-.env.*
-!.env.example
+                    ┌──────────────────────────────────────┐
+                    │         os.environ                    │
+                    │  (process environment variables)      │
+                    └───┬──────────────────────┬───────────┘
+                        │                      │
+              ┌─────────▼──────────┐   ┌───────▼──────────┐
+              │  Local Dev         │   │  PythonAnywhere   │
+              │  .env file         │   │  WSGI file sets   │
+              │  loaded by         │   │  os.environ[]     │
+              │  python-dotenv     │   │  directly         │
+              └────────────────────┘   └──────────────────┘
+                        │                      │
+                        └──────────┬───────────┘
+                                   ▼
+                        ┌──────────────────────┐
+                        │  settings.py          │
+                        │  os.environ.get(...)  │
+                        └──────────────────────┘
 ```
 
 ---
 
-## 4. `settings.py` — Load `.env` & Read Variables
+## 1. Local Development Setup
+
+### 1a. Create `.env`
+
+Copy the template and fill in real values:
+
+```bash
+cp .env.example .env
+```
+
+`.env` is in `.gitignore` — it will never be committed.
+
+### 1b. Required Variables
+
+| Variable | Description |
+|----------|-------------|
+| `DJANGO_SECRET_KEY` | Generate with `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"` |
+| `DJANGO_DEBUG` | `True` for local dev, `False` for production |
+| `DJANGO_ALLOWED_HOSTS` | Comma-separated hostnames (e.g. `localhost,127.0.0.1`) |
+| `CLOUDINARY_CLOUD_NAME` | From Cloudinary Dashboard |
+| `CLOUDINARY_API_KEY` | From Cloudinary Dashboard |
+| `CLOUDINARY_API_SECRET` | From Cloudinary Dashboard |
+
+### 1c. Optional Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DATABASE_URL` | SQLite (`db.sqlite3`) | PostgreSQL/MySQL URL for production |
+| `EMAIL_HOST` | — | SMTP server for password reset emails |
+| `EMAIL_HOST_USER` | — | SMTP username |
+| `EMAIL_HOST_PASSWORD` | — | SMTP password |
+
+---
+
+## 2. `settings.py` Integration
+
+### 2a. Load .env (optional dependency)
 
 ```python
 from pathlib import Path
 import os
 
-# ── Load .env file (optional — allows production to skip python-dotenv) ──
 try:
     from dotenv import load_dotenv
     load_dotenv()
 except ImportError:
     pass
+```
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+The `try/except` allows the app to boot even when `python-dotenv` is not installed (e.g. on PythonAnywhere where env vars come from the WSGI file).
 
-# ── Core Django settings from environment ──
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'fallback-dev-only')
+### 2b. Read secrets with fallbacks
+
+```python
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+if not SECRET_KEY:
+    from django.core.management.utils import get_random_secret_key
+    SECRET_KEY = get_random_secret_key()
+
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
-
-# ── Production security (auto-enabled when DEBUG=False) ──
-if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-# ── Third-party API keys ──
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
-}
 ```
 
-### Key Pattern: `os.environ.get('KEY', 'default')`
+### 2c. Database URL support
 
-- Reading from `os.environ` works whether the value came from `.env` (via `load_dotenv()`) or from the hosting platform's environment variables tab.
-- The second argument is a **fallback default** — safe for development, but in production the env var should always be set.
-
-### Why wrap `load_dotenv()` in try/except?
+Uses `dj-database-url` when `DATABASE_URL` is set, otherwise falls back to SQLite:
 
 ```python
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    pass
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 ```
 
-On **PythonAnywhere**, you set environment variables through the Web UI, not via `.env`. The `python-dotenv` package may not be installed. This try/except lets the app boot regardless.
+PythonAnywhere provides MySQL (`yourusername.mysql.pythonanywhere-services.com`) or you can use the free SQLite.
 
 ---
 
-## 5. PythonAnywhere Deployment: Two Ways to Set Env Vars
+## 3. PythonAnywhere Deployment
 
-### Option A: PythonAnywhere Web UI (Recommended)
+### 3a. The Problem
 
-1. Go to **Web tab** → **Environment variables** section
-2. Add each variable (one per line):
+The PythonAnywhere **free plan** does not have a "Environment Variables" UI in the Web tab. You must set env vars inside the WSGI file itself.
 
-```
-DJANGO_SECRET_KEY     →  django-insecure-abc...
-DJANGO_DEBUG          →  False
-DJANGO_ALLOWED_HOSTS  →  streamhub.pythonanywhere.com,localhost,127.0.0.1
-CLOUDINARY_CLOUD_NAME →  your_cloud
-CLOUDINARY_API_KEY    →  123456789
-CLOUDINARY_API_SECRET →  your_secret
-```
+### 3b. Solution — WSGI File
 
-3. Click **Save**, then **Reload**
+Use `deploy/pythonanywhere_wsgi.py` as your WSGI file template. There are two options:
 
-PythonAnywhere injects these directly into the WSGI process's `os.environ` — no WSGI file changes needed. Your `settings.py` already reads them with `os.environ.get(...)`.
-
-### Option B: Manual WSGI File Edit (Alternative)
-
-If you prefer to hardcode env var loading in the WSGI file (e.g., if you deploy a `.env` file to the server):
+**Option A — Hardcode env vars directly** (simplest, no .env needed on server):
 
 ```python
-# /var/www/streamhub_pythonanywhere_com_wsgi.py
 import os
-from pathlib import Path
 
-# ── Load .env from project root ──
+os.environ['DJANGO_SECRET_KEY']       = 'your-production-key'
+os.environ['DJANGO_DEBUG']            = 'False'
+os.environ['DJANGO_ALLOWED_HOSTS']    = 'yourdomain.pythonanywhere.com'
+os.environ['DATABASE_URL']            = 'mysql://user:pass@host/dbname'
+os.environ['CLOUDINARY_CLOUD_NAME']   = 'your-cloud-name'
+os.environ['CLOUDINARY_API_KEY']      = 'your-api-key'
+os.environ['CLOUDINARY_API_SECRET']   = 'your-api-secret'
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_project.settings')
+from django.core.wsgi import get_wsgi_application
+application = get_wsgi_application()
+```
+
+**Option B — Load from `.env` file** (requires `python-dotenv` installed):
+
+```python
 from dotenv import load_dotenv
-env_path = Path('/home/streamhub/YouTube-Clone/.env')
-load_dotenv(dotenv_path=env_path)
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_project.settings')
-
-from django.core.wsgi import get_wsgi_application
-application = get_wsgi_application()
+from pathlib import Path
+load_dotenv(dotenv_path=Path('/home/yourusername/YouTube-Clone/.env'))
 ```
 
-**Downside:** You'd need to upload a `.env` file to the server and keep it in sync. The Web UI is simpler and more secure.
+### 3c. On PythonAnywhere, replace the WSGI file at:
+
+```
+/var/www/yourusername_pythonanywhere_com_wsgi.py
+```
+
+Navigate there via the **Web** tab → **Code** section → click the WSGI file link.
+
+### 3d. Also configure:
+
+1. **Virtualenv**: Web tab → Virtualenv → enter `/home/yourusername/.virtualenvs/venv-name`
+2. **Static files** (if not using Cloudinary):
+   - URL: `/static/`
+   - Directory: `/home/yourusername/YouTube-Clone/staticfiles`
+3. **Source code**: `/home/yourusername/YouTube-Clone`
+4. **Working directory**: `/home/yourusername/YouTube-Clone`
+
+### 3e. Reload
+
+Click the green **Reload** button after every change.
 
 ---
 
-## 6. The Default WSGI File (No Changes Needed)
+## 4. Verification
 
-```python
-# django_project/wsgi.py
-import os
-from django.core.wsgi import get_wsgi_application
+### 4a. Local (Windows PowerShell)
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_project.settings')
-
-application = get_wsgi_application()
+```powershell
+python manage.py check
+python manage.py runserver
 ```
 
-This is Django's default WSGI file. It does **not** need to load `.env` because:
-- **Locally:** `settings.py` calls `load_dotenv()` when the module imports
-- **PythonAnywhere:** The Web UI injects env vars into the process before Django starts
+### 4b. PythonAnywhere
 
----
+Open the bash console and run:
 
-## 7. `requirements.txt`
-
-```
-python-dotenv>=1.0.0
+```bash
+python manage.py check
+python manage.py migrate
+python manage.py collectstatic --noinput
 ```
 
-Not strictly needed on PythonAnywhere (where env vars come from the Web UI), but harmless to include. The try/except in `settings.py` handles the case where it's missing.
+Then **Reload** the web app.
 
 ---
 
@@ -189,7 +213,8 @@ Not strictly needed on PythonAnywhere (where env vars come from the Web UI), but
 
 | Environment | How env vars are set | `python-dotenv` needed? |
 |-------------|---------------------|------------------------|
-| Local dev   | `.env` file          | Yes (in `settings.py`) |
-| PythonAnywhere | Web UI → Environment Variables | No (handled by try/except) |
+| Local dev | `.env` file loaded by `load_dotenv()` | Yes |
+| PythonAnywhere (paid) | Web UI → Environment Variables | No |
+| PythonAnywhere (free) | Hardcoded in WSGI file | No |
 
-The same `settings.py` and `os.environ.get(...)` calls work in both environments without modification.
+The same `settings.py` and `os.environ.get(...)` calls work identically in all environments.
