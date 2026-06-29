@@ -18,14 +18,38 @@
         max-width: 720px;
         margin: 0 auto;
         padding: 8px 0 60px;
-        animation: fadeUp 0.4s ease both;
-    }
-    @keyframes fadeUp {
-        from { opacity:0; transform:translateY(18px); }
-        to   { opacity:1; transform:translateY(0); }
     }
 
-    /* ── HEADER ── */
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(18px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50%      { opacity: 0.5; }
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    @keyframes shimmer {
+        0%   { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-8px); max-height: 0; }
+        to   { opacity: 1; transform: translateY(0); max-height: 60px; }
+    }
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(8px); max-height: 0; }
+        to   { opacity: 1; transform: translateY(0); max-height: 200px; }
+    }
+
+    .stagger-1 { animation: fadeUp 0.4s ease both; }
+    .stagger-2 { animation: fadeUp 0.4s ease 0.08s both; }
+    .stagger-3 { animation: fadeUp 0.4s ease 0.16s both; }
+    .stagger-4 { animation: fadeUp 0.4s ease 0.24s both; }
+    .stagger-5 { animation: fadeUp 0.4s ease 0.32s both; }
+
     .back-link {
         display: inline-flex; align-items: center; gap: 6px;
         font-size: 0.82rem; color: var(--muted);
@@ -42,7 +66,6 @@
     }
     .page-header p { font-size: 0.9rem; color: var(--muted2); }
 
-    /* ── CURRENT THUMB PREVIEW ── */
     .current-thumb-bar {
         display: flex;
         align-items: center;
@@ -67,7 +90,6 @@
     }
     .current-thumb-meta { font-size: 0.78rem; color: var(--muted2); }
 
-    /* ── CARD ── */
     .edit-card {
         background: var(--card);
         border: 1px solid var(--border);
@@ -83,7 +105,6 @@
         background: linear-gradient(90deg, transparent, rgba(255,165,0,0.3), transparent);
     }
 
-    /* ── SECTION SEP ── */
     .section-sep {
         font-size: 0.7rem; font-family: 'Outfit', sans-serif;
         font-weight: 600; text-transform: uppercase;
@@ -91,13 +112,12 @@
         margin: 26px 0 16px;
         display: flex; align-items: center; gap: 10px;
     }
-    .section-sep:first-child { margin-top: 0; }
+    .section-sep:first-of-type { margin-top: 0; }
     .section-sep::before, .section-sep::after {
         content: ''; flex: 1; height: 1px; background: var(--border);
     }
 
-    /* ── FIELDS ── */
-    .field-group { margin-bottom: 18px; }
+    .field-group { margin-bottom: 22px; }
     .field-label {
         display: flex; align-items: center; gap: 6px;
         font-size: 0.8rem; font-weight: 500; color: var(--muted2);
@@ -107,6 +127,8 @@
         font-size: 0.68rem; background: rgba(255,255,255,0.06);
         border-radius: 4px; padding: 1px 6px; color: var(--muted); margin-left: auto;
     }
+    .required-star { color: var(--accent); margin-left: 2px; }
+
     .field-wrap { position: relative; }
     .field-icon {
         position: absolute; left: 13px; top: 50%;
@@ -118,7 +140,7 @@
     .field-input {
         width: 100%; background: var(--input-bg);
         border: 1px solid var(--border); border-radius: 10px;
-        color: var(--text); padding: 11px 14px 11px 38px;
+        color: var(--text); padding: 12px 14px 12px 38px;
         font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
         outline: none; transition: border-color 0.2s, box-shadow 0.2s;
     }
@@ -127,11 +149,19 @@
         border-color: rgba(255,150,50,0.35);
         box-shadow: 0 0 0 3px rgba(255,150,50,0.07);
     }
+    .field-input.error {
+        border-color: #ff4466;
+        box-shadow: 0 0 0 3px rgba(255,68,102,0.1);
+    }
+    .field-input.valid {
+        border-color: rgba(34,197,94,0.4);
+        box-shadow: 0 0 0 3px rgba(34,197,94,0.07);
+    }
 
     .field-textarea {
         width: 100%; background: var(--input-bg);
         border: 1px solid var(--border); border-radius: 10px;
-        color: var(--text); padding: 11px 14px;
+        color: var(--text); padding: 12px 14px;
         font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
         outline: none; resize: vertical; min-height: 90px;
         transition: border-color 0.2s, box-shadow 0.2s;
@@ -149,81 +179,135 @@
     .char-count.warn { color: #ff8c00; }
     .char-count.over { color: var(--accent); }
 
-    /* ── DROP ZONES ── */
-    .drop-zone {
-        position: relative; border: 1.5px dashed rgba(255,255,255,0.1);
-        border-radius: 14px; background: var(--input-bg);
-        transition: all 0.25s ease; cursor: pointer; overflow: hidden;
-    }
-    .drop-zone:hover, .drop-zone.dragging {
-        border-color: rgba(255,150,50,0.35);
-        background: rgba(255,150,50,0.04);
-    }
-    .drop-zone input[type="file"] {
-        position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 10;
-    }
-    .drop-inner {
-        padding: 30px 24px; text-align: center; pointer-events: none;
-        transition: transform 0.25s;
-    }
-    .drop-zone:hover .drop-inner,
-    .drop-zone.dragging .drop-inner { transform: scale(1.01); }
-    .drop-icon {
-        font-size: 2.2rem; color: var(--muted); margin-bottom: 10px;
-        display: block; transition: color 0.25s;
-    }
-    .drop-zone:hover .drop-icon,
-    .drop-zone.dragging .drop-icon { color: #ff9955; }
-    .drop-title {
-        font-family: 'Outfit', sans-serif; font-size: 0.9rem;
-        font-weight: 600; color: var(--text); margin-bottom: 4px;
-    }
-    .drop-hint { font-size: 0.76rem; color: var(--muted2); }
-    .drop-keep {
-        font-size: 0.72rem; color: var(--muted); margin-top: 6px;
-        display: inline-flex; align-items: center; gap: 5px;
-    }
-    .drop-keep i { color: #00c853; }
-
-    /* Selected state */
-    .file-selected-bar {
-        display: none; align-items: center; gap: 12px;
-        padding: 12px 18px;
-        background: rgba(255,150,50,0.06);
-        border-top: 1px solid rgba(255,150,50,0.1);
-    }
-    .file-selected-bar.show { display: flex; }
-    .file-selected-bar i { font-size: 1.4rem; color: #ff9955; }
-    .file-name { font-size: 0.83rem; color: var(--text); font-weight: 500; }
-    .file-size { font-size: 0.73rem; color: var(--muted2); }
-
-    /* Thumb preview */
-    .thumb-new-preview {
-        display: none; padding: 0 16px 14px;
-    }
-    .thumb-new-preview.show { display: block; }
-    .thumb-new-preview img {
-        width: 100%; max-height: 160px; object-fit: cover;
-        border-radius: 9px; border: 1px solid var(--border);
-    }
-    .thumb-change-hint {
-        font-size: 0.72rem; color: var(--muted2); text-align: center; margin-top: 5px;
+    .field-helper {
+        font-size: 0.72rem;
+        color: var(--muted);
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
     }
 
-    /* ── FIELD ERROR ── */
     .field-error {
         font-size: 0.77rem; color: #ff4466; margin-top: 6px;
         display: flex; align-items: center; gap: 5px;
+        animation: slideDown 0.25s ease both;
     }
 
-    /* ── GLOBAL ERROR ── */
     .alert-error {
         background: rgba(255,0,51,0.08); border: 1px solid rgba(255,0,51,0.18);
         border-radius: 10px; padding: 12px 16px; font-size: 0.84rem; color: #ff6680;
         margin-bottom: 22px; display: flex; align-items: flex-start; gap: 9px;
     }
 
-    /* ── CHANGE INDICATOR ── */
+    .drop-zone {
+        position: relative; border: 1.5px dashed rgba(255,255,255,0.1);
+        border-radius: 14px; background: var(--input-bg);
+        transition: all 0.25s ease; cursor: pointer; overflow: hidden;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+        border-color: rgba(255,150,50,0.35);
+        background: rgba(255,150,50,0.04);
+    }
+    .drop-zone.dragover {
+        border-color: #ff9955;
+        background: rgba(255,150,50,0.08);
+        transform: scale(1.005);
+    }
+    .drop-zone.has-file {
+        border-style: solid;
+        border-color: rgba(255,150,50,0.2);
+    }
+    .drop-zone input[type="file"] {
+        position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 10;
+    }
+    .drop-inner {
+        padding: 30px 24px; text-align: center; pointer-events: none;
+        transition: all 0.25s;
+    }
+    .drop-zone.has-file .drop-inner { padding: 20px 24px 12px; }
+    .drop-zone:hover .drop-inner,
+    .drop-zone.dragover .drop-inner { transform: scale(1.01); }
+
+    .drop-icon {
+        font-size: 2.2rem; color: var(--muted); margin-bottom: 10px;
+        display: block; transition: color 0.25s;
+    }
+    .drop-zone:hover .drop-icon,
+    .drop-zone.dragover .drop-icon { color: #ff9955; }
+    .drop-title {
+        font-family: 'Outfit', sans-serif; font-size: 0.9rem;
+        font-weight: 600; color: var(--text); margin-bottom: 4px;
+    }
+    .drop-hint { font-size: 0.76rem; color: var(--muted2); }
+    .drop-formats { font-size: 0.7rem; color: var(--muted); margin-top: 6px; opacity: 0.7; }
+    .drop-keep {
+        font-size: 0.72rem; color: var(--muted); margin-top: 6px;
+        display: inline-flex; align-items: center; gap: 5px;
+    }
+    .drop-keep i { color: #00c853; }
+
+    .file-selected-bar {
+        display: none; align-items: center; gap: 12px;
+        padding: 12px 18px;
+        background: rgba(255,150,50,0.06);
+        border-top: 1px solid rgba(255,150,50,0.1);
+        animation: slideUp 0.3s ease both;
+    }
+    .file-selected-bar.show { display: flex; }
+    .file-selected-bar .file-icon { font-size: 1.4rem; color: #ff9955; flex-shrink: 0; }
+    .file-details { min-width: 0; flex: 1; }
+    .file-selected-bar .file-name {
+        font-size: 0.83rem; color: var(--text); font-weight: 500;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .file-selected-bar .file-size { font-size: 0.73rem; color: var(--muted2); }
+    .file-remove {
+        font-size: 0.75rem;
+        color: var(--muted);
+        background: none;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 6px;
+        padding: 4px 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+        flex-shrink: 0;
+    }
+    .file-remove:hover {
+        color: #ff4466;
+        border-color: rgba(255,68,102,0.3);
+        background: rgba(255,68,102,0.08);
+    }
+
+    .thumb-new-preview {
+        display: none;
+    }
+    .thumb-new-preview.show { display: block; animation: slideUp 0.3s ease both; }
+    .thumb-new-preview img {
+        width: 100%; max-height: 200px; object-fit: cover;
+        border-radius: 9px; border: 1px solid var(--border);
+    }
+    .thumb-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 8px;
+    }
+    .thumb-change {
+        font-size: 0.75rem;
+        color: var(--muted2);
+        background: none;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 6px;
+        padding: 4px 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .thumb-change:hover {
+        color: var(--text);
+        border-color: rgba(255,255,255,0.15);
+    }
+
     .unsaved-badge {
         display: none;
         background: rgba(255,150,50,0.1);
@@ -235,45 +319,82 @@
     }
     .unsaved-badge.show { display: inline-block; }
 
-    /* ── PROGRESS ── */
     .upload-progress {
         display: none; margin: 20px 0;
     }
-    .upload-progress.show { display: block; }
+    .upload-progress.show { display: block; animation: fadeUp 0.3s ease both; }
     .progress-track {
-        height: 5px; background: rgba(255,255,255,0.06);
+        height: 4px; background: rgba(255,255,255,0.06);
         border-radius: 99px; overflow: hidden;
     }
     .progress-fill {
         height: 100%; width: 0; border-radius: 99px;
         background: linear-gradient(90deg, #ff5500, #ff9955);
-        transition: width 0.3s ease;
+        transition: width 0.4s ease;
+    }
+    .progress-fill.indeterminate {
+        width: 40%;
+        animation: shimmer 1.5s ease-in-out infinite;
+        background: linear-gradient(90deg, #ff5500, #ff9955, #ff5500);
+        background-size: 200% 100%;
     }
     .progress-label {
-        font-size: 0.78rem; color: var(--muted2); margin-top: 7px;
+        font-size: 0.8rem; color: var(--muted2); margin-top: 8px;
         text-align: center;
     }
+    .progress-status {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 4px;
+        font-size: 0.75rem;
+        color: var(--muted);
+    }
 
-    /* ── BUTTONS ── */
     .btn-row {
         display: flex; gap: 10px; margin-top: 28px;
     }
     .btn-save {
         flex: 1; background: linear-gradient(135deg, #cc5500, #ff7730);
-        color: #fff; border: none; border-radius: 11px; padding: 13px;
+        color: #fff; border: none; border-radius: 11px; padding: 14px;
         font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 600;
         cursor: pointer; transition: all 0.25s ease;
         box-shadow: 0 4px 24px rgba(255,120,50,0.22);
         display: flex; align-items: center; justify-content: center; gap: 8px;
+        position: relative;
     }
-    .btn-save:hover {
+    .btn-save:hover:not(:disabled) {
         transform: translateY(-1px);
         box-shadow: 0 8px 30px rgba(255,120,50,0.36);
     }
+    .btn-save:active:not(:disabled) { transform: translateY(0); }
+    .btn-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-save .spinner {
+        display: none;
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+    }
+    .btn-save.loading .spinner { display: inline-block; }
+    .btn-save.loading .btn-text { opacity: 0.7; }
+    .btn-save.loading .btn-icon { display: none; }
+    .btn-save .success-check {
+        display: none;
+        font-size: 1.2rem;
+    }
+    .btn-save.success .success-check { display: inline-block; }
+    .btn-save.success .spinner,
+    .btn-save.success .btn-text,
+    .btn-save.success .btn-icon { display: none; }
+
     .btn-cancel {
         background: rgba(255,255,255,0.05);
         color: var(--muted2); border: 1px solid var(--border);
-        border-radius: 11px; padding: 13px 24px;
+        border-radius: 11px; padding: 14px 24px;
         font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
         cursor: pointer; text-decoration: none;
         transition: all 0.2s; display: flex; align-items: center; gap: 7px;
@@ -287,6 +408,16 @@
         .edit-card { padding: 24px 16px; }
         .btn-row { flex-direction: column; }
         .current-thumb-bar { flex-direction: column; align-items: flex-start; }
+        .page-header h1 { font-size: 1.4rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .stagger-1, .stagger-2, .stagger-3, .stagger-4, .stagger-5 { animation: none; }
+        .upload-progress.show { animation: none; }
+        .file-selected-bar.show { animation: none; }
+        .thumb-new-preview.show { animation: none; }
+        .field-error { animation: none; }
+        .progress-fill.indeterminate { animation: none; }
     }
 </style>
 {% endblock %}
@@ -294,13 +425,11 @@
 {% block content %}
 <div class="edit-page">
 
-    <!-- Back -->
-    <a href="{% url 'video_list' %}" class="back-link">
+    <a href="{% url 'video_list' %}" class="back-link stagger-1">
         <i class="bi bi-arrow-left"></i> Back to videos
     </a>
 
-    <!-- Header -->
-    <div class="page-header">
+    <div class="page-header stagger-1">
         <h1>
             Edit Video
             <span class="unsaved-badge" id="unsavedBadge">Unsaved changes</span>
@@ -308,9 +437,8 @@
         <p>Update your video details below</p>
     </div>
 
-    <!-- Current video chip -->
     {% if video.thumbnail_url %}
-    <div class="current-thumb-bar">
+    <div class="current-thumb-bar stagger-2">
         <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}">
         <div class="current-thumb-info">
             <div class="current-thumb-title">{{ video.title }}</div>
@@ -325,8 +453,7 @@
     </div>
     {% endif %}
 
-    <!-- Card -->
-    <div class="edit-card">
+    <div class="edit-card stagger-2">
 
         {% if form.non_field_errors %}
             <div class="alert-error">
@@ -335,25 +462,24 @@
             </div>
         {% endif %}
 
-        <form method="post" enctype="multipart/form-data" id="editForm">
+        <form method="post" enctype="multipart/form-data" id="editForm" novalidate>
             {% csrf_token %}
 
-            <!-- ─ Info ─ -->
-            <div class="section-sep">Video Info</div>
+            <div class="section-sep stagger-3">Video Info</div>
 
-            <!-- Title -->
-            <div class="field-group">
+            <div class="field-group stagger-3">
                 <label class="field-label" for="{{ form.title.id_for_label }}">
-                    <i class="bi bi-type"></i> Title
+                    <i class="bi bi-type"></i> Title <span class="required-star">*</span>
                 </label>
                 <div class="field-wrap">
                     <input type="text"
                            name="{{ form.title.name }}"
                            class="field-input"
                            id="{{ form.title.id_for_label }}"
-                           placeholder="Video title"
+                           placeholder="Give your video a clear, compelling title"
                            maxlength="100"
                            required
+                           autocomplete="off"
                            value="{{ form.title.value|default:'' }}">
                     <i class="bi bi-pencil field-icon"></i>
                 </div>
@@ -363,8 +489,7 @@
                 {% endif %}
             </div>
 
-            <!-- Description -->
-            <div class="field-group">
+            <div class="field-group stagger-3">
                 <label class="field-label" for="{{ form.description.id_for_label }}">
                     <i class="bi bi-card-text"></i> Description
                     <span class="optional-tag">optional</span>
@@ -372,7 +497,7 @@
                 <textarea name="{{ form.description.name }}"
                           class="field-textarea"
                           id="{{ form.description.id_for_label }}"
-                          placeholder="Describe your video..."
+                          placeholder="Tell viewers what your video is about — include keywords to help people find it"
                           maxlength="500">{{ form.description.value|default:'' }}</textarea>
                 <div class="char-count" id="descCount">{{ form.description.value|default:''|length }} / 500</div>
                 {% if form.description.errors %}
@@ -380,51 +505,92 @@
                 {% endif %}
             </div>
 
-            <!-- ─ Files ─ -->
-            <div class="section-sep">Replace Files</div>
+            <div class="section-sep stagger-4">Replace Files</div>
 
-            <div class="field-group">
+            <div class="field-group stagger-4">
                 <label class="field-label" for="{{ form.video_file.id_for_label }}">
                     <i class="bi bi-camera-video"></i> Replace Video File
                     <span class="optional-tag">optional</span>
                 </label>
-                <div class="field-wrap">
+                <div class="drop-zone" id="videoDropZone">
                     <input type="file"
                            name="{{ form.video_file.name }}"
-                           class="field-input"
                            id="{{ form.video_file.id_for_label }}"
                            accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov">
+                    <div class="drop-inner" id="videoDropInner">
+                        <i class="bi bi-cloud-upload drop-icon"></i>
+                        <div class="drop-title">Choose a new video file or drag it here</div>
+                        <div class="drop-hint">MP4, WebM, or MOV</div>
+                        <div class="drop-formats">Maximum 500 MB</div>
+                        <div class="drop-keep"><i class="bi bi-check-circle-fill"></i> Current video kept if not replaced</div>
+                    </div>
+                    <div class="file-selected-bar" id="videoFileInfo">
+                        <i class="bi bi-file-play file-icon"></i>
+                        <div class="file-details">
+                            <div class="file-name" id="videoFileName"></div>
+                            <div class="file-size" id="videoFileSize"></div>
+                        </div>
+                        <button type="button" class="file-remove" id="videoFileRemove">Remove</button>
+                    </div>
                 </div>
                 {% if form.video_file.errors %}
                     <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.video_file.errors|join:", " }}</div>
                 {% endif %}
             </div>
 
-            <div class="field-group">
+            <div class="field-group stagger-4">
                 <label class="field-label" for="{{ form.thumbnail.id_for_label }}">
                     <i class="bi bi-image"></i> Replace Thumbnail
                     <span class="optional-tag">optional</span>
                 </label>
-                <div class="field-wrap">
+                <div class="drop-zone" id="thumbDropZone">
                     <input type="file"
                            name="{{ form.thumbnail.name }}"
-                           class="field-input"
                            id="{{ form.thumbnail.id_for_label }}"
                            accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp">
+                    <div class="drop-inner" id="thumbDropInner">
+                        <i class="bi bi-image drop-icon"></i>
+                        <div class="drop-title">Choose a new thumbnail image</div>
+                        <div class="drop-hint">JPEG, PNG, or WebP &middot; 16:9 recommended</div>
+                        <div class="drop-formats">Max 2 MB</div>
+                        <div class="drop-keep"><i class="bi bi-check-circle-fill"></i> Current thumbnail kept if not replaced</div>
+                    </div>
+                    <div class="thumb-new-preview" id="thumbPreview">
+                        <img id="thumbPreviewImg" alt="New thumbnail preview">
+                        <div class="thumb-meta">
+                            <div>
+                                <div class="file-name" id="thumbFileName"></div>
+                                <div class="file-size" id="thumbFileSize"></div>
+                            </div>
+                            <button type="button" class="thumb-change" id="thumbChange">Change</button>
+                        </div>
+                    </div>
                 </div>
                 {% if form.thumbnail.errors %}
                     <div class="field-error"><i class="bi bi-x-circle"></i>{{ form.thumbnail.errors|join:", " }}</div>
                 {% endif %}
             </div>
 
-            <!-- Buttons -->
-            <div class="btn-row">
+            <div class="btn-row stagger-5">
                 <button type="submit" class="btn-save" id="saveBtn">
-                    <i class="bi bi-check2-circle"></i> Save Changes
+                    <i class="bi bi-check2-circle btn-icon"></i>
+                    <span class="spinner"></span>
+                    <span class="btn-text">Save Changes</span>
+                    <span class="success-check"><i class="bi bi-check-lg"></i></span>
                 </button>
                 <a href="{{ object.get_absolute_url }}" class="btn-cancel">
                     <i class="bi bi-x"></i> Cancel
                 </a>
+            </div>
+
+            <div class="upload-progress" id="uploadProgress">
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-label" id="progressLabel">Saving your changes...</div>
+                <div class="progress-status" id="progressStatus">
+                    <i class="bi bi-arrow-repeat"></i> Please don't close this page
+                </div>
             </div>
 
         </form>
@@ -433,46 +599,239 @@
 
 <script>
     function getEl(id) { return document.getElementById(id); }
-
-    // ── Unsaved changes indicator ──
-    const unsavedBadge = getEl('unsavedBadge');
-    const originalTitle = getEl('{{ form.title.id_for_label }}').value;
-    const originalDesc  = getEl('{{ form.description.id_for_label }}').value;
-
-    function checkChanges() {
-        const titleChanged = getEl('{{ form.title.id_for_label }}').value !== originalTitle;
-        const descChanged  = getEl('{{ form.description.id_for_label }}').value !== originalDesc;
-        unsavedBadge.classList.toggle('show', titleChanged || descChanged);
+    function formatSize(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), sizes.length - 1);
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     }
 
-    getEl('{{ form.title.id_for_label }}').addEventListener('input', checkChanges);
-    getEl('{{ form.description.id_for_label }}').addEventListener('input', checkChanges);
+    document.addEventListener('DOMContentLoaded', () => {
+        let formDirty = false;
 
-    // ── Char counters ──
-    function setupCounter(inputId, countId, max) {
-        const el = getEl(inputId);
-        const ct = getEl(countId);
-        if (!el) return;
-        el.addEventListener('input', () => {
-            const len = el.value.length;
-            ct.textContent = `${len} / ${max}`;
-            ct.className = 'char-count' + (len > max * 0.9 ? (len >= max ? ' over' : ' warn') : '');
-        });
-    }
-    setupCounter('{{ form.title.id_for_label }}',       'titleCount', 100);
-    setupCounter('{{ form.description.id_for_label }}', 'descCount',  500);
-
-    // ── Warn on leave with unsaved changes ──
-    window.addEventListener('beforeunload', e => {
-        if (unsavedBadge.classList.contains('show')) {
-            e.preventDefault();
-            e.returnValue = '';
+        // ── Char counters ──
+        function setupCounter(inputId, countId, max) {
+            const el = getEl(inputId);
+            const ct = getEl(countId);
+            if (!el) return;
+            const update = () => {
+                const len = el.value.length;
+                ct.textContent = `${len} / ${max}`;
+                ct.className = 'char-count' + (len > max * 0.9 ? (len >= max ? ' over' : ' warn') : '');
+            };
+            el.addEventListener('input', update);
+            update();
         }
-    });
+        setupCounter('{{ form.title.id_for_label }}',       'titleCount', 100);
+        setupCounter('{{ form.description.id_for_label }}', 'descCount',  500);
 
-    // ── Don't warn when submitting ──
-    getEl('editForm').addEventListener('submit', () => {
-        window.onbeforeunload = null;
+        // ── Unsaved changes tracking ──
+        const unsavedBadge = getEl('unsavedBadge');
+        const originalTitle = getEl('{{ form.title.id_for_label }}').value;
+        const originalDesc  = getEl('{{ form.description.id_for_label }}').value;
+
+        function checkChanges() {
+            const titleChanged = getEl('{{ form.title.id_for_label }}').value !== originalTitle;
+            const descChanged  = getEl('{{ form.description.id_for_label }}').value !== originalDesc;
+            const hasNewFile = getEl('{{ form.video_file.id_for_label }}').files.length > 0;
+            const hasNewThumb = getEl('{{ form.thumbnail.id_for_label }}').files.length > 0;
+            const changed = titleChanged || descChanged || hasNewFile || hasNewThumb;
+            unsavedBadge.classList.toggle('show', changed);
+            formDirty = changed;
+        }
+
+        getEl('{{ form.title.id_for_label }}').addEventListener('input', checkChanges);
+        getEl('{{ form.description.id_for_label }}').addEventListener('input', checkChanges);
+
+        // ── Title inline validation ──
+        const titleInput = getEl('{{ form.title.id_for_label }}');
+        if (titleInput) {
+            titleInput.addEventListener('blur', () => {
+                const val = titleInput.value.trim();
+                titleInput.classList.remove('error', 'valid');
+                if (val.length > 0 && val.length < 3) {
+                    titleInput.classList.add('error');
+                } else if (val.length >= 3) {
+                    titleInput.classList.add('valid');
+                }
+            });
+            titleInput.addEventListener('input', () => {
+                titleInput.classList.remove('error', 'valid');
+            });
+        }
+
+        // ── Video file drop zone ──
+        const videoInput = getEl('{{ form.video_file.id_for_label }}');
+        const videoDropZone = getEl('videoDropZone');
+        const videoDropInner = getEl('videoDropInner');
+        const videoFileInfo = getEl('videoFileInfo');
+        const videoFileName = getEl('videoFileName');
+        const videoFileSize = getEl('videoFileSize');
+        const videoFileRemove = getEl('videoFileRemove');
+
+        if (videoInput) {
+            videoInput.addEventListener('change', () => {
+                const file = videoInput.files[0];
+                if (file) {
+                    videoFileName.textContent = file.name;
+                    videoFileSize.textContent = formatSize(file.size);
+                    videoDropInner.style.display = 'none';
+                    videoFileInfo.classList.add('show');
+                    videoDropZone.classList.add('has-file');
+                    checkChanges();
+                }
+            });
+
+            videoDropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                videoDropZone.classList.add('dragover');
+            });
+            videoDropZone.addEventListener('dragleave', () => {
+                videoDropZone.classList.remove('dragover');
+            });
+            videoDropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                videoDropZone.classList.remove('dragover');
+                if (e.dataTransfer.files.length > 0) {
+                    videoInput.files = e.dataTransfer.files;
+                    videoInput.dispatchEvent(new Event('change'));
+                }
+            });
+
+            if (videoFileRemove) {
+                videoFileRemove.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    videoInput.value = '';
+                    videoFileInfo.classList.remove('show');
+                    videoDropInner.style.display = '';
+                    videoDropZone.classList.remove('has-file');
+                    checkChanges();
+                });
+            }
+        }
+
+        // ── Thumbnail drop zone ──
+        const thumbInput = getEl('{{ form.thumbnail.id_for_label }}');
+        const thumbDropZone = getEl('thumbDropZone');
+        const thumbDropInner = getEl('thumbDropInner');
+        const thumbPreview = getEl('thumbPreview');
+        const thumbPreviewImg = getEl('thumbPreviewImg');
+        const thumbFileName = getEl('thumbFileName');
+        const thumbFileSize = getEl('thumbFileSize');
+        const thumbChange = getEl('thumbChange');
+
+        if (thumbInput) {
+            thumbInput.addEventListener('change', () => {
+                const file = thumbInput.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        thumbPreviewImg.src = e.target.result;
+                        thumbDropInner.style.display = 'none';
+                        thumbPreview.classList.add('show');
+                        thumbDropZone.classList.add('has-file');
+                    };
+                    reader.readAsDataURL(file);
+                    thumbFileName.textContent = file.name;
+                    thumbFileSize.textContent = formatSize(file.size);
+                    checkChanges();
+                }
+            });
+
+            thumbDropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                thumbDropZone.classList.add('dragover');
+            });
+            thumbDropZone.addEventListener('dragleave', () => {
+                thumbDropZone.classList.remove('dragover');
+            });
+            thumbDropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                thumbDropZone.classList.remove('dragover');
+                if (e.dataTransfer.files.length > 0) {
+                    thumbInput.files = e.dataTransfer.files;
+                    thumbInput.dispatchEvent(new Event('change'));
+                }
+            });
+
+            if (thumbChange) {
+                thumbChange.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    thumbInput.value = '';
+                    thumbPreview.classList.remove('show');
+                    thumbDropInner.style.display = '';
+                    thumbDropZone.classList.remove('has-file');
+                    checkChanges();
+                });
+            }
+        }
+
+        // ── Warn on leave with unsaved changes ──
+        window.addEventListener('beforeunload', (e) => {
+            if (formDirty) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // ── Submit handling ──
+        const form = getEl('editForm');
+        const saveBtn = getEl('saveBtn');
+        const uploadProgress = getEl('uploadProgress');
+        const progressFill = getEl('progressFill');
+        const progressLabel = getEl('progressLabel');
+        const progressStatus = getEl('progressStatus');
+
+        form.addEventListener('submit', (e) => {
+            const title = titleInput ? titleInput.value.trim() : '';
+
+            if (title.length < 3) {
+                e.preventDefault();
+                if (titleInput) {
+                    titleInput.classList.add('error');
+                    titleInput.focus();
+                }
+                return;
+            }
+
+            saveBtn.disabled = true;
+            saveBtn.classList.add('loading');
+            uploadProgress.classList.add('show');
+            progressFill.className = 'progress-fill indeterminate';
+
+            let progress = 0;
+            const stages = [
+                { at: 20, label: 'Validating...', icon: 'bi-arrow-repeat' },
+                { at: 50, label: 'Saving changes...', icon: 'bi-cloud-upload' },
+                { at: 80, label: 'Processing...', icon: 'bi-gear' },
+                { at: 100, label: 'Finalizing...', icon: 'bi-check-circle' },
+            ];
+
+            const interval = setInterval(() => {
+                progress += Math.random() * 8 + 2;
+                if (progress >= 95) {
+                    clearInterval(interval);
+                    return;
+                }
+                progressFill.style.width = Math.min(progress, 90) + '%';
+                progressFill.className = 'progress-fill';
+                const stage = stages.filter(s => progress >= s.at).pop();
+                if (stage) {
+                    progressLabel.textContent = stage.label;
+                    progressStatus.innerHTML = `<i class="bi ${stage.icon}"></i> Please don't close this page`;
+                }
+            }, 400);
+
+            formDirty = false;
+        });
+
+        window.addEventListener('pageshow', () => {
+            saveBtn.disabled = false;
+            saveBtn.classList.remove('loading', 'success');
+            uploadProgress.classList.remove('show');
+            progressFill.style.width = '0%';
+        });
     });
 </script>
 {% endblock %}
