@@ -1,7 +1,6 @@
 from django.db import models
 from django.conf import settings
 from django.urls import reverse
-from cloudinary.utils import cloudinary_url
 
 
 class Video(models.Model):
@@ -39,12 +38,7 @@ class Video(models.Model):
     def video_url(self):
         if not self.video_file:
             return None
-        url, _ = cloudinary_url(
-            self.video_file.name,
-            resource_type='video',
-            secure=True
-        )
-        return url
+        return self.video_file.url
 
 
 class VideoReaction(models.Model):
