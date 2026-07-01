@@ -3,7 +3,7 @@
 [![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://streamhub.pythonanywhere.com/)
 [![Python](https://img.shields.io/badge/python-3.13-blue)](https://python.org)
 [![Django](https://img.shields.io/badge/django-6.0-092E20)](https://djangoproject.com)
-[![Tests](https://img.shields.io/badge/tests-149-passing-green)](https://github.com/Musthak2004/YouTube-Clone)
+[![Tests](https://img.shields.io/badge/tests-158-passing-green)](https://github.com/Musthak2004/YouTube-Clone)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen)](https://pre-commit.com)
 
@@ -20,7 +20,7 @@ A production-ready video sharing platform inspired by YouTube, built with Django
 - **User Authentication** — Custom `CustomUser` model extending `AbstractUser` with email, profile picture, bio. Full signup, login, logout via `django.contrib.auth`.
 - **Video Management** — Upload videos with title, description, and optional thumbnail. Inline editing and deletion owned by the uploader. **Server-side file size validation** (500 MB video, 5 MB thumbnail). HTML5 video player with poster support.
 - **Channel System** — Every user gets an auto-created channel on signup (`channels/signals.py`). Customizable name, description, and banner. Public channel page with subscriber count, video count, and total views.
-- **Comments** — Full CRUD on videos. Owner-only edit/delete. **Paginated** (10 per page). Newest-first ordering.
+- **Comments** — Full CRUD on videos. Owner-only edit/delete. **Paginated** (10 per page). **Threaded replies** with nested display, left-border indentation, and inline reply forms. Reply toggle with auto-focus and expandable textarea.
 - **Like / Dislike Reactions** — Toggle-based: click again to remove, click opposite to switch. Unique constraint per user-video pair.
 - **Subscriptions** — Subscribe and unsubscribe from channels. Self-subscription prevented via `ValidationError`. Toggle on video detail and channel detail pages.
 - **Notification System** — Auto-generated notifications when someone comments on your video or subscribes to your channel. Notification list page with pagination, mark-as-read via AJAX, and an unread count badge on the navbar bell icon.
@@ -54,7 +54,13 @@ A production-ready video sharing platform inspired by YouTube, built with Django
 - **Unsaved Changes Protection** — `beforeunload` warning when form state differs from initial. Visual "Unsaved changes" badge on the edit page.
 - **Toast Notifications** — Auto-dismissing messages (4s) for form actions.
 - **Comment Pagination** — Paginated comments on the video detail page with page navigator (first, prev, page numbers, next, last).
+- **Threaded Replies** — Nested comment display with left-border indentation, inline reply forms with JS toggle, auto-focus, and expandable textarea.
 - **Bootstrap Icons + Google Fonts** — Outfit (headings) and DM Sans (body) typography.
+
+### Account & Settings
+
+- **Settings Page** — Combined profile and password management. Two-section card with inline form switching and validation.
+- **Password Reset Flow** — Full Django auth password reset with styled email form, confirmation page, new password form (with validation/error states), completion page, and plain-text email template. Invalid/expired link handling.
 
 ### Advanced
 
@@ -133,9 +139,9 @@ YouTube-Clone/
 │   └── tests.py                    # 26 tests
 │
 ├── comments/                       # Video comments (1 model)
-│   ├── models.py                   # Comment (FK → Video, FK → User)
+│   ├── models.py                   # Comment (FK → Video, FK → User, parent self-FK)
 │   ├── views.py / urls.py
-│   └── tests.py                    # 16 tests
+│   └── tests.py                    # 25 tests
 │
 ├── subscriptions/                  # Channel subscriptions (1 model)
 │   ├── models.py                   # Subscription (unique user+channel;
@@ -213,6 +219,8 @@ CustomUser ──┬── Channel (OneToOne, auto-created via signal)
               ├── Notification.recipient (FK)
               └── Notification.actor (FK)
 
+Comment ── parent (self-FK, nullable)
+
 Video ──┬── VideoTagMap (M2M through → VideoTag)
          ├── VideoReaction.video (FK)
          ├── VideoView.video (FK)
@@ -234,7 +242,7 @@ Channel ── Video.channel (FK, nullable)
 |                |                 | `unique_together: (user, video)`                                  |
 | videos         | VideoView       | user (nullable), video, viewed_at                                 |
 | channels       | Channel         | owner (OneToOne→User), name, description, banner, created_at      |
-| comments       | Comment         | video, user, text, created_at, updated_at                         |
+| comments       | Comment         | video, user, parent (nullable self-FK), text, created_at, updated_at |
 | subscriptions  | Subscription    | user, channel (FK→User), subscribed_at                            |
 |                |                 | `unique_together: (user, channel)`; self-sub blocked              |
 | recommendations| VideoTag        | name (unique)                                                     |
@@ -344,14 +352,14 @@ DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
 
 ## Testing
 
-The project has **149 tests** across **36 test classes** covering all 10 apps:
+The project has **158 tests** across **36 test classes** covering all 10 apps:
 
 | App            | Test Files | Tests | Coverage Highlights                         |
 | -------------- | ---------- | ----- | ------------------------------------------- |
 | videos         | 1          | 27    | CRUD, reactions (like/dislike/toggle), views |
 | accounts       | 1          | 14    | Signup (valid, mismatched, existing), login, logout |
 | channels       | 1          | 26    | CRUD, ownership, pagination, context data    |
-| comments       | 1          | 16    | CRUD, ownership, owner-only edit/delete      |
+| comments       | 1          | 25    | CRUD, ownership, threaded replies, nesting, reply counts |
 | subscriptions  | 1          | 12    | Subscribe, unsubscribe, self-sub block, own list |
 | search         | 1          | 16    | Query results, empty query, history CRUD     |
 | recommendations| 1          | 21    | Tags, tag maps, user interests, tag page views |
@@ -485,8 +493,6 @@ The API is available at `/api/`:
 
 ## Known Limitations
 
-- **Settings page** — Placeholder link in the dropdown menu
-- **Password reset** — Not implemented
 - **Playlists** — Not supported
 - **Async video processing** — No transcoding or HLS streaming (requires FFmpeg + Celery/Huey on the server)
 - **Real-time features** — No WebSockets/SSE (requires Django Channels + Redis, not available on PythonAnywhere free tier)
