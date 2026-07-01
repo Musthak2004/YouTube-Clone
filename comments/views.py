@@ -29,6 +29,11 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['video'] = get_object_or_404(Video, pk=self.kwargs["video_pk"])
+        parent_pk = self.request.GET.get('parent') or self.request.POST.get('parent')
+        if parent_pk:
+            ctx['parent_comment'] = get_object_or_404(
+                Comment, pk=parent_pk, video=ctx['video']
+            )
         return ctx
 
     def form_valid(self, form):
@@ -36,6 +41,12 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         form.instance.video = get_object_or_404(
             Video, pk=self.kwargs["video_pk"]
         )
+        parent_pk = self.request.POST.get('parent')
+        if parent_pk:
+            parent = get_object_or_404(
+                Comment, pk=parent_pk, video=form.instance.video
+            )
+            form.instance.parent = parent
         return super().form_valid(form)
 
     def get_success_url(self):

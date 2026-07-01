@@ -219,7 +219,11 @@
             <div class="user-avatar">{{ request.user.username|slice:":1"|upper }}</div>
             <div class="card-header-info">
                 <div class="card-title-text">Add a Comment</div>
-                <div class="card-sub-text">Commenting as <strong style="color:var(--text);">{{ request.user.username }}</strong></div>
+                <div class="card-sub-text">Commenting as <strong style="color:var(--text);">{{ request.user.username }}</strong>
+                {% if parent_comment %}
+                    &nbsp;·&nbsp; replying to <strong style="color:var(--text);">{{ parent_comment.user.username }}</strong>
+                {% endif %}
+                </div>
             </div>
         </div>
 
@@ -235,6 +239,9 @@
 
         <form method="post">
             {% csrf_token %}
+            {% if parent_comment %}
+                <input type="hidden" name="parent" value="{{ parent_comment.pk }}">
+            {% endif %}
 
             <div class="field-group">
                 <label class="field-label" for="{{ form.text.id_for_label }}">

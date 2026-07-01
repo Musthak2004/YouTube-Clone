@@ -266,6 +266,52 @@
     .no-comments i { font-size: 2.2rem; display: block; margin-bottom: 10px; color: var(--muted); }
     .no-comments p { font-size: 0.875rem; }
 
+    /* ── Threaded Replies ── */
+    .comment-replies {
+        margin-left: 48px; padding-left: 16px;
+        border-left: 2px solid rgba(255,255,255,0.06);
+    }
+    .comment-reply-item {
+        display: flex; gap: 10px; padding: 10px 0;
+        animation: fadeUp 0.3s ease both;
+    }
+    .comment-reply-item .comment-avatar .ch-avatar,
+    .comment-reply-item .comment-avatar .ch-avatar-fallback {
+        width: 28px; height: 28px; font-size: 11px;
+    }
+    .btn-reply {
+        background: none; border: none; color: var(--muted); cursor: pointer;
+        font-size: 0.78rem; font-family: 'DM Sans', sans-serif; padding: 2px 0;
+        transition: color 0.2s; text-decoration: none;
+    }
+    .btn-reply:hover { color: var(--text); }
+    .reply-form-wrap {
+        margin-top: 8px; display: none;
+    }
+    .reply-form-wrap.active { display: block; }
+    .reply-textarea {
+        width: 100%; background: var(--input-bg, #0e0e0e);
+        border: none; border-bottom: 2px solid var(--border);
+        color: var(--text); padding: 8px 0; font-size: 0.85rem;
+        font-family: 'DM Sans', sans-serif; outline: none; resize: none;
+        transition: border-color 0.2s;
+    }
+    .reply-textarea:focus { border-bottom-color: rgba(255,255,255,0.3); }
+    .reply-textarea::placeholder { color: #444; }
+    .reply-form-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .btn-reply-cancel {
+        background: transparent; border: none; color: var(--muted); cursor: pointer;
+        font-size: 0.8rem; padding: 4px 12px; border-radius: 8px; font-family: 'DM Sans', sans-serif;
+        transition: background 0.2s;
+    }
+    .btn-reply-cancel:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+    .btn-reply-submit {
+        background: rgba(255,255,255,0.06); border: none; color: var(--muted2); cursor: pointer;
+        font-size: 0.8rem; padding: 4px 16px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-weight: 500;
+        transition: all 0.2s;
+    }
+    .btn-reply-submit.ready { background: rgba(255,255,255,0.1); color: var(--text); }
+
     .sidebar-title { font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 600; margin-bottom: 14px; }
 
     .related-item {
@@ -490,6 +536,60 @@
                                     {% endif %}
                                 </div>
                                 <div class="comment-text">{{ comment.text }}</div>
+                                {% if user.is_authenticated %}
+                                    <button type="button" class="btn-reply" data-comment-id="{{ comment.pk }}">Reply</button>
+                                    <!-- Inline reply form -->
+                                    <div class="reply-form-wrap" id="replyForm-{{ comment.pk }}">
+                                        <form method="post" action="{% url 'comment_create' video.pk %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="parent" value="{{ comment.pk }}">
+                                            <textarea name="text" class="reply-textarea" rows="1" placeholder="Write a reply..." required></textarea>
+                                            <div class="reply-form-actions">
+                                                <button type="submit" class="btn-reply-submit">Reply</button>
+                                                <button type="button" class="btn-reply-cancel" data-comment-id="{{ comment.pk }}">Cancel</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                {% endif %}
+
+                                {% if comment.replies.all %}
+                                    <div class="comment-replies">
+                                        {% for reply in comment.replies.all %}
+                                            <div class="comment-reply-item">
+                                                <div class="comment-avatar">
+                                                    {% if reply.user.profile_picture %}
+                                                        <img src="{{ reply.user.profile_picture.url }}" class="ch-avatar" alt="">
+                                                    {% else %}
+                                                        <div class="ch-avatar-fallback">{{ reply.user.username|slice:":1"|upper }}</div>
+                                                    {% endif %}
+                                                </div>
+                                                <div style="flex:1;min-width:0;">
+                                                    <div class="comment-meta">
+                                                        <span class="comment-username">{{ reply.user.username }}</span>
+                                                        <span class="comment-time">{{ reply.created_at|timesince }} ago</span>
+                                                        {% if reply.updated_at > reply.created_at %}
+                                                            <span class="comment-edited">(edited)</span>
+                                                        {% endif %}
+                                                        {% if user.is_authenticated and user == reply.user %}
+                                                            <div class="comment-edit-btns">
+                                                                <a href="{% url 'comment_edit' reply.pk %}" class="btn-cm-icon">
+                                                                    <i class="bi bi-pencil"></i>
+                                                                </a>
+                                                                <a href="{% url 'comment_delete' reply.pk %}" class="btn-cm-icon danger">
+                                                                    <i class="bi bi-trash3"></i>
+                                                                </a>
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="comment-text">{{ reply.text }}</div>
+                                                    {% if user.is_authenticated %}
+                                                        <button type="button" class="btn-reply" data-comment-id="{{ comment.pk }}">Reply</button>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
                     {% endfor %}
@@ -636,6 +736,38 @@
             submitComment.classList.remove('ready');
         });
     }
+
+    // ── Reply toggle ──
+    document.querySelectorAll('.btn-reply').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const commentId = btn.dataset.commentId;
+            const formWrap  = document.getElementById('replyForm-' + commentId);
+            if (!formWrap) return;
+            // Hide any other open reply forms
+            document.querySelectorAll('.reply-form-wrap.active').forEach(w => {
+                if (w !== formWrap) w.classList.remove('active');
+            });
+            formWrap.classList.toggle('active');
+            if (formWrap.classList.contains('active')) {
+                const ta = formWrap.querySelector('.reply-textarea');
+                ta.focus();
+            }
+        });
+    });
+    document.querySelectorAll('.btn-reply-cancel').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const commentId = btn.dataset.commentId;
+            const formWrap  = document.getElementById('replyForm-' + commentId);
+            if (formWrap) {
+                formWrap.classList.remove('active');
+                formWrap.querySelector('.reply-textarea').value = '';
+            }
+        });
+    });
+    // Auto-expand reply textarea on focus
+    document.querySelectorAll('.reply-textarea').forEach(ta => {
+        ta.addEventListener('focus', () => { ta.rows = 3; });
+    });
 
     // ── Share button ──
     const shareBtn   = document.getElementById('shareBtn');

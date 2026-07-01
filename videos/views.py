@@ -8,6 +8,7 @@ from django.views import View
 
 from subscriptions.models import Subscription
 from recommendations.models import VideoTag
+from comments.models import Comment
 from .models import Video, VideoView, VideoReaction
 from .forms import VideoUploadForm
 
@@ -132,8 +133,16 @@ class VideoDetailView(DetailView):
 
         ctx['video_tags'] = video.tags.select_related('tag').all()
 
-        # Paginated comments
-        comments_qs = video.comments.select_related('user').all().order_by('-created_at')
+        # Paginated top-level comments with replies prefetched
+        from django.db.models import Prefetch
+        comments_qs = video.comments.select_related('user').filter(
+            parent__isnull=True
+        ).prefetch_related(
+            Prefetch(
+                'replies',
+                queryset=Comment.objects.select_related('user').order_by('created_at')
+            )
+        ).order_by('-created_at')
         paginator = Paginator(comments_qs, 10)
         cpage_num = self.request.GET.get('cpage', 1)
         ctx['comment_page'] = paginator.get_page(cpage_num)
