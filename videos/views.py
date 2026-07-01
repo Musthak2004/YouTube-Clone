@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views import View
 
 from subscriptions.models import Subscription
+from recommendations.models import VideoTag
 from .models import Video, VideoView, VideoReaction
 from .forms import VideoUploadForm
 
@@ -52,10 +53,18 @@ class VideoListView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        return Video.objects.select_related('uploader', 'channel').order_by('-uploaded_at')
+        qs = Video.objects.select_related('uploader', 'channel').order_by('-uploaded_at')
+        tag_id = self.request.GET.get('tag_id')
+        if tag_id:
+            qs = qs.filter(tags__tag_id=tag_id)
+        return qs
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        tag_id = self.request.GET.get('tag_id')
+        ctx['all_tags'] = VideoTag.objects.all().order_by('name')
+        ctx['active_tag_id'] = int(tag_id) if tag_id else None
+        ctx['filter_params'] = f'tag_id={tag_id}&' if tag_id else ''
         if self.request.user.is_authenticated:
             from recommendations.utils import get_recommendations
             ctx['recommended_videos'] = get_recommendations(self.request.user)

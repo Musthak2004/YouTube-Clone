@@ -320,16 +320,12 @@
 
     <!-- Filter chips -->
     <div class="filter-row">
-        <button class="chip active">All</button>
-        <button class="chip">Music</button>
-        <button class="chip">Gaming</button>
-        <button class="chip">Movies</button>
-        <button class="chip">Tech</button>
-        <button class="chip">Sports</button>
-        <button class="chip">Comedy</button>
-        <button class="chip">Education</button>
-        <button class="chip">Live</button>
-        <button class="chip">New</button>
+        <a href="?" class="chip {% if not active_tag_id %}active{% endif %}">All</a>
+        {% for tag in all_tags %}
+        <a href="?tag_id={{ tag.id }}" class="chip {% if active_tag_id == tag.id %}active{% endif %}">
+            {{ tag.name }}
+        </a>
+        {% endfor %}
     </div>
 
     {% if recommended_videos %}
@@ -446,8 +442,8 @@
     {% if is_paginated %}
     <div class="pager">
         {% if page_obj.has_previous %}
-            <a href="?page=1" class="page-btn" title="First">«</a>
-            <a href="?page={{ page_obj.previous_page_number }}" class="page-btn">
+            <a href="?{{ filter_params }}page=1" class="page-btn" title="First">«</a>
+            <a href="?{{ filter_params }}page={{ page_obj.previous_page_number }}" class="page-btn">
                 <i class="bi bi-chevron-left" style="font-size:0.8rem;"></i>
             </a>
         {% else %}
@@ -459,15 +455,15 @@
             {% if page_obj.number == num %}
                 <span class="page-btn active">{{ num }}</span>
             {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                <a href="?page={{ num }}" class="page-btn">{{ num }}</a>
+                <a href="?{{ filter_params }}page={{ num }}" class="page-btn">{{ num }}</a>
             {% endif %}
         {% endfor %}
 
         {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}" class="page-btn">
+            <a href="?{{ filter_params }}page={{ page_obj.next_page_number }}" class="page-btn">
                 <i class="bi bi-chevron-right" style="font-size:0.8rem;"></i>
             </a>
-            <a href="?page={{ page_obj.paginator.num_pages }}" class="page-btn" title="Last">»</a>
+            <a href="?{{ filter_params }}page={{ page_obj.paginator.num_pages }}" class="page-btn" title="Last">»</a>
         {% else %}
             <span class="page-btn disabled"><i class="bi bi-chevron-right" style="font-size:0.8rem;"></i></span>
             <span class="page-btn disabled">»</span>
@@ -479,11 +475,11 @@
 </div>
 
 <script>
-    // Filter chips toggle
+    // Filter chips — immediately highlight clicked chip for responsiveness
     document.querySelectorAll('.chip').forEach(chip => {
-        chip.addEventListener('click', () => {
+        chip.addEventListener('click', function() {
             document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-            chip.classList.add('active');
+            this.classList.add('active');
         });
     });
 </script>
