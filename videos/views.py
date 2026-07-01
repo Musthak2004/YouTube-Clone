@@ -95,6 +95,16 @@ class VideoDetailView(DetailView):
                 user=request.user,
                 video=self.object
             )
+
+            # Track tag interest for recommendations
+            from recommendations.models import UserInterest, VideoTagMap
+            for tag_map in VideoTagMap.objects.select_related('tag').filter(video=self.object):
+                interest, _ = UserInterest.objects.get_or_create(
+                    user=request.user,
+                    tag=tag_map.tag
+                )
+                interest.score += 1
+                interest.save()
         return response
 
     def get_context_data(self, **kwargs):
