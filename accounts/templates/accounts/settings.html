@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Settings — YouTube Clone{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 640px;">
+  <h4 class="mb-4 fw-bold" style="font-family: 'Outfit', sans-serif;">
+    <i class="bi bi-gear me-2" style="color: var(--accent);"></i>Settings
+  </h4>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- Profile Section -->
+    <div class="card mb-4" style="background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden;">
+      <div class="card-header px-4 py-3" style="background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border);">
+        <h5 class="mb-0" style="font-family: 'Outfit', sans-serif; font-size: 0.95rem;">
+          <i class="bi bi-person-circle me-2" style="color: var(--accent);"></i>Profile
+        </h5>
+      </div>
+      <div class="card-body px-4 py-4">
+        {{ profile_form|crispy }}
+      </div>
+    </div>
+
+    <!-- Password Section -->
+    <div class="card mb-4" style="background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden;">
+      <div class="card-header px-4 py-3" style="background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border);">
+        <h5 class="mb-0" style="font-family: 'Outfit', sans-serif; font-size: 0.95rem;">
+          <i class="bi bi-lock me-2" style="color: var(--accent);"></i>Change Password
+        </h5>
+      </div>
+      <div class="card-body px-4 py-4">
+        {{ password_form|crispy }}
+      </div>
+    </div>
+
+    <div class="d-flex gap-3">
+      <button type="submit" class="btn px-4" style="
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 28px;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 600;
+        font-size: 0.875rem;
+      ">
+        <i class="bi bi-check-lg me-1"></i>Save Changes
+      </button>
+      <a href="{{ request.META.HTTP_REFERER|default:'/' }}" class="btn px-4" style="
+        background: transparent;
+        color: var(--text-secondary);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 28px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.875rem;
+        text-decoration: none;
+      ">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
