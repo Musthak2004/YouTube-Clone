@@ -3,6 +3,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, redirect
+from django.core.paginator import Paginator
 from django.views import View
 
 from subscriptions.models import Subscription
@@ -120,6 +121,13 @@ class VideoDetailView(DetailView):
         )
 
         ctx['video_tags'] = video.tags.select_related('tag').all()
+
+        # Paginated comments
+        comments_qs = video.comments.select_related('user').all().order_by('-created_at')
+        paginator = Paginator(comments_qs, 10)
+        cpage_num = self.request.GET.get('cpage', 1)
+        ctx['comment_page'] = paginator.get_page(cpage_num)
+        ctx['comment_count'] = paginator.count
 
         if user.is_authenticated:
             from recommendations.utils import get_recommendations

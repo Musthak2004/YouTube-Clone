@@ -372,9 +372,7 @@ The tag-based recommendation system works as follows:
 ## Known Limitations
 
 - **Video upload** — No server-side file size validation (browser-side hint only)
-- **Comments** — Not paginated on video detail pages (all comments load at once)
 - **Search** — Uses basic `icontains` matching, not full-text search
-- **Filter chips** — Visual only; actual category filtering not yet wired
 - **Notifications** — Bell icon is decorative; no notification system yet
 - **Settings page** — Placeholder link in the dropdown menu
 - **Password reset** — Not implemented
