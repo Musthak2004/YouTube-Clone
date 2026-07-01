@@ -306,7 +306,8 @@
 
         <!-- Player -->
         <div class="player-wrap">
-            <video controls poster="{% if video.thumbnail_url %}{{ video.thumbnail_url }}{% endif %}" preload="metadata">
+            <video controls poster="{% if video.thumbnail_url %}{{ video.thumbnail_url }}{% endif %}" preload="metadata"
+                   id="videoPlayer" data-video-id="{{ video.pk }}">
                 <source src="{{ video.video_url }}" type="video/mp4">
                 Your browser does not support video playback.
             </video>
@@ -650,5 +651,39 @@
             }, 2500);
         });
     });
+
+    // ── Watch duration tracking ──
+    const videoEl = document.getElementById('videoPlayer');
+    if (videoEl && {{ user.is_authenticated|yesno:"true,false" }}) {
+        const videoId = videoEl.dataset.videoId;
+        let lastReported = 0;
+
+        videoEl.addEventListener('timeupdate', () => {
+            const current = Math.floor(videoEl.currentTime);
+            // Report every 15 seconds of playback
+            if (current - lastReported >= 15) {
+                lastReported = current;
+                fetch('/watch_history/progress/' + videoId + '/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({ watch_duration: current }),
+                }).catch(() => {}); // fire-and-forget
+            }
+        });
+
+        // Final update when leaving the page
+        window.addEventListener('beforeunload', () => {
+            const current = Math.floor(videoEl.currentTime);
+            if (current > 0) {
+                navigator.sendBeacon(
+                    '/watch_history/progress/' + videoId + '/',
+                    new Blob([JSON.stringify({ watch_duration: current })], { type: 'application/json' })
+                );
+            }
+        });
+    }
 </script>
 {% endblock %}

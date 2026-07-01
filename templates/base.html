@@ -497,6 +497,68 @@
       .bg-elevated {
         background: var(--bg-elevated);
       }
+
+      /* ─── LIGHT MODE ─── */
+      :root.light,
+      [data-theme="light"] {
+        --bg-primary: #ffffff;
+        --bg-secondary: #f5f5f5;
+        --bg-elevated: #ffffff;
+        --bg-hover: #f0f0f0;
+        --border-subtle: rgba(0, 0, 0, 0.08);
+        --text-primary: #0f0f0f;
+        --text-secondary: #606060;
+        --text-muted: #909090;
+      }
+      :root.light .navbar {
+        background-color: rgba(255, 255, 255, 0.95) !important;
+      }
+      :root.light .search-inner {
+        background: #f0f0f0;
+      }
+      :root.light .search-btn {
+        background: #e5e5e5;
+      }
+      :root.light .search-btn:hover {
+        background: #d5d5d5;
+      }
+      :root.light .avatar-fallback,
+      :root.light .ch-avatar-fallback {
+        background: linear-gradient(135deg, #e0e0e0, #ccc);
+        color: #333;
+      }
+      :root.light .sidebar {
+        background-color: #ffffff;
+      }
+      :root.light .chip {
+        background: rgba(0,0,0,0.04);
+      }
+      :root.light .chip:hover {
+        background: rgba(0,0,0,0.08);
+        color: #000;
+      }
+      :root.light .chip.active {
+        background: #0f0f0f;
+        color: #fff;
+      }
+      :root.light .video-title-text { color: #0f0f0f; }
+      :root.light .uploader-name { color: #606060; }
+      :root.light .channel-bar,
+      :root.light .desc-box { background: #f5f5f5; }
+      :root.light .comment-textarea { color: #0f0f0f; }
+      :root.light .comment-textarea::placeholder { color: #999; }
+      :root.light .comment-text { color: #333; }
+      :root.light .empty-icon { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.08); }
+      :root.light .thumb-placeholder { background: #e5e5e5; }
+      :root.light .thumb-placeholder i { color: #bbb; }
+      :root.light .no-comments i { color: #ccc; }
+      :root.light .history-card { background: #f5f5f5; }
+      :root.light .channel-row { background: #f5f5f5; }
+      :root.light .search-bar { background: #f0f0f0; }
+      :root.light .yt-toast { background: #f5f5f5; color: #0f0f0f; border-color: rgba(0,0,0,0.1); }
+      :root.light .page-btn { background: rgba(0,0,0,0.05); }
+      :root.light .page-btn.active { background: #0f0f0f; color: #fff; }
+      :root.light .comment-item { border-color: rgba(0,0,0,0.06); }
     </style>
 
     <title>{% block title %}YouTube-Clone{% endblock %}</title>
@@ -641,6 +703,11 @@
               <li>
                 <a class="dropdown-item" href="{% url 'search' %}">
                   <i class="bi bi-search"></i> Search
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#" id="themeToggle">
+                  <i class="bi bi-sun-fill" id="themeIcon"></i> <span id="themeLabel">Light mode</span>
                 </a>
               </li>
               <li>
@@ -818,6 +885,43 @@
           setTimeout(() => toast.remove(), 400);
         }, 4000);
       });
+
+      // ─── Theme Toggle ───
+      const htmlEl = document.documentElement;
+      const themeToggle = document.getElementById('themeToggle');
+      const themeIcon = document.getElementById('themeIcon');
+      const themeLabel = document.getElementById('themeLabel');
+
+      function applyTheme(theme) {
+        if (theme === 'light') {
+          htmlEl.classList.add('light');
+          htmlEl.setAttribute('data-theme', 'light');
+          themeIcon.className = 'bi bi-moon-fill';
+          themeLabel.textContent = 'Dark mode';
+        } else {
+          htmlEl.classList.remove('light');
+          htmlEl.removeAttribute('data-theme');
+          themeIcon.className = 'bi bi-sun-fill';
+          themeLabel.textContent = 'Light mode';
+        }
+        localStorage.setItem('yt-theme', theme);
+      }
+
+      const saved = localStorage.getItem('yt-theme');
+      if (saved === 'light') applyTheme('light');
+
+      if (themeToggle) {
+        themeToggle.addEventListener('click', (e) => {
+          e.preventDefault();
+          const current = htmlEl.classList.contains('light') ? 'dark' : 'light';
+          applyTheme(current);
+          // Close dropdown
+          const dropdown = bootstrap.Dropdown.getInstance(
+            document.querySelector('[data-bs-toggle="dropdown"]')
+          );
+          if (dropdown) dropdown.hide();
+        });
+      }
     </script>
 
     {% block extra_js %}{% endblock %}

@@ -50,6 +50,13 @@ else:
 # Media files stored locally in media/ directory.
 # Static files served from staticfiles/ after collectstatic.
 
+# ── Sentry (optional) ────────────────────────────────────────────────────────
+# Set SENTRY_DSN in your environment or .env to enable error tracking.
+SENTRY_DSN = os.environ.get('SENTRY_DSN')
+if SENTRY_DSN:
+    import sentry_sdk
+    sentry_sdk.init(dsn=SENTRY_DSN, send_default_pii=True)
+
 # ── Email (optional) ─────────────────────────────────────────────────────────
 EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
@@ -67,6 +74,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crispy_forms',
     'crispy_bootstrap5',
+    'rest_framework',
+    'api.apps.ApiConfig',
     'accounts.apps.AccountsConfig',
     'videos.apps.VideosConfig',
     'comments.apps.CommentsConfig',
@@ -134,6 +143,22 @@ LOGOUT_REDIRECT_URL = 'home'
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
+
+# ── Django REST Framework ────────────────────────────────────────────────────
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+}
 
 LOGGING = {
     "version": 1,

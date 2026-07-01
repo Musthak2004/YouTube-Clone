@@ -24,6 +24,10 @@ A production-ready video sharing platform inspired by YouTube, built with Django
 - **Watch History** — Auto-tracked when authenticated users view a video. Grouped by date. Clear all or remove individual entries. Tracks watch duration percentage.
 - **Search** — Search videos by title and channels by name using `icontains`. Recent search history saved for authenticated users (last 8). Clear all or remove individual entries.
 - **Video View Tracking** — `VideoView` records per-user (or anonymous) views. Aggregated counter on the `Video` model updated on each view.
+- **Watch Duration Tracking** — Periodic JS `timeupdate` events record seconds watched per video, enabling resume-from-last-position and engagement metrics.
+- **Error Reporting** — Optional [Sentry](https://sentry.io) integration via `SENTRY_DSN` env var.
+- **REST API** — DRF-based API at `/api/` with browsable interface. Endpoints for videos (filterable by tag/search), channels, comments, tags, and user profile.
+- **Light Mode** — Theme toggle in the user dropdown, persisted in `localStorage`.
 
 ### Advanced
 
@@ -377,7 +381,6 @@ The tag-based recommendation system works as follows:
 - **Settings page** — Placeholder link in the dropdown menu
 - **Password reset** — Not implemented
 - **Playlists** — Not supported
-- **REST API** — Not yet implemented (planned with DRF)
 
 ---
 
