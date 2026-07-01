@@ -136,3 +136,40 @@ class CommentListTests(TestCase):
     def test_comments_appear_on_video_detail(self):
         response = self.client.get(reverse('video_detail', args=[self.video.pk]))
         self.assertContains(response, 'First comment')
+
+
+class CommentModelTests(TestCase):
+    def setUp(self):
+        self.uploader = User.objects.create_user(username='up_model', email='upmodel@test.com', password='pass')
+        self.video = Video.objects.create(
+            uploader=self.uploader, title='Model Test'
+        )
+        self.commenter = User.objects.create_user(username='com_model', email='commodel@test.com', password='pass')
+
+    def test_comment_string_representation(self):
+        comment = Comment.objects.create(
+            user=self.commenter, video=self.video, text='Nice!'
+        )
+        self.assertIn(str(self.commenter), str(comment))
+        self.assertIn(str(self.video), str(comment))
+
+    def test_created_at_is_auto_set(self):
+        comment = Comment.objects.create(
+            user=self.commenter, video=self.video, text='Timestamp test'
+        )
+        self.assertIsNotNone(comment.created_at)
+
+    def test_updated_at_is_auto_set(self):
+        comment = Comment.objects.create(
+            user=self.commenter, video=self.video, text='Update test'
+        )
+        self.assertIsNotNone(comment.updated_at)
+
+    def test_comment_redirects_to_video(self):
+        comment = Comment.objects.create(
+            user=self.commenter, video=self.video, text='Redirect test'
+        )
+        self.assertEqual(
+            comment.get_absolute_url(),
+            reverse('video_detail', args=[self.video.pk])
+        )

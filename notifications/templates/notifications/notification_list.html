@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Notifications — YouTube-Clone{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 720px;">
+  <h4 class="mb-4 fw-bold" style="font-family: 'Outfit', sans-serif;">
+    <i class="bi bi-bell me-2" style="color: var(--accent);"></i>Notifications
+  </h4>
+
+  {% if notifications %}
+    <div class="list-group list-group-flush">
+      {% for n in notifications %}
+      <div
+        class="list-group-item d-flex align-items-start gap-3 px-3 py-3 notification-item"
+        data-pk="{{ n.pk }}"
+        style="
+          background: {% if n.is_read %}transparent{% else %}var(--bg-elevated){% endif %};
+          border-color: var(--border-subtle);
+          transition: background var(--transition);
+          {% if not n.is_read %}border-left: 3px solid var(--accent);{% endif %}
+        "
+      >
+        <!-- Actor avatar -->
+        <div class="flex-shrink-0">
+          {% if n.actor.profile_picture %}
+          <img
+            src="{{ n.actor.profile_picture.url }}"
+            alt="{{ n.actor.username }}"
+            class="rounded-circle"
+            style="width: 40px; height: 40px; object-fit: cover;"
+          />
+          {% else %}
+          <div
+            class="rounded-circle d-flex align-items-center justify-content-center"
+            style="
+              width: 40px; height: 40px;
+              background: linear-gradient(135deg, #333, #1a1a1a);
+              font-family: 'Outfit', sans-serif;
+              font-weight: 600;
+              font-size: 15px;
+              color: var(--text-primary);
+            "
+          >
+            {{ n.actor.username|slice:":1"|upper }}
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Body -->
+        <div class="flex-grow-1 min-width-0">
+          <div style="font-size: 0.9rem; color: var(--text-primary); line-height: 1.4;">
+            <strong>{{ n.actor.username }}</strong>
+            {% if n.verb == 'commented' %}
+              commented on your video
+              {% if n.target_video %}
+                "<a
+                  href="{{ n.target_video.get_absolute_url }}"
+                  style="color: var(--accent); text-decoration: none;"
+                >{{ n.target_video.title|truncatechars:50 }}</a>"
+              {% endif %}
+            {% elif n.verb == 'subscribed' %}
+              subscribed to your channel
+            {% else %}
+              {{ n.verb }}
+            {% endif %}
+          </div>
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">
+            {{ n.created_at|timesince }} ago
+          </div>
+        </div>
+
+        <!-- Mark-read button (only if unread) -->
+        <div class="flex-shrink-0">
+          {% if not n.is_read %}
+          <button
+            class="mark-read-btn btn btn-sm"
+            data-pk="{{ n.pk }}"
+            style="
+              background: transparent;
+              border: 1px solid var(--border-subtle);
+              color: var(--text-secondary);
+              border-radius: 50%;
+              width: 32px; height: 32px;
+              padding: 0;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 0.8rem;
+              cursor: pointer;
+              transition: all var(--transition);
+            "
+            title="Mark as read"
+          >
+            <i class="bi bi-check-lg"></i>
+          </button>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav class="mt-4">
+      <ul class="pagination justify-content-center" style="gap: 4px;">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link page-btn" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+        </li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+          <a class="page-link page-btn {% if num == page_obj.number %}active{% endif %}" href="?page={{ num }}">{{ num }}</a>
+        </li>
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link page-btn" href="?page={{ page_obj.next_page_number }}">Next</a>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+
+  {% else %}
+    <div class="text-center py-5" style="color: var(--text-muted);">
+      <i class="bi bi-bell-slash" style="font-size: 3rem; display: block; margin-bottom: 16px;"></i>
+      <p style="font-size: 1.1rem;">No notifications yet.</p>
+      <p>Comments and subscriptions on your content will appear here.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Mark a single notification as read via AJAX
+  document.querySelectorAll('.mark-read-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const pk = this.dataset.pk;
+      const item = this.closest('.notification-item');
+      fetch('/notifications/' + pk + '/read/', {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+          'Content-Type': 'application/json',
+        },
+      }).then(function(r) { return r.json(); }).then(function(data) {
+        if (data.ok) {
+          item.style.background = 'transparent';
+          item.style.borderLeft = 'none';
+          btn.remove();
+          // Update the bell badge
+          var badge = document.querySelector('.badge-dot');
+          if (badge) {
+            var existing = document.querySelector('.unread-count-badge');
+            if (existing) {
+              var c = parseInt(existing.textContent || '0', 10);
+              c = Math.max(0, c - 1);
+              existing.textContent = c;
+              if (c === 0) existing.style.display = 'none';
+            }
+          }
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

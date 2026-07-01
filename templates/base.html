@@ -635,10 +635,28 @@
           </a>
 
           <!-- Notifications -->
-          <button class="nav-icon-btn" title="Notifications">
+          <a href="{% url 'notification_list' %}" class="nav-icon-btn" title="Notifications">
             <i class="bi bi-bell"></i>
             <span class="badge-dot"></span>
-          </button>
+            <span class="unread-count-badge" id="unreadBadge" style="
+              position: absolute;
+              top: -2px;
+              right: -4px;
+              background: var(--accent);
+              color: #fff;
+              font-size: 0.6rem;
+              font-weight: 700;
+              min-width: 16px;
+              height: 16px;
+              padding: 0 4px;
+              border-radius: 99px;
+              display: none;
+              align-items: center;
+              justify-content: center;
+              font-family: 'Outfit', sans-serif;
+              line-height: 1;
+            ">0</span>
+          </a>
 
           <!-- Profile Dropdown -->
           <div class="dropdown ms-1">
@@ -922,6 +940,24 @@
           if (dropdown) dropdown.hide();
         });
       }
+    </script>
+
+    <script>
+      // ─── Notification badge count ───
+      (function() {
+        var badge = document.getElementById('unreadBadge');
+        if (!badge) return;
+        fetch('/notifications/unread-count/')
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            var count = data.count || 0;
+            if (count > 0) {
+              badge.textContent = count > 99 ? '99+' : count;
+              badge.style.display = 'flex';
+            }
+          })
+          .catch(function() { /* silently ignore */ });
+      })();
     </script>
 
     {% block extra_js %}{% endblock %}

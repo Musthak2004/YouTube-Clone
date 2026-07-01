@@ -70,3 +70,53 @@ class LoginLogoutTests(TestCase):
         self.client.login(username='testuser', password='testpass123')
         response = self.client.post(reverse('logout'))
         self.assertEqual(response.status_code, 302)
+
+
+class CustomUserModelTests(TestCase):
+    def test_string_representation(self):
+        user = User.objects.create_user(
+            username='struser', email='str@test.com', password='pass123'
+        )
+        self.assertEqual(str(user), 'struser')
+
+    def test_email_unique(self):
+        User.objects.create_user(
+            username='user1', email='same@test.com', password='pass123'
+        )
+        with self.assertRaises(Exception):
+            User.objects.create_user(
+                username='user2', email='same@test.com', password='pass123'
+            )
+
+
+class ChannelAutoCreationTests(TestCase):
+    def test_channel_created_on_user_creation(self):
+        from channels.models import Channel
+        user = User.objects.create_user(
+            username='newuser', email='new@test.com', password='pass123'
+        )
+        self.assertTrue(Channel.objects.filter(owner=user).exists())
+        channel = Channel.objects.get(owner=user)
+        self.assertEqual(channel.name, f"{user.username}'s Channel")
+
+    def test_channel_has_correct_owner(self):
+        from channels.models import Channel
+        user = User.objects.create_user(
+            username='owneruser', email='owner@test.com', password='pass123'
+        )
+        channel = Channel.objects.get(owner=user)
+        self.assertEqual(channel.owner, user)
+
+
+class PasswordChangeTests(TestCase):
+    def test_password_change_requires_login(self):
+        response = self.client.get(reverse('password_change'))
+        self.assertEqual(response.status_code, 302)
+
+    def test_password_change_page_status_code(self):
+        User.objects.create_user(
+            username='passuser', email='pass@test.com', password='oldpass123'
+        )
+        self.client.login(username='passuser', password='oldpass123')
+        response = self.client.get(reverse('password_change'))
+        self.assertEqual(response.status_code, 200)

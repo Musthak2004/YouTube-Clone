@@ -11,7 +11,7 @@ from videos.models import Video
 
 class WatchHistoryView(LoginRequiredMixin, ListView):
     template_name = 'watch_history/watch_history.html'
-    context_object_name = 'watch_history'
+    context_object_name = 'history'
     paginate_by = 16
 
     def get_queryset(self):

@@ -85,6 +85,7 @@ INSTALLED_APPS = [
     'recommendations.apps.RecommendationsConfig',
     'watch_history.apps.HistoryConfig',
     'pages.apps.PagesConfig',
+    'notifications.apps.NotificationsConfig',
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

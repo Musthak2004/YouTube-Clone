@@ -30,4 +30,5 @@ urlpatterns = [
     path("recommendations/", include("recommendations.urls")),
     path("watch_history/", include("watch_history.urls")),
     path("api/", include("api.urls")),
+    path("notifications/", include("notifications.urls")),
 ]

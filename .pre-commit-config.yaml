@@ -1,0 +1,30 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 25.1.0
+    hooks:
+      - id: black
+        language_version: python3.13
+  - repo: https://github.com/pycqa/isort
+    rev: 6.0.1
+    hooks:
+      - id: isort
+        name: isort (python)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.0
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+  - repo: local
+    hooks:
+      - id: django-check
+        name: django system check
+        entry: python manage.py check
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: django-tests
+        name: django tests
+        entry: python manage.py test
+        language: system
+        pass_filenames: false
+        always_run: true

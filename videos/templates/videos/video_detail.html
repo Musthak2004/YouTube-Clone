@@ -685,5 +685,50 @@
             }
         });
     }
+	// ── Keyboard shortcuts ──
+	document.addEventListener('keydown', (e) => {
+	  const video = document.getElementById('videoPlayer');
+	  if (!video) return;
+	  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+	  switch (e.key.toLowerCase()) {
+	    case ' ':
+	    case 'k':
+	      e.preventDefault();
+	      video.paused ? video.play() : video.pause();
+	      break;
+	    case 'f':
+	      e.preventDefault();
+	      video.requestFullscreen?.();
+	      break;
+	    case 'm':
+	      e.preventDefault();
+	      video.muted = !video.muted;
+	      break;
+	    case 'j':
+	      e.preventDefault();
+	      video.currentTime = Math.max(0, video.currentTime - 10);
+	      break;
+	    case 'l':
+	      e.preventDefault();
+	      video.currentTime = Math.min(video.duration or 0, video.currentTime + 10);
+	      break;
+	    case 'arrowleft':
+	      e.preventDefault();
+	      video.currentTime = Math.max(0, video.currentTime - 5);
+	      break;
+	    case 'arrowright':
+	      e.preventDefault();
+	      video.currentTime = Math.min(video.duration or 0, video.currentTime + 5);
+	      break;
+	    case 'arrowup':
+	      e.preventDefault();
+	      video.volume = Math.min(1, video.volume + 0.1);
+	      break;
+	    case 'arrowdown':
+	      e.preventDefault();
+	      video.volume = Math.max(0, video.volume - 0.1);
+	      break;
+	  }
+	});
 </script>
 {% endblock %}
