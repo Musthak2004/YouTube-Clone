@@ -1,40 +1,44 @@
-from django.views.generic import ListView, DetailView
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.urls import reverse_lazy
-from django.shortcuts import get_object_or_404, redirect
 from django.core.paginator import Paginator
+from django.db.models import Count
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse_lazy
 from django.views import View
+from django.views.generic import DetailView, ListView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
-from subscriptions.models import Subscription
-from recommendations.models import VideoTag
 from comments.models import Comment
-from .models import Video, VideoView, VideoReaction
+from playlists.models import PlaylistItem
+from recommendations.models import VideoTag
+from subscriptions.models import Subscription
+
 from .forms import VideoUploadForm
+from .models import Video, VideoReaction, VideoView
+
 
 class LikedVideosView(LoginRequiredMixin, ListView):
-    template_name = 'videos/liked_videos.html'
-    context_object_name = 'videos'
+    template_name = "videos/liked_videos.html"
+    context_object_name = "videos"
     paginate_by = 12
 
     def get_queryset(self):
-        return Video.objects.select_related('uploader').filter(
-            reactions__user=self.request.user,
-            reactions__reaction='like'
-        ).order_by('-reactions__id')
+        return (
+            Video.objects.select_related("uploader")
+            .filter(reactions__user=self.request.user, reactions__reaction="like")
+            .order_by("-reactions__id")
+        )
+
 
 class VideoReactionView(LoginRequiredMixin, View):
     def post(self, request, pk):
-        video    = get_object_or_404(Video, pk=pk)
-        reaction = request.POST.get('reaction')  # 'like' or 'dislike'
+        video = get_object_or_404(Video, pk=pk)
+        reaction = request.POST.get("reaction")  # 'like' or 'dislike'
 
-        if reaction not in ('like', 'dislike'):
+        if reaction not in ("like", "dislike"):
             return redirect(video.get_absolute_url())
 
         obj, created = VideoReaction.objects.get_or_create(
-            user=request.user,
-            video=video,
-            defaults={'reaction': reaction}
+            user=request.user, video=video, defaults={"reaction": reaction}
         )
 
         if not created:
@@ -48,6 +52,7 @@ class VideoReactionView(LoginRequiredMixin, View):
 
         return redirect(video.get_absolute_url())
 
+
 class VideoListView(ListView):
     model = Video
     template_name = "videos/video_list.html"
@@ -55,30 +60,33 @@ class VideoListView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        qs = Video.objects.select_related('uploader', 'channel').order_by('-uploaded_at')
-        tag_id = self.request.GET.get('tag_id')
+        qs = Video.objects.select_related("uploader", "channel").order_by(
+            "-uploaded_at"
+        )
+        tag_id = self.request.GET.get("tag_id")
         if tag_id:
             qs = qs.filter(tags__tag_id=tag_id)
         return qs
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        tag_id = self.request.GET.get('tag_id')
-        ctx['all_tags'] = VideoTag.objects.all().order_by('name')
-        ctx['active_tag_id'] = int(tag_id) if tag_id else None
-        ctx['filter_params'] = f'tag_id={tag_id}&' if tag_id else ''
+        tag_id = self.request.GET.get("tag_id")
+        ctx["all_tags"] = VideoTag.objects.all().order_by("name")
+        ctx["active_tag_id"] = int(tag_id) if tag_id else None
+        ctx["filter_params"] = f"tag_id={tag_id}&" if tag_id else ""
         if self.request.user.is_authenticated:
             from recommendations.utils import get_recommendations
-            ctx['recommended_videos'] = get_recommendations(self.request.user)
+
+            ctx["recommended_videos"] = get_recommendations(self.request.user)
         return ctx
 
 
 class VideoDetailView(DetailView):
     model = Video
-    template_name = 'videos/video_detail.html'
+    template_name = "videos/video_detail.html"
 
     def get_queryset(self):
-        return Video.objects.select_related('uploader', 'channel')
+        return Video.objects.select_related("uploader", "channel")
 
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
@@ -86,23 +94,23 @@ class VideoDetailView(DetailView):
         # Track video view
         VideoView.objects.create(
             user=request.user if request.user.is_authenticated else None,
-            video=self.object
+            video=self.object,
         )
         Video.objects.filter(pk=self.object.pk).update(views=self.object.views + 1)
 
         if request.user.is_authenticated:
             from watch_history.models import WatchHistory
-            WatchHistory.objects.create(
-                user=request.user,
-                video=self.object
-            )
+
+            WatchHistory.objects.create(user=request.user, video=self.object)
 
             # Track tag interest for recommendations
             from recommendations.models import UserInterest, VideoTagMap
-            for tag_map in VideoTagMap.objects.select_related('tag').filter(video=self.object):
+
+            for tag_map in VideoTagMap.objects.select_related("tag").filter(
+                video=self.object
+            ):
                 interest, _ = UserInterest.objects.get_or_create(
-                    user=request.user,
-                    tag=tag_map.tag
+                    user=request.user, tag=tag_map.tag
                 )
                 interest.score += 1
                 interest.save()
@@ -111,48 +119,70 @@ class VideoDetailView(DetailView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         video = self.object
-        user  = self.request.user
+        user = self.request.user
 
-        ctx['subscriber_count'] = video.uploader.subscribers_list.count()
+        ctx["subscriber_count"] = video.uploader.subscribers_list.count()
 
-        ctx['is_subscribed'] = (
-            user.is_authenticated and
-            Subscription.objects.filter(user=user, channel=video.uploader).exists()
+        ctx["is_subscribed"] = (
+            user.is_authenticated
+            and Subscription.objects.filter(user=user, channel=video.uploader).exists()
         )
 
-        ctx['user_reaction'] = None
+        ctx["user_reaction"] = None
         if user.is_authenticated:
             reaction = video.reactions.filter(user=user).first()
-            ctx['user_reaction'] = reaction.reaction if reaction else None
+            ctx["user_reaction"] = reaction.reaction if reaction else None
 
-        ctx['related_videos'] = (
+        # User's playlists for "Save to Playlist" modal
+        ctx["user_playlists"] = []
+        ctx["video_playlist_ids"] = []
+        if user.is_authenticated:
+            ctx["user_playlists"] = user.playlists.annotate(
+                item_count=Count("items")
+            ).order_by("-updated_at")
+            ctx["video_playlist_ids"] = list(
+                PlaylistItem.objects.filter(
+                    video=video, playlist__owner=user
+                ).values_list("playlist_id", flat=True)
+            )
+
+        ctx["related_videos"] = (
             Video.objects.filter(channel=video.channel)
             .exclude(pk=video.pk)
-            .order_by('-uploaded_at')[:10]
+            .order_by("-uploaded_at")[:10]
         )
 
-        ctx['video_tags'] = video.tags.select_related('tag').all()
+        ctx["video_tags"] = video.tags.select_related("tag").all()
 
         # Paginated top-level comments with replies prefetched
         from django.db.models import Prefetch
-        comments_qs = video.comments.select_related('user').filter(
-            parent__isnull=True
-        ).prefetch_related(
-            Prefetch(
-                'replies',
-                queryset=Comment.objects.select_related('user').order_by('created_at')
+
+        comments_qs = (
+            video.comments.select_related("user")
+            .filter(parent__isnull=True)
+            .prefetch_related(
+                Prefetch(
+                    "replies",
+                    queryset=Comment.objects.select_related("user").order_by(
+                        "created_at"
+                    ),
+                )
             )
-        ).order_by('-created_at')
+            .order_by("-created_at")
+        )
         paginator = Paginator(comments_qs, 10)
-        cpage_num = self.request.GET.get('cpage', 1)
-        ctx['comment_page'] = paginator.get_page(cpage_num)
-        ctx['comment_count'] = paginator.count
+        cpage_num = self.request.GET.get("cpage", 1)
+        ctx["comment_page"] = paginator.get_page(cpage_num)
+        ctx["comment_count"] = paginator.count
 
         if user.is_authenticated:
             from recommendations.utils import get_recommendations
-            ctx['recommended_videos'] = get_recommendations(user).exclude(pk=video.pk)[:6]
+
+            ctx["recommended_videos"] = get_recommendations(user).exclude(pk=video.pk)[
+                :6
+            ]
         else:
-            ctx['recommended_videos'] = Video.objects.none()
+            ctx["recommended_videos"] = Video.objects.none()
 
         return ctx
 
@@ -164,15 +194,16 @@ class VideoCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.uploader = self.request.user
-        if hasattr(self.request.user, 'channel'):
+        if hasattr(self.request.user, "channel"):
             form.instance.channel = self.request.user.channel
         response = super().form_valid(form)
 
         # Tags save
-        tag_ids = self.request.POST.getlist('tags')
+        tag_ids = self.request.POST.getlist("tags")
         for tag_id in tag_ids:
             try:
                 from recommendations.models import VideoTag, VideoTagMap
+
                 tag = VideoTag.objects.get(pk=tag_id)
                 VideoTagMap.objects.get_or_create(video=self.object, tag=tag)
             except VideoTag.DoesNotExist:

@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% block title %}Create Playlist — YouClone{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --card:   #111111;
+    --border: rgba(255,255,255,0.07);
+    --muted:  #555;
+    --muted2: #888;
+    --text:   #f0f0f0;
+    --accent: #ff0033;
+}
+
+.form-page {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px 0 60px;
+    animation: fadeUp 0.35s ease both;
+}
+@keyframes fadeUp {
+    from { opacity:0; transform:translateY(14px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+
+.form-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+}
+
+.form-card h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.form-card h1 i { color: var(--accent); }
+
+.form-group { margin-bottom: 20px; }
+.form-group label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    display: block;
+}
+.form-group .help-text {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 4px;
+}
+
+.btn-submit {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 99px;
+    padding: 11px 28px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 16px rgba(255,0,51,0.2);
+}
+.btn-submit:hover { background: #e0002d; transform: translateY(-1px); }
+
+.btn-cancel {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--muted2);
+    border-radius: 99px;
+    padding: 11px 24px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+.btn-cancel:hover { background: rgba(255,255,255,0.09); color: var(--text); }
+
+.form-actions { display: flex; gap: 12px; margin-top: 28px; align-items: center; }
+
+.errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 6px 0 0;
+}
+.errorlist li {
+    font-size: 0.8rem;
+    color: #f87171;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-card">
+        <h1><i class="bi bi-collection-play-fill"></i> New Playlist</h1>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}">Name</label>
+                {{ form.title }}
+                {{ form.title.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">Description</label>
+                {{ form.description }}
+                {{ form.description.errors }}
+                <div class="help-text">Optional — give your playlist a description</div>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.visibility.id_for_label }}">Visibility</label>
+                {{ form.visibility }}
+                {{ form.visibility.errors }}
+                <div class="help-text">
+                    <strong>Public</strong> — anyone can see it<br>
+                    <strong>Unlisted</strong> — only people with the link can see it<br>
+                    <strong>Private</strong> — only you can see it
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-submit"><i class="bi bi-check-lg"></i> Create Playlist</button>
+                <a href="{% url 'playlist_list' %}" class="btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -788,8 +788,8 @@
 
       <div class="sidebar-section">
         <div class="sidebar-section-label">Library</div>
-        <a href="#" class="sidebar-item">
-          <i class="bi bi-collection"></i>
+        <a href="{% url 'playlist_list' %}" class="sidebar-item {% if request.resolver_match.url_name == 'playlist_list' %}active{% endif %}">
+          <i class="bi bi-collection{% if request.resolver_match.url_name == 'playlist_list' %}-fill{% endif %}"></i>
           <span class="sidebar-text">Playlists</span>
         </a>
         <a

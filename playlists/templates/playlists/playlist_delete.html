@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% block title %}Delete Playlist — YouClone{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --card:   #111111;
+    --card2:  #161616;
+    --border: rgba(255,255,255,0.07);
+    --muted:  #555;
+    --muted2: #888;
+    --text:   #f0f0f0;
+    --accent: #ff0033;
+}
+
+.delete-page {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 40px 0;
+    animation: fadeUp 0.35s ease both;
+}
+@keyframes fadeUp {
+    from { opacity:0; transform:translateY(14px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+
+.delete-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px;
+    text-align: center;
+}
+
+.danger-icon {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: rgba(255,0,51,0.08);
+    border: 1px solid rgba(255,0,51,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 18px;
+    font-size: 1.6rem;
+    color: #ff6680;
+}
+
+.delete-card h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.delete-card p {
+    font-size: 0.875rem;
+    color: var(--muted2);
+    margin-bottom: 24px;
+    line-height: 1.6;
+}
+
+.playlist-summary {
+    background: var(--card2, #161616);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+    text-align: left;
+}
+.playlist-summary strong {
+    font-family: 'Outfit', sans-serif;
+    color: var(--text);
+    display: block;
+    margin-bottom: 4px;
+}
+.playlist-summary .pl-meta {
+    font-size: 0.8rem;
+    color: var(--muted2);
+}
+
+.warning-box {
+    background: rgba(255,0,51,0.06);
+    border: 1px solid rgba(255,0,51,0.12);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 0.82rem;
+    color: #ff6680;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+}
+.warning-box i { font-size: 1.1rem; flex-shrink: 0; }
+
+.confirm-label {
+    font-size: 0.82rem;
+    color: var(--muted2);
+    margin-bottom: 10px;
+    display: block;
+    text-align: left;
+}
+
+.confirm-input {
+    width: 100%;
+    background: #0c0c0c;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 20px;
+    text-align: center;
+}
+.confirm-input:focus { border-color: rgba(255,255,255,0.2); }
+
+.btn-delete {
+    background: #dc2626;
+    color: #fff;
+    border: none;
+    border-radius: 99px;
+    padding: 11px 28px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.5;
+    pointer-events: none;
+}
+.btn-delete.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+.btn-delete.active:hover { background: #b91c1c; transform: translateY(-1px); }
+
+.btn-cancel {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--muted2);
+    border-radius: 99px;
+    padding: 11px 24px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-left: 10px;
+}
+.btn-cancel:hover { background: rgba(255,255,255,0.09); color: var(--text); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-page">
+    <div class="delete-card">
+        <div class="danger-icon"><i class="bi bi-exclamation-triangle"></i></div>
+        <h1>Delete Playlist</h1>
+        <p>This action cannot be undone. All videos in this playlist<br>will not be deleted — only the playlist itself.</p>
+
+        <div class="playlist-summary">
+            <strong>{{ playlist.title }}</strong>
+            <div class="pl-meta">{{ playlist.items.count }} video{{ playlist.items.count|pluralize }}</div>
+        </div>
+
+        <div class="warning-box">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>Videos added to other playlists will remain in those playlists.</span>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <label class="confirm-label">Type <strong>DELETE</strong> to confirm</label>
+            <input type="text" class="confirm-input" id="confirmInput" placeholder="Type DELETE here">
+            <div>
+                <button type="submit" class="btn-delete" id="deleteBtn">
+                    <i class="bi bi-trash3"></i> Delete Playlist
+                </button>
+                <a href="{% url 'playlist_detail' playlist.pk %}" class="btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const input = document.getElementById('confirmInput');
+    const btn = document.getElementById('deleteBtn');
+    input.addEventListener('input', () => {
+        btn.classList.toggle('active', input.value === 'DELETE');
+    });
+</script>
+{% endblock %}

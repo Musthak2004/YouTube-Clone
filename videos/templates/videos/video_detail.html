@@ -339,6 +339,129 @@
         .ch-actions { margin-left: 0; }
         .tags-row { padding: 8px 0 12px; }
     }
+
+    /* ── SAVE TO PLAYLIST MODAL ── */
+    .playlist-modal .modal-content {
+        background: #1a1a1a;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 16px;
+    }
+    .playlist-modal .modal-header {
+        border-bottom: 1px solid rgba(255,255,255,0.07);
+        padding: 18px 20px;
+    }
+    .playlist-modal .modal-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 600;
+    }
+    .playlist-modal .modal-body { padding: 12px 20px 20px; }
+    .playlist-modal .modal-footer {
+        border-top: 1px solid rgba(255,255,255,0.07);
+        padding: 14px 20px;
+    }
+    .playlist-modal .btn-close {
+        filter: invert(0.8);
+    }
+
+    .pl-checkbox-wrap {
+        display: flex;
+        align-items: center;
+        padding: 10px 12px;
+        border-radius: 10px;
+        transition: background 0.2s;
+        cursor: pointer;
+        gap: 12px;
+    }
+    .pl-checkbox-wrap:hover { background: rgba(255,255,255,0.04); }
+
+    .pl-checkbox-wrap input[type="checkbox"] {
+        width: 18px; height: 18px;
+        accent-color: var(--accent);
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+    .pl-checkbox-wrap label {
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        flex: 1;
+    }
+    .pl-checkbox-wrap .pl-count {
+        font-size: 0.78rem;
+        color: var(--muted2);
+    }
+
+    .pl-modal-create {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .pl-modal-create input {
+        flex: 1;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 8px;
+        padding: 8px 12px;
+        color: var(--text);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.85rem;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    .pl-modal-create input:focus { border-color: rgba(255,255,255,0.2); }
+    .pl-modal-create input::placeholder { color: #555; }
+    .pl-modal-create button {
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+    .pl-modal-create button:hover { background: #e0002d; }
+
+    .pl-modal-list {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    .pl-modal-list::-webkit-scrollbar { width: 4px; }
+    .pl-modal-list::-webkit-scrollbar-thumb { background: #333; border-radius: 99px; }
+
+    .pl-modal-empty {
+        text-align: center;
+        padding: 30px 0;
+        color: var(--muted2);
+        font-size: 0.85rem;
+    }
+    .pl-modal-empty i {
+        display: block;
+        font-size: 2rem;
+        color: var(--muted);
+        margin-bottom: 10px;
+    }
+
+    .btn-pl-save {
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 99px;
+        padding: 9px 22px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-pl-save:hover { background: #e0002d; }
 </style>
 {% endblock %}
 
@@ -390,7 +513,7 @@
                 <button class="action-btn" id="shareBtn">
                     <i class="bi bi-share"></i> Share
                 </button>
-                <button class="action-btn">
+                <button class="action-btn" id="saveBtn" data-bs-toggle="modal" data-bs-target="#playlistSaveModal">
                     <i class="bi bi-bookmark"></i> Save
                 </button>
             </div>
@@ -696,6 +819,55 @@
 </div>
 </div>
 
+{% if user.is_authenticated %}
+<!-- Save to Playlist Modal -->
+<div class="modal fade playlist-modal" id="playlistSaveModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-bookmark-plus" style="color:var(--accent);margin-right:8px;"></i> Save to Playlist</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'playlist_add_video' video.pk %}">
+        {% csrf_token %}
+        <div class="modal-body">
+
+          <!-- Create new playlist inline -->
+          <div class="pl-modal-create">
+            <input type="text" id="newPlaylistName" placeholder="New playlist name..." maxlength="100">
+            <button type="button" id="createPlaylistBtn" disabled>Create</button>
+          </div>
+
+          <!-- Playlist checkboxes -->
+          <div class="pl-modal-list" id="playlistCheckboxList">
+            {% if user_playlists %}
+              {% for pl in user_playlists %}
+              <div class="pl-checkbox-wrap">
+                <input type="checkbox" name="playlist_ids" value="{{ pl.pk }}"
+                       id="pl-{{ pl.pk }}"
+                       {% if pl.pk in video_playlist_ids %}checked{% endif %}>
+                <label for="pl-{{ pl.pk }}">{{ pl.title }}</label>
+                <span class="pl-count">{{ pl.item_count }} videos</span>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="pl-modal-empty">
+                <i class="bi bi-collection-play"></i>
+                <p>No playlists yet. Create one above!</p>
+              </div>
+            {% endif %}
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn-pl-save"><i class="bi bi-check-lg"></i> Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
 <!-- Share toast -->
 <div id="shareToast" style="
     position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px);
@@ -862,5 +1034,49 @@
 	      break;
 	  }
 	});
+
+	// ── Save to Playlist modal ──
+	const newPlaylistInput = document.getElementById('newPlaylistName');
+	const createPlBtn = document.getElementById('createPlaylistBtn');
+	const plCheckboxList = document.getElementById('playlistCheckboxList');
+
+	if (newPlaylistInput && createPlBtn) {
+		newPlaylistInput.addEventListener('input', () => {
+			createPlBtn.disabled = newPlaylistInput.value.trim().length < 1;
+		});
+
+		createPlBtn.addEventListener('click', () => {
+			const name = newPlaylistInput.value.trim();
+			if (!name) return;
+
+			fetch('{% url "playlist_create" %}', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+					'X-CSRFToken': '{{ csrf_token }}',
+				},
+				body: new URLSearchParams({
+					'title': name,
+					'visibility': 'public',
+				}),
+			}).then(r => r.json()).then(data => {
+				if (data.id) {
+					const wrap = document.createElement('div');
+					wrap.className = 'pl-checkbox-wrap';
+					wrap.innerHTML = `
+						<input type="checkbox" name="playlist_ids" value="${data.id}"
+						       id="pl-${data.id}" checked>
+						<label for="pl-${data.id}">${data.title}</label>
+						<span class="pl-count">0 videos</span>
+					`;
+					if (plCheckboxList) plCheckboxList.prepend(wrap);
+					newPlaylistInput.value = '';
+					createPlBtn.disabled = true;
+					const empty = plCheckboxList?.querySelector('.pl-modal-empty');
+					if (empty) empty.remove();
+				}
+			}).catch(() => {});
+		});
+	}
 </script>
 {% endblock %}

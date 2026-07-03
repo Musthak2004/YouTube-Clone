@@ -3,7 +3,7 @@
 [![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://streamhub.pythonanywhere.com/)
 [![Python](https://img.shields.io/badge/python-3.13-blue)](https://python.org)
 [![Django](https://img.shields.io/badge/django-6.0-092E20)](https://djangoproject.com)
-[![Tests](https://img.shields.io/badge/tests-158-passing-green)](https://github.com/Musthak2004/YouTube-Clone)
+[![Tests](https://img.shields.io/badge/tests-195-passing-green)](https://github.com/Musthak2004/YouTube-Clone)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen)](https://pre-commit.com)
 
@@ -57,6 +57,15 @@ A production-ready video sharing platform inspired by YouTube, built with Django
 - **Threaded Replies** — Nested comment display with left-border indentation, inline reply forms with JS toggle, auto-focus, and expandable textarea.
 - **Bootstrap Icons + Google Fonts** — Outfit (headings) and DM Sans (body) typography.
 
+### Playlists
+
+- **Full CRUD** — Create, edit, and delete playlists with title, description, and visibility (public/private/unlisted).
+- **Save to Playlist** — Inline "Save" button on the video detail page opens a modal to toggle playlist membership. Create new playlists directly from the modal via AJAX.
+- **Playlist Detail** — Videos displayed in a grid with order numbers, "Play All" button, and owner edit/delete controls.
+- **Sidebar Integration** — The sidebar Playlists link is wired to the user's playlist list with active highlighting.
+- **REST API** — Read-only playlist endpoints at `/api/playlists/`, and an `add-to-playlist` action on the video API endpoint.
+- **Ownership Enforcement** — `UserPassesTestMixin` protects all mutation views. Private playlists redirect non-owners.
+
 ### Account & Settings
 
 - **Settings Page** — Combined profile and password management. Two-section card with inline form switching and validation.
@@ -108,7 +117,7 @@ A production-ready video sharing platform inspired by YouTube, built with Django
 
 ## Project Architecture
 
-### App Structure (10 apps, 13 models)
+### App Structure (11 apps, 15 models)
 
 ```text
 YouTube-Clone/
@@ -174,6 +183,15 @@ YouTube-Clone/
 │   ├── views.py / urls.py
 │   └── tests.py                    # 2 tests
 │
+├── playlists/                       # Playlist management (2 models)
+│   ├── models.py                   # Playlist (owner, title, visibility),
+│   │                               #   PlaylistItem (playlist, video, order)
+│   ├── forms.py                    # PlaylistForm
+│   ├── views.py                    # 7 views: CRUD + add-to-playlist + reorder
+│   ├── urls.py                     # 7 routes under /playlists/
+│   ├── admin.py                    # Admin registration
+│   └── tests.py                    # 37 tests
+│
 ├── pages/                          # Landing page
 │   ├── views.py / urls.py
 │   └── tests.py                    # 2 tests
@@ -218,6 +236,7 @@ CustomUser ──┬── Channel (OneToOne, auto-created via signal)
               ├── UserInterest.user (FK)
               ├── Notification.recipient (FK)
               └── Notification.actor (FK)
+              ├── Playlist.owner (FK)
 
 Comment ── parent (self-FK, nullable)
 
@@ -231,7 +250,7 @@ Video ──┬── VideoTagMap (M2M through → VideoTag)
 Channel ── Video.channel (FK, nullable)
 ```
 
-### Model Reference (13 models)
+### Model Reference (15 models)
 
 | App            | Model           | Key Fields                                                        |
 | -------------- | --------------- | ----------------------------------------------------------------- |
@@ -251,6 +270,8 @@ Channel ── Video.channel (FK, nullable)
 | watch_history  | WatchHistory    | user, video, watched_at, watch_duration; `duration_percent` prop  |
 | search         | SearchHistory   | user, query, searched_at                                          |
 | notifications  | Notification    | recipient, actor, verb, target_video (nullable), is_read          |
+| playlists      | Playlist        | owner, title, description, visibility, created_at, updated_at      |
+| playlists      | PlaylistItem    | playlist, video, order, added_at; `UniqueConstraint(playlist, video)` |
 
 ### URL Structure
 
@@ -266,6 +287,7 @@ Channel ── Video.channel (FK, nullable)
 | `/search/`           | search         | 3 routes                          |
 | `/recommendations/`  | recommendations| `/recommendations/tag/<pk>/`      |
 | `/watch_history/`    | watch_history  | 3 routes                          |
+| `/playlists/`        | playlists      | 7 routes                          |
 | `/notifications/`    | notifications  | 3 routes                          |
 | `/api/`              | api            | DRF browsable API + auth          |
 
@@ -352,7 +374,7 @@ DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
 
 ## Testing
 
-The project has **158 tests** across **36 test classes** covering all 10 apps:
+The project has **195 tests** across **42 test classes** covering all 11 apps:
 
 | App            | Test Files | Tests | Coverage Highlights                         |
 | -------------- | ---------- | ----- | ------------------------------------------- |
@@ -366,6 +388,7 @@ The project has **158 tests** across **36 test classes** covering all 10 apps:
 | watch_history  | 1          | 15    | CRUD, ownership, clear all, single remove    |
 | notifications  | 1          | 2     | Model creation, string representation        |
 | pages          | 1          | 2     | Status code, template used                   |
+| playlists      | 1          | 37    | CRUD, ownership, toggle add/remove, UniqueConstraint, AJAX creation |
 
 ```bash
 # Run all tests
@@ -493,7 +516,6 @@ The API is available at `/api/`:
 
 ## Known Limitations
 
-- **Playlists** — Not supported
 - **Async video processing** — No transcoding or HLS streaming (requires FFmpeg + Celery/Huey on the server)
 - **Real-time features** — No WebSockets/SSE (requires Django Channels + Redis, not available on PythonAnywhere free tier)
 
