@@ -402,16 +402,21 @@
                                 uploaded
                             {% elif n.verb == 'subscribed' %}
                                 subscribed to your channel
+                            {% elif n.verb == 'went_live' %}
+                                went live!
                             {% else %}
                                 {{ n.verb }}
                             {% endif %}
                         </span>
                         {% if n.target_video %}
-                            {% if n.verb != 'subscribed' %}
+                            {% if n.verb != 'subscribed' and n.verb != 'went_live' %}
                             <a href="{{ n.target_video.get_absolute_url }}" class="target-link">
                                 {{ n.target_video.title|truncatechars:50 }}
                             </a>
                             {% endif %}
+                        {% endif %}
+                        {% if n.verb == 'went_live' %}
+                            <i class="bi bi-broadcast text-danger" style="margin-left:4px;"></i>
                         {% endif %}
                     </div>
                     <div class="notif-time">

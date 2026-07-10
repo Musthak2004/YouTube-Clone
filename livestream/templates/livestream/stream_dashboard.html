@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+{% block title %}Stream Dashboard — YouClone{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --accent:   #ff0033;
+    --card:     #111111;
+    --card2:    #161616;
+    --border:   rgba(255,255,255,0.07);
+    --muted:    #555;
+    --muted2:   #888;
+    --text:     #f0f0f0;
+    --live:     #ff0033;
+    --live-bg:  rgba(255,0,51,0.08);
+}
+
+.dashboard-page { max-width: 900px; margin: 0 auto; padding-bottom: 60px; animation: fadeUp 0.35s ease both; }
+@keyframes fadeUp {
+    from { opacity:0; transform:translateY(14px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+
+.page-header {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 14px; margin-bottom: 28px;
+}
+.page-header h1 {
+    font-family: "Outfit", sans-serif; font-size: 1.6rem; font-weight: 700;
+    display: flex; align-items: center; gap: 10px; margin-bottom: 4px;
+}
+.page-header h1 i { color: var(--accent); }
+.page-header p { font-size: 0.9rem; color: var(--muted2); margin: 0; }
+
+/* ── Live Status Card ── */
+.live-status-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 20px 24px; margin-bottom: 24px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+}
+.live-status-left { display: flex; align-items: center; gap: 14px; }
+.live-indicator {
+    width: 12px; height: 12px; border-radius: 50%; background: #555; flex-shrink: 0;
+}
+.live-indicator.active { background: var(--accent); animation: pulse 1.5s ease infinite; }
+@keyframes pulse {
+    0%,100% { opacity: 1; }
+    50%     { opacity: 0.3; }
+}
+.live-status-label { font-family: "Outfit", sans-serif; font-size: 0.95rem; font-weight: 600; }
+.live-status-label small { font-weight: 400; color: var(--muted2); font-size: 0.82rem; }
+.live-actions { display: flex; gap: 8px; }
+.btn-go-live {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: linear-gradient(135deg, #ff0033, #ff4444);
+    color: #fff; border: none; border-radius: 99px; padding: 10px 22px;
+    font-family: "Outfit", sans-serif; font-size: 0.88rem; font-weight: 600;
+    cursor: pointer; text-decoration: none; transition: all 0.2s;
+}
+.btn-go-live:hover { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(255,0,51,0.3); color: #fff; }
+.btn-dashboard {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--muted2);
+    border-radius: 99px; padding: 10px 22px; font-family: "Outfit", sans-serif;
+    font-size: 0.88rem; font-weight: 500; text-decoration: none; transition: all 0.2s;
+}
+.btn-dashboard:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+
+/* ── Stream List ── */
+.section-title {
+    font-family: "Outfit", sans-serif; font-size: 1rem; font-weight: 600;
+    margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+}
+.stream-list { display: flex; flex-direction: column; gap: 8px; }
+.stream-row {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 18px; transition: background 0.2s; text-decoration: none;
+}
+.stream-row:hover { background: var(--card2); }
+.stream-thumb {
+    width: 100px; height: 56px; border-radius: 8px; background: #1a1a1a; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.stream-thumb i { font-size: 1.2rem; color: #333; }
+.stream-info { flex: 1; min-width: 0; }
+.stream-title {
+    font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.stream-meta { font-size: 0.75rem; color: var(--muted2); display: flex; gap: 10px; flex-wrap: wrap; }
+.stream-badge {
+    font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 99px; font-family: "Outfit", sans-serif;
+}
+.stream-badge.live { background: var(--live-bg); color: #ff6680; border: 1px solid rgba(255,0,51,0.2); }
+.stream-badge.ended { background: rgba(255,255,255,0.04); color: var(--muted); border: 1px solid var(--border); }
+.stream-views { font-size: 0.75rem; color: var(--muted2); white-space: nowrap; }
+
+/* ── Empty State ── */
+.empty-state { text-align: center; padding: 60px 24px; }
+.empty-icon-wrap {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 18px; font-size: 1.8rem; color: var(--muted2);
+}
+.empty-title { font-family: "Outfit", sans-serif; font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+.empty-sub { font-size: 0.85rem; color: var(--muted2); margin-bottom: 20px; line-height: 1.6; }
+
+/* ── No Channel Card ── */
+.no-channel-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 48px 24px; text-align: center;
+}
+.no-channel-card i { font-size: 2rem; color: var(--muted); display: block; margin-bottom: 12px; }
+.no-channel-card h3 { font-family: "Outfit", sans-serif; font-weight: 600; margin-bottom: 8px; }
+.no-channel-card p { font-size: 0.85rem; color: var(--muted2); margin-bottom: 20px; }
+
+/* ── Pagination ── */
+.pagination-wrap {
+    display: flex; justify-content: center; gap: 8px; margin-top: 28px; flex-wrap: wrap;
+}
+.page-btn {
+    padding: 8px 16px; border-radius: 8px; font-size: 0.85rem;
+    background: var(--card); border: 1px solid var(--border); color: var(--muted2);
+    text-decoration: none; transition: all 0.2s; font-family: "Outfit", sans-serif;
+    display: inline-flex; align-items: center; gap: 5px;
+}
+.page-btn:hover { border-color: rgba(255,255,255,0.14); color: var(--text); }
+.page-btn.active { background: var(--live-bg); border-color: rgba(255,0,51,0.2); color: var(--accent); }
+.page-btn.disabled { opacity: 0.35; pointer-events: none; }
+
+@media (max-width: 600px) {
+    .live-status-card { flex-direction: column; align-items: stretch; }
+    .stream-row { flex-direction: column; align-items: stretch; }
+    .stream-thumb { width: 100%; height: 120px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+
+    <div class="page-header">
+        <div>
+            <h1><i class="bi bi-broadcast"></i> Stream Dashboard</h1>
+            <p>Manage your live streams and settings</p>
+        </div>
+        {% if channel %}
+        <a href="{% url 'stream_settings' %}" class="btn-dashboard">
+            <i class="bi bi-gear"></i> Stream Settings
+        </a>
+        {% endif %}
+    </div>
+
+    {% if channel %}
+
+        <!-- Live Status -->
+        <div class="live-status-card">
+            <div class="live-status-left">
+                <div class="live-indicator {% if active_stream %}active{% endif %}"></div>
+                <div class="live-status-label">
+                    {% if active_stream %}
+                        You're live: <strong>{{ active_stream.title }}</strong>
+                    {% else %}
+                        You're offline
+                    {% endif %}
+                    <br><small>
+                        {% if active_stream %}
+                            {{ active_stream.viewer_count }} watching
+                            &middot; Started {{ active_stream.started_at|timesince }} ago
+                        {% elif has_stream_key %}
+                            Stream key is active
+                        {% else %}
+                            No stream key configured
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+            <div class="live-actions">
+                {% if active_stream %}
+                    <a href="{% url 'watch_stream' active_stream.pk %}" class="btn-go-live">
+                        <i class="bi bi-eye"></i> Watch Stream
+                    </a>
+                {% else %}
+                    <a href="{% url 'go_live' %}" class="btn-go-live">
+                        <i class="bi bi-broadcast"></i> Go Live
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Past Streams -->
+        <div class="section-title">
+            <i class="bi bi-clock-history" style="color:var(--muted2);"></i> Past Streams
+        </div>
+
+        {% if streams %}
+        <div class="stream-list">
+            {% for s in streams %}
+            <a href="{% url 'watch_stream' s.pk %}" class="stream-row">
+                <div class="stream-thumb">
+                    {% if s.thumbnail %}
+                        <img src="{{ s.thumbnail.url }}" alt="" style="width:100%;height:100%;object-fit:cover;">
+                    {% else %}
+                        <i class="bi bi-broadcast"></i>
+                    {% endif %}
+                </div>
+                <div class="stream-info">
+                    <div class="stream-title">{{ s.title }}</div>
+                    <div class="stream-meta">
+                        <span class="stream-badge {% if s.is_live %}live{% else %}ended{% endif %}">
+                            {% if s.is_live %}LIVE{% else %}Ended{% endif %}
+                        </span>
+                        {% if not s.is_live and s.ended_at %}
+                            <span>{{ s.ended_at|timesince }} ago</span>
+                        {% endif %}
+                        {% if s.is_live %}
+                            <span>{{ s.viewer_count }} watching</span>
+                        {% endif %}
+                        <span>{{ s.started_at|date:"M j, Y" }}</span>
+                    </div>
+                </div>
+                <div class="stream-views">
+                    <i class="bi bi-eye"></i> {{ s.viewer_count }}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+        <div class="pagination-wrap">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="page-btn">
+                    <i class="bi bi-chevron-left"></i> Prev
+                </a>
+            {% endif %}
+            {% for num in paginator.page_range %}
+                <a href="?page={{ num }}" class="page-btn {% if page_obj.number == num %}active{% endif %}">{{ num }}</a>
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="page-btn">
+                    Next <i class="bi bi-chevron-right"></i>
+                </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon-wrap"><i class="bi bi-broadcast"></i></div>
+            <div class="empty-title">No streams yet</div>
+            <p class="empty-sub">
+                Start your first live stream and it'll appear here.
+            </p>
+            <a href="{% url 'go_live' %}" class="btn-go-live">
+                <i class="bi bi-broadcast"></i> Go Live
+            </a>
+        </div>
+        {% endif %}
+
+    {% else %}
+    <!-- No channel -->
+    <div class="no-channel-card">
+        <i class="bi bi-person-circle"></i>
+        <h3>No channel found</h3>
+        <p>You need a channel to start live streaming.</p>
+        <a href="{% url 'channel_create' %}" class="btn-go-live">
+            <i class="bi bi-plus-circle"></i> Create Channel
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

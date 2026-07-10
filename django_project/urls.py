@@ -33,4 +33,5 @@ urlpatterns = [
     path("api/", include("api.urls")),
     path("playlists/", include("playlists.urls")),
     path("notifications/", include("notifications.urls")),
+    path("live/", include("livestream.urls")),
 ]

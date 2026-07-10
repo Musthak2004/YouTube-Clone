@@ -1,0 +1,401 @@
+{% extends "base.html" %}
+{% block title %}{{ stream.title }} — Live{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --live:    #ff0033;
+    --live-bg: rgba(255,0,51,0.1);
+    --card:    #111111;
+    --card2:   #161616;
+    --border:  rgba(255,255,255,0.07);
+    --muted:   #555;
+    --muted2:  #888;
+    --text:    #f0f0f0;
+    --chat-bg: #0d0d0d;
+}
+
+.stream-page { padding: 8px 0 60px; animation: fadeUp 0.35s ease both; }
+@keyframes fadeUp {
+    from { opacity:0; transform:translateY(14px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── Player ── */
+.player-wrap {
+    position: relative; width: 100%; aspect-ratio: 16/9;
+    background: #000; border-radius: 14px; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+}
+.player-placeholder {
+    text-align: center;
+}
+.player-placeholder i {
+    font-size: 3.5rem; color: #333; display: block; margin-bottom: 12px;
+}
+.player-placeholder h3 {
+    font-family: "Outfit", sans-serif; font-weight: 600; color: #555; margin-bottom: 4px;
+}
+.player-placeholder p {
+    font-size: 0.85rem; color: #444;
+}
+.live-badge {
+    position: absolute; top: 16px; left: 16px;
+    background: var(--live); color: #fff;
+    font-family: "Outfit", sans-serif; font-weight: 700; font-size: 0.7rem;
+    padding: 4px 12px; border-radius: 99px; text-transform: uppercase;
+    display: flex; align-items: center; gap: 6px; letter-spacing: 0.5px;
+}
+.live-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: #fff;
+    animation: pulse 1.5s ease infinite;
+}
+@keyframes pulse {
+    0%,100% { opacity: 1; }
+    50%     { opacity: 0.3; }
+}
+
+/* ── Stream Info ── */
+.stream-info-bar {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    flex-wrap: wrap; gap: 14px; margin: 18px 0 0;
+}
+.stream-meta { flex: 1; min-width: 0; }
+.stream-title {
+    font-family: "Outfit", sans-serif; font-size: 1.3rem; font-weight: 700;
+    margin-bottom: 6px;
+}
+.stream-stats {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    font-size: 0.82rem; color: var(--muted2);
+}
+.stream-stats i { margin-right: 4px; }
+.channel-link {
+    color: var(--text); text-decoration: none; font-weight: 500;
+    display: flex; align-items: center; gap: 8px; transition: color 0.2s;
+}
+.channel-link:hover { color: var(--live); }
+.channel-avatar {
+    width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+}
+.channel-avatar-fallback {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #2a2a2a, #111);
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Outfit", sans-serif; font-weight: 700; font-size: 14px;
+}
+
+.owner-actions { display: flex; gap: 8px; }
+.btn-end-live {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,0,51,0.1); border: 1px solid rgba(255,0,51,0.2);
+    color: #ff6680; border-radius: 99px; padding: 9px 20px;
+    font-family: "Outfit", sans-serif; font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+}
+.btn-end-live:hover { background: rgba(255,0,51,0.18); color: #ff4455; }
+
+.description-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 18px; margin-top: 14px;
+    font-size: 0.88rem; color: #ccc; line-height: 1.6;
+}
+
+/* ── Chat ── */
+.chat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; display: flex; flex-direction: column;
+    height: calc(100vh - 160px); max-height: 700px; min-height: 400px;
+    overflow: hidden; position: sticky; top: 76px;
+}
+.chat-header {
+    padding: 14px 18px;
+    font-family: "Outfit", sans-serif; font-weight: 600; font-size: 0.95rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+}
+.chat-header i { color: var(--live); }
+
+.chat-messages {
+    flex: 1; overflow-y: auto; padding: 12px 14px;
+    display: flex; flex-direction: column; gap: 8px;
+}
+.chat-msg {
+    display: flex; flex-direction: column; gap: 2px;
+    animation: msgIn 0.2s ease both;
+}
+@keyframes msgIn {
+    from { opacity:0; transform:translateY(6px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+.chat-msg-user {
+    font-size: 0.75rem; font-weight: 600; color: var(--live); display: flex; align-items: center; gap: 6px;
+}
+.chat-msg-time {
+    font-size: 0.65rem; color: var(--muted); font-weight: 400;
+}
+.chat-msg-text {
+    font-size: 0.84rem; color: #ddd; line-height: 1.5; word-break: break-word;
+}
+
+.chat-empty {
+    text-align: center; padding: 40px 16px; color: var(--muted2); font-size: 0.85rem;
+}
+.chat-empty i { font-size: 2rem; display: block; margin-bottom: 10px; color: var(--muted); }
+
+.chat-input-area {
+    padding: 12px 14px; border-top: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.chat-input-row {
+    display: flex; gap: 8px;
+}
+.chat-input {
+    flex: 1; background: var(--chat-bg); border: 1px solid var(--border);
+    border-radius: 99px; padding: 10px 16px; color: var(--text);
+    font-family: "DM Sans", sans-serif; font-size: 0.84rem; outline: none;
+    transition: border-color 0.2s;
+}
+.chat-input:focus { border-color: rgba(255,255,255,0.2); }
+.chat-input::placeholder { color: #444; }
+.chat-send-btn {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--live); color: #fff; border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s;
+}
+.chat-send-btn:hover { background: #e0002d; }
+.chat-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.chat-login-prompt {
+    padding: 12px 14px; border-top: 1px solid var(--border);
+    text-align: center; font-size: 0.82rem; color: var(--muted2);
+}
+.chat-login-prompt a { color: var(--live); text-decoration: none; font-weight: 500; }
+.chat-login-prompt a:hover { text-decoration: underline; }
+
+@media (max-width: 991px) {
+    .chat-card { height: 400px; position: static; margin-top: 16px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="stream-page">
+<div class="container-fluid px-3 px-md-4">
+
+    <div class="row g-4">
+        <!-- Main: Player + Info -->
+        <div class="col-lg-8">
+
+            <!-- Player -->
+            <div class="player-wrap">
+                {% if stream.is_live %}
+                    <span class="live-badge">
+                        <span class="live-dot"></span> LIVE
+                    </span>
+                    <div class="player-placeholder">
+                        <i class="bi bi-broadcast"></i>
+                        <h3>Stream is live</h3>
+                        <p>Video player loads when stream data is received</p>
+                    </div>
+                {% else %}
+                    <div class="player-placeholder">
+                        <i class="bi bi-stop-circle"></i>
+                        <h3>Stream ended</h3>
+                        <p>{{ stream.ended_at|timesince }} ago</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Stream Info -->
+            <div class="stream-info-bar">
+                <div class="stream-meta">
+                    <div class="stream-title">{{ stream.title }}</div>
+                    <div class="stream-stats">
+                        <a href="{% url 'channel_detail' stream.channel.pk %}" class="channel-link">
+                            {% if stream.channel.owner.profile_picture %}
+                                <img src="{{ stream.channel.owner.profile_picture.url }}" class="channel-avatar" alt="">
+                            {% else %}
+                                <div class="channel-avatar-fallback">{{ stream.channel.name|slice:":1"|upper }}</div>
+                            {% endif %}
+                            {{ stream.channel.name }}
+                        </a>
+                        <span>&middot;</span>
+                        <span><i class="bi bi-eye"></i> {{ stream.viewer_count }} watching</span>
+                        {% if stream.started_at %}
+                            <span>&middot;</span>
+                            <span><i class="bi bi-clock"></i> Started {{ stream.started_at|timesince }} ago</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if is_owner and stream.is_live %}
+                <div class="owner-actions">
+                    <form method="post" action="{% url 'end_stream' stream.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-end-live">
+                            <i class="bi bi-stop-circle"></i> End Stream
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if stream.description %}
+            <div class="description-box">
+                {{ stream.description|linebreaks }}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar: Chat -->
+        <div class="col-lg-4">
+            <div class="chat-card">
+                <div class="chat-header">
+                    <i class="bi bi-chat-dots"></i> Live Chat
+                    <span style="font-size:0.75rem;color:var(--muted2);font-weight:400;margin-left:auto;">
+                        {{ stream.viewer_count }} watching
+                    </span>
+                </div>
+
+                <div class="chat-messages" id="chatMessages">
+                    {% for msg in recent_chat %}
+                    <div class="chat-msg">
+                        <div class="chat-msg-user">
+                            {{ msg.user.username }}
+                            <span class="chat-msg-time">{{ msg.sent_at|time }}</span>
+                        </div>
+                        <div class="chat-msg-text">{{ msg.message }}</div>
+                    </div>
+                    {% empty %}
+                    <div class="chat-empty" id="chatEmpty">
+                        <i class="bi bi-chat-dots"></i>
+                        No messages yet. Be the first to say something!
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if user.is_authenticated %}
+                    {% if stream.is_live %}
+                    <div class="chat-input-area">
+                        <div class="chat-input-row">
+                            <input type="text" class="chat-input" id="chatInput"
+                                   placeholder="Say something..." maxlength="500">
+                            <button class="chat-send-btn" id="chatSendBtn">
+                                <i class="bi bi-send"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="chat-login-prompt">
+                        <i class="bi bi-stop-circle"></i> Chat is closed — stream has ended.
+                    </div>
+                    {% endif %}
+                {% else %}
+                <div class="chat-login-prompt">
+                    <a href="{% url 'login' %}">Sign in</a> to join the chat.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if stream.is_live %}
+<script>
+(function() {
+    var chatMessages = document.getElementById('chatMessages');
+    var chatEmpty = document.getElementById('chatEmpty');
+    var chatInput = document.getElementById('chatInput');
+    var chatSendBtn = document.getElementById('chatSendBtn');
+    var lastId = {% if recent_chat %}{{ recent_chat.last.id }}{% else %}0{% endif %};
+    var polling = true;
+    var streamPk = {{ stream.pk }};
+
+    function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(text));
+        return div.innerHTML;
+    }
+
+    function pollChat() {
+        if (!polling) return;
+        var url = '/live/' + streamPk + '/chat/?after=' + lastId;
+        fetch(url)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                data.messages.forEach(function(msg) {
+                    var div = document.createElement('div');
+                    div.className = 'chat-msg';
+                    div.innerHTML = '<div class="chat-msg-user">' +
+                        escapeHtml(msg.user) +
+                        ' <span class="chat-msg-time">' + msg.sent_at.slice(11, 16) + '</span></div>' +
+                        '<div class="chat-msg-text">' + escapeHtml(msg.message) + '</div>';
+                    chatMessages.appendChild(div);
+                    if (msg.id > lastId) lastId = msg.id;
+                });
+                if (data.messages.length > 0 && chatEmpty) {
+                    chatEmpty.style.display = 'none';
+                }
+                // Auto-scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            })
+            .catch(function() {});
+    }
+
+    // Poll every 2 seconds
+    setInterval(pollChat, 2000);
+
+    // Send message
+    function sendMessage() {
+        var msg = chatInput.value.trim();
+        if (!msg) return;
+        chatSendBtn.disabled = true;
+        fetch('/live/' + streamPk + '/chat/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: 'message=' + encodeURIComponent(msg),
+        })
+        .then(function(r) {
+            if (r.status === 201) {
+                chatInput.value = '';
+                chatInput.focus();
+            }
+            return r.json();
+        })
+        .then(function(data) {
+            if (data.error) {
+                alert(data.error);
+            }
+        })
+        .catch(function() {})
+        .finally(function() {
+            chatSendBtn.disabled = false;
+        });
+    }
+
+    if (chatSendBtn) {
+        chatSendBtn.addEventListener('click', sendMessage);
+    }
+    if (chatInput) {
+        chatInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    }
+
+    // Auto-scroll on load
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+})();
+</script>
+{% endif %}
+{% endblock %}

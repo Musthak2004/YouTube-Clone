@@ -192,7 +192,19 @@
             </div>
 
             <div class="ch-meta">
-                <div class="ch-name">{{ channel.name }}</div>
+                <div class="ch-name">
+                    {{ channel.name }}
+                    {% if is_live and live_stream %}
+                        <a href="{% url 'watch_stream' live_stream.pk %}" style="
+                            display:inline-flex;align-items:center;gap:6px;
+                            background:rgba(255,0,51,0.1);border:1px solid rgba(255,0,51,0.2);
+                            color:#ff6680;font-size:0.7rem;font-weight:700;padding:3px 10px;
+                            border-radius:99px;text-transform:uppercase;text-decoration:none;
+                            vertical-align:middle;margin-left:8px;
+                            animation:pulse 1.5s ease infinite;
+                        "><span style="width:6px;height:6px;border-radius:50%;background:#ff0033;"></span>LIVE</a>
+                    {% endif %}
+                </div>
                 <div class="ch-info-row">
                     <span class="ch-info-item"><i class="bi bi-person"></i> {{ channel.owner.username }}</span>
                     <span class="ch-info-dot">·</span>

@@ -91,6 +91,7 @@ INSTALLED_APPS = [
     "pages.apps.PagesConfig",
     "playlists.apps.PlaylistsConfig",
     "notifications.apps.NotificationsConfig",
+    "livestream.apps.LivestreamConfig",
 ]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
