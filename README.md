@@ -1,6 +1,6 @@
 # YouTube Clone
 
-[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://streamhub.pythonanywhere.com/)
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://youtube-clone-alpha-nine-58.vercel.app/)
 [![Python](https://img.shields.io/badge/python-3.13-blue)](https://python.org)
 [![Django](https://img.shields.io/badge/django-6.0-092E20)](https://djangoproject.com)
 [![Tests](https://img.shields.io/badge/tests-195-passing-green)](https://github.com/Musthak2004/YouTube-Clone)
@@ -9,7 +9,7 @@
 
 A production-ready video sharing platform inspired by YouTube, built with Django 6.0. Features video upload and playback, user authentication, channels, subscriptions, comments, like/dislike reactions, watch history, tag-based browsing, a tag-weighted recommendation engine, full REST API, notification system, and keyboard shortcuts for video playback.
 
-**Live Demo:** [streamhub.pythonanywhere.com](https://streamhub.pythonanywhere.com/)
+**Live Demo:** [youtube-clone-alpha-nine-58.vercel.app](https://youtube-clone-alpha-nine-58.vercel.app/)
 
 ---
 
@@ -77,6 +77,8 @@ A production-ready video sharing platform inspired by YouTube, built with Django
 - **Recommendation Engine** — `UserInterest` scores increment when a user visits a tag page. `get_recommendations()` utility matches unwatched videos by tag affinity, weighted by recency (2× bonus for last 14 days), view count, and tag match count. Returns top 12 results.
 - **Related Videos** — Up to 10 videos from the same channel shown on the detail page sidebar.
 - **Production Security** — HSTS, SSL redirect, secure cookies, and `SECURE_PROXY_SSL_HEADER` all auto-enabled when `DEBUG=False`.
+- **Cloud Media Storage** — Videos, thumbnails, profile pictures, and channel banners stored on Cloudinary CDN, with automatic local fallback for development.
+- **Vercel + Neon Deployment** — Serverless Django on Vercel with serverless PostgreSQL via Neon. Deploy via CLI with one command.
 
 ---
 
@@ -108,10 +110,12 @@ A production-ready video sharing platform inspired by YouTube, built with Django
 
 ### Deployment
 
-| Platform       | Purpose                |
-| -------------- | ---------------------- |
-| PythonAnywhere | Production hosting     |
-| GitHub         | Version control        |
+| Platform       | Purpose                          |
+| -------------- | -------------------------------- |
+| Vercel         | Production hosting (serverless)  |
+| Neon           | PostgreSQL database (serverless) |
+| Cloudinary     | Media storage (videos, images)   |
+| GitHub         | Version control                  |
 
 ---
 
@@ -357,7 +361,10 @@ python manage.py runserver
 | `DJANGO_SECRET_KEY`    | No *     | Random fallback       | Django secret key                      |
 | `DJANGO_DEBUG`         | No       | `False`               | Set `True` for development             |
 | `DJANGO_ALLOWED_HOSTS` | No       | `localhost,127.0.0.1` | Comma-separated hostnames              |
-| `DATABASE_URL`         | No       | SQLite                | `mysql://user:pass@host/dbname`        |
+| `DATABASE_URL`         | No       | SQLite                | `postgres://user:pass@host/dbname`     |
+| `CLOUDINARY_CLOUD_NAME`| No       | —                     | Cloudinary cloud name (media storage)  |
+| `CLOUDINARY_API_KEY`   | No       | —                     | Cloudinary API key                     |
+| `CLOUDINARY_API_SECRET`| No       | —                     | Cloudinary API secret                  |
 | `SENTRY_DSN`           | No       | —                     | Sentry error tracking DSN              |
 | `EMAIL_HOST`           | No       | —                     | SMTP host (password reset etc.)        |
 
@@ -368,6 +375,11 @@ python manage.py runserver
 DJANGO_SECRET_KEY=your-secret-key
 DJANGO_DEBUG=True
 DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+
+# Cloudinary (optional — required for Vercel)
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
 ```
 
 ---
@@ -409,65 +421,41 @@ python manage.py test -v 2
 
 ---
 
-## Deployment
+## Deploy to Vercel
 
-### PythonAnywhere
+Live at **[youtube-clone-alpha-nine-58.vercel.app](https://youtube-clone-alpha-nine-58.vercel.app/)**.
 
-Live at **[streamhub.pythonanywhere.com](https://streamhub.pythonanywhere.com/)**.
+### One-time Setup
 
-#### One-time Setup
+1. Fork/clone the repo and push to your own GitHub account.
+2. Go to [vercel.com](https://vercel.com) and import the repository.
+3. The project includes `vercel.json` — Vercel auto-detects the Django framework.
+4. **Set environment variables** in the Vercel project dashboard:
+   - `DJANGO_SECRET_KEY` — generate one with `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"`
+   - `DJANGO_ALLOWED_HOSTS` — `.vercel.app`
+   - `DATABASE_URL` — provision a [Neon](https://neon.tech) Postgres database (or use Vercel Marketplace → Neon)
+   - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` — media storage
 
-1. On PythonAnywhere, clone the repo and set up the virtual environment:
-
+5. **Run migrations** (in the Vercel build step or locally pointing to your DB):
    ```bash
-   git clone https://github.com/Musthak2004/YouTube-Clone.git
-   cd YouTube-Clone
-   git checkout musthak
-   python3.13 -m venv .venv
-   source .venv/bin/activate
-   pip install -r requirements.txt
    python manage.py migrate
    python manage.py collectstatic --noinput
    ```
 
-2. **Create Web App**: Web tab → Add new web app → Manual Configuration → Python 3.13
-
-3. **Configure**:
-   - Virtualenv: `/home/streamhub/YouTube-Clone/.venv`
-   - Source code: `/home/streamhub/YouTube-Clone`
-   - Working directory: `/home/streamhub/YouTube-Clone`
-   - Static files: URL `/static/` → `/home/streamhub/YouTube-Clone/staticfiles`
-   - Media files: URL `/media/` → `/home/streamhub/YouTube-Clone/media`
-
-4. **Set environment variables** in the WSGI file (`/var/www/streamhub_pythonanywhere_com_wsgi.py`):
-
-   ```python
-   import os, sys
-   os.environ['DJANGO_DEBUG'] = 'False'
-   os.environ['DJANGO_ALLOWED_HOSTS'] = 'streamhub.pythonanywhere.com'
-   os.environ['DJANGO_SECRET_KEY'] = 'your-production-secret-key'
-   path = '/home/streamhub/YouTube-Clone'
-   if path not in sys.path:
-       sys.path.insert(0, path)
-   os.environ['DJANGO_SETTINGS_MODULE'] = 'django_project.settings'
-   from django.core.wsgi import get_wsgi_application
-   application = get_wsgi_application()
+6. Deploy from the CLI:
+   ```bash
+   vercel deploy --prod --yes
    ```
 
-5. **Reload** the web app.
-
-#### Future Updates
+### Future Updates
 
 ```bash
-cd ~/YouTube-Clone
+cd YouTube-Clone
 git pull origin musthak
-source .venv/bin/activate
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py collectstatic --noinput
+vercel deploy --prod --yes
 ```
 
-Then click **Reload** on the PythonAnywhere Web tab.
+Or push to your default git branch — Vercel auto-deploys when connected via Git.
 
 ### Pre-commit Hooks (Optional)
 
@@ -516,8 +504,8 @@ The API is available at `/api/`:
 
 ## Known Limitations
 
-- **Async video processing** — No transcoding or HLS streaming (requires FFmpeg + Celery/Huey on the server)
-- **Real-time features** — No WebSockets/SSE (requires Django Channels + Redis, not available on PythonAnywhere free tier)
+- **Async video processing** — No transcoding or HLS streaming (requires FFmpeg + Celery/Huey)
+- **Real-time features** — No WebSockets/SSE (requires Django Channels + Redis)
 
 ---
 
@@ -530,7 +518,9 @@ MIT — see [LICENSE](LICENSE) for details.
 ## Acknowledgments
 
 - Built with [Django](https://djangoproject.com)
-- Deployed on [PythonAnywhere](https://pythonanywhere.com)
+- Deployed on [Vercel](https://vercel.com)
+- Database by [Neon](https://neon.tech)
+- Media storage by [Cloudinary](https://cloudinary.com)
 - Icons by [Bootstrap Icons](https://icons.getbootstrap.com)
 - Fonts by [Google Fonts](https://fonts.google.com) (Outfit + DM Sans)
 - Inspired by [YouTube](https://youtube.com)

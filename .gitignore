@@ -25,3 +25,5 @@ Thumbs.db
 
 # Build artifacts
 staticfiles_build/
+.vercel
+.env*

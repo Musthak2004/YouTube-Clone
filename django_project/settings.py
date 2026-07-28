@@ -23,6 +23,14 @@ if not SECRET_KEY:
 DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
+# Auto-add Vercel deployment URL if present
+VERCEL_URL = os.environ.get("VERCEL_URL")
+if VERCEL_URL:
+    ALLOWED_HOSTS.append(VERCEL_URL)
+    ALLOWED_HOSTS.append(VERCEL_URL.replace("https://", ""))
+    # Allow all *.vercel.app domains for aliased preview URLs
+    ALLOWED_HOSTS.append(".vercel.app")
+
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     CSRF_COOKIE_SECURE = True
@@ -50,8 +58,36 @@ else:
     }
 
 # ── Storage ─────────────────────────────────────────────────────────────────
-# Media files stored locally in media/ directory.
 # Static files served from staticfiles/ after collectstatic.
+# Media files: use Cloudinary when configured, else local media/ directory.
+
+cloudinary_name = os.environ.get("CLOUDINARY_CLOUD_NAME")
+cloudinary_key = os.environ.get("CLOUDINARY_API_KEY")
+cloudinary_secret = os.environ.get("CLOUDINARY_API_SECRET")
+
+if cloudinary_name and cloudinary_key and cloudinary_secret:
+    CLOUDINARY_STORAGE = {
+        "CLOUD_NAME": cloudinary_name,
+        "API_KEY": cloudinary_key,
+        "API_SECRET": cloudinary_secret,
+    }
+    STORAGES = {
+        "default": {
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    MEDIA_URL = f"https://res.cloudinary.com/{cloudinary_name}/"
+    # Also set legacy CLOUDINARY_URL so the cloudinary SDK picks it up
+    os.environ.setdefault(
+        "CLOUDINARY_URL",
+        f"cloudinary://{cloudinary_key}:{cloudinary_secret}@{cloudinary_name}",
+    )
+else:
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
 
 # ── Sentry (optional) ────────────────────────────────────────────────────────
 # Set SENTRY_DSN in your environment or .env to enable error tracking.
@@ -76,6 +112,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "cloudinary",
     "crispy_forms",
     "crispy_bootstrap5",
     "rest_framework",
@@ -142,9 +179,6 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
 
 AUTH_USER_MODEL = "accounts.CustomUser"
 LOGIN_REDIRECT_URL = "home"
